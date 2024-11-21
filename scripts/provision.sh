@@ -5,7 +5,9 @@ set -e
 SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
 
+# load config
 . $SCRIPTPATH/config.sh
+
 # check for ssh key
 if [ ! -e "$HOME/.ssh/id_rsa.pub" ]
 then
