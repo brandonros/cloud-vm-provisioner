@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "vultr" {
-    # uses VULTR_API_KEY env var
+  # uses VULTR_API_KEY env var
 }
 
 resource "vultr_ssh_key" "my_ssh_key" {
@@ -17,7 +17,7 @@ resource "vultr_ssh_key" "my_ssh_key" {
 }
 
 resource "vultr_instance" "my_instance" {
-    plan = "vc2-4c-8gb" # 4 vCPUs, 8 GB, $0.056/hr
+    plan = "vhf-4c-16gb" # 4 vCPUs, 16 GB, $0.133/hr
     region = "atl"
     os_id = 2136 # bookworm
     hostname = "instance1"

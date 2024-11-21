@@ -21,7 +21,7 @@ resource "digitalocean_droplet" "droplet1" {
   image    = "debian-12-x64"
   name     = "droplet1"
   region   = "nyc3"
-  size     = "s-4vcpu-8gb" # 4 vCPU, 8 GB, $0.07143/hr
+  size     = "s-4vcpu-16gb-amd" # 4 vCPU, 16 GB, $0.125/hr
   ssh_keys = [digitalocean_ssh_key.ssh_key.fingerprint]
 }
 

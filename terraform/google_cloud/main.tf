@@ -15,7 +15,7 @@ provider "google" {
 
 resource "google_compute_instance" "my_instance" {
   name         = "my-instance"
-  machine_type = "n2-standard-2" # 2 vCPUs, 8.0 GiB, nested virtualization, $0.0971/hr
+  machine_type = "t2d-standard-4" # 4 vCPUs, 16.0 GiB, $0.1690/hr
   zone         = "us-east1-b"
 
   boot_disk {
