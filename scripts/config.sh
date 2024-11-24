@@ -1,5 +1,6 @@
 #CLOUD_PROVIDER="google_cloud"
-CLOUD_PROVIDER="vultr"
+#CLOUD_PROVIDER="vultr"
 #CLOUD_PROVIDER="azure"
 #CLOUD_PROVIDER="digitalocean"
 #CLOUD_PROVIDER="aws"
+CLOUD_PROVIDER="oracle"
