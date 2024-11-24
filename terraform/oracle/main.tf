@@ -32,6 +32,11 @@ variable "region" {
   default = "us-ashburn-1"
 }
 
+variable "availability_domain" {
+  type    = string
+  default = "xYGb:US-ASHBURN-AD-3"
+}
+
 provider "oci" {
   tenancy_ocid     = var.tenancy_ocid
   user_ocid        = var.user_ocid
@@ -82,6 +87,7 @@ resource "oci_core_route_table" "free_rt" {
   }
 }
 
+# Create a subnet
 resource "oci_core_subnet" "free_subnet" {
   cidr_block        = "10.0.1.0/24"
   compartment_id    = var.tenancy_ocid
@@ -91,15 +97,17 @@ resource "oci_core_subnet" "free_subnet" {
   display_name      = "free-subnet"
 }
 
+# Create an instance
 resource "oci_core_instance" "free_instance" {
-  availability_domain = "xYGb:US-ASHBURN-AD-3"
+  availability_domain = var.availability_domain
   compartment_id      = var.tenancy_ocid
   display_name        = "free-instance"
-  shape               = "VM.Standard.E2.1.Micro"
+  shape               = "VM.Standard.E2.1.Micro" # AMD EPYC 7551, dictated by the free tier
+  #shape               = "VM.Standard.A1.Flex" # ARM-based shape for Always Free tier (out of capacity)
 
   shape_config {
-    memory_in_gbs = 1
-    ocpus         = 1
+    memory_in_gbs = 1 # dictated by the free tier
+    ocpus         = 1 # dictated by the free tier
   }
 
   source_details {
