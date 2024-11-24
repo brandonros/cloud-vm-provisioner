@@ -6,7 +6,7 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# install k3s (comes with )
+# install k3s
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --write-kubeconfig-mode 644 --disable=traefik --disable=metrics-server" sh -
 
 # wait for k3s to be ready

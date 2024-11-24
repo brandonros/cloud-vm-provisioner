@@ -9,8 +9,13 @@ terraform {
 
 provider "google" {
   credentials = file("~/gcp/service-account-key.json")
-  project = "hyperswitch-poc"
+  project = "kubevirt-poc" # create this manually
   region  = "us-east1" # Set your desired region
+}
+
+variable "os_login_user_id" {
+  type        = string
+  default     = "109486927228315081685" # from gcloud compute os-login describe-profile
 }
 
 resource "google_compute_instance" "my_instance" {
@@ -33,7 +38,7 @@ resource "google_compute_instance" "my_instance" {
   }
 
   metadata = {
-    ssh-keys = "109486927228315081685:${file("~/.ssh/id_rsa.pub")}"
+    ssh-keys = "${var.os_login_user_id}:${file("~/.ssh/id_rsa.pub")}"
   }
 
   // Enable nested virtualization
@@ -43,7 +48,7 @@ resource "google_compute_instance" "my_instance" {
 }
 
 output "instance_username" {
-  value = "109486927228315081685" # from gcloud compute os-login describe-profile --project=hyperswitch-poc
+  value = var.os_login_user_id
 }
 
 output "instance_ipv4" {
