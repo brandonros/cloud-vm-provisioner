@@ -3,4 +3,5 @@
 #CLOUD_PROVIDER="azure"
 #CLOUD_PROVIDER="digitalocean"
 #CLOUD_PROVIDER="aws"
-CLOUD_PROVIDER="oracle"
+#CLOUD_PROVIDER="oracle"
+CLOUD_PROVIDER="hetzner"

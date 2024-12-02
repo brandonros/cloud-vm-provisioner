@@ -44,6 +44,13 @@ then
     echo "DIGITALOCEAN_TOKEN is not set"
     exit 1
   fi
+elif [ "$CLOUD_PROVIDER" == "hetzner" ]
+then
+  if [ -z "${HCLOUD_TOKEN}" ]
+  then
+    echo "HCLOUD_TOKEN is not set"
+    exit 1
+  fi
 elif [ "$CLOUD_PROVIDER" == "aws" ]
 then
   if [ -z "${AWS_ACCESS_KEY_ID}" ]
