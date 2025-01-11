@@ -1,35 +1,25 @@
 - name: deploy wireguard
   hosts: my_instance
   gather_facts: false
-  become: true
-  become_user: debian
   environment:
     KUBECONFIG: "/home/debian/.kube/config"
+  vars:
+    playbook_dir_parent: "{{ playbook_dir | dirname }}"
   tasks:
+    - name: Read local wireguard yaml
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir_parent }}/helm/wireguard.yaml"
+      delegate_to: localhost
+      become: false
+      register: wireguard_yaml
+      
     - name: rollout
-      when: "'wireguard' not in wireguard_deployment_check.stdout"
+      become: true
+      become_user: debian
       timeout: 300      
       ansible.builtin.shell: |
         cat << 'EOF' | kubectl apply -f -
-        apiVersion: helm.cattle.io/v1
-        kind: HelmChart
-        metadata:
-          name: wireguard
-          namespace: kube-system
-        spec:
-          repo: https://bryopsida.github.io/wireguard-chart/
-          chart: wireguard
-          targetNamespace: wireguard
-          valuesContent: |-
-            wireguard:
-              serverAddress: 10.34.0.1/24
-              serverCidr: 10.34.0.0/24
-              natAddSourceNet: true
-              interfaceOpts: {}
-              clients: 
-                - FriendlyName: client1
-                  AllowedIPs: 0.0.0.0/0
-                  PublicKey: QPL87TNT7cgO3k3iJsJtSz/RghyNSy6RIIOok//QABw=
-                  PersistentKeepalive: 25
+        {{ wireguard_yaml.content | b64decode }}
         EOF
-        kubectl wait deployment -n wireguard wireguard --for condition=Available=True --timeout=300s
+        # TODO: wait for deployment to exist first before waiting for it to be available
+        kubectl wait deployment -n wireguard wireguard-wireguard --for condition=Available=True --timeout=300s --wait-for-creation

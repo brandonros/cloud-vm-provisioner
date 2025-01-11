@@ -1,0 +1,21 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: wireguard
+  namespace: kube-system
+spec:
+  repo: https://bryopsida.github.io/wireguard-chart/
+  chart: wireguard
+  createNamespace: true
+  targetNamespace: wireguard
+  valuesContent: |-
+    wireguard:
+      serverAddress: 10.34.0.1/24
+      serverCidr: 10.34.0.0/24
+      natAddSourceNet: true
+      interfaceOpts: {}
+      clients: 
+        - FriendlyName: client1
+          AllowedIPs: 0.0.0.0/0
+          PublicKey: QPL87TNT7cgO3k3iJsJtSz/RghyNSy6RIIOok//QABw=
+          PersistentKeepalive: 25

@@ -50,3 +50,16 @@
     - name: auto remove
       ansible.builtin.apt:
         autoremove: yes
+
+    - name: Check if k9s is installed
+      ansible.builtin.command: which k9s
+      register: k9s_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: install k9s
+      when: k9s_check.rc != 0
+      ansible.builtin.shell: |
+        wget https://github.com/derailed/k9s/releases/download/v0.32.7/k9s_linux_amd64.deb
+        apt install -y ./k9s_linux_amd64.deb
+        rm k9s_linux_amd64.deb
