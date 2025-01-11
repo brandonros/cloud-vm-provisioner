@@ -9,3 +9,8 @@ spec:
   targetNamespace: wireguard
   valuesContent: |-
     wireguard:
+      serverAddress: 10.34.0.1/24
+      serverCidr: 10.34.0.0/24
+      natAddSourceNet: true
+      interfaceOpts: {}
+      clients: []

@@ -21,5 +21,5 @@
       when: "'wireguard' not in wireguard_deployment_check.stdout"
       timeout: 300      
       ansible.builtin.shell: |
-        kubectl apply -n wireguard -f https://raw.githubusercontent.com/brandonros/cloud-vm-provisioner/main/helm/wireguard.yaml
+        kubectl apply -f https://raw.githubusercontent.com/brandonros/cloud-vm-provisioner/refs/heads/master/helm/wireguard.yaml
         kubectl wait deployment -n wireguard wireguard --for condition=Available=True --timeout=300s
