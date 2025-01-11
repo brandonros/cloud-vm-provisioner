@@ -1,0 +1,25 @@
+- name: deploy wireguard
+  hosts: my_instance
+  gather_facts: false
+  become: true
+  become_user: debian
+  environment:
+    KUBECONFIG: "/home/debian/.kube/config"
+  tasks:
+    - name: Check if wireguard deployment exists
+      ansible.builtin.shell: |
+        kubectl get deployment -n wireguard wireguard --ignore-not-found
+      register: wireguard_deployment_check
+      failed_when: wireguard_deployment_check.rc not in [0, 1]
+
+    - name: create namespace
+      when: "'wireguard' not in wireguard_deployment_check.stdout"
+      ansible.builtin.shell: |
+        kubectl create namespace wireguard --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: rollout
+      when: "'wireguard' not in wireguard_deployment_check.stdout"
+      timeout: 300      
+      ansible.builtin.shell: |
+        kubectl apply -n wireguard -f https://raw.githubusercontent.com/brandonros/cloud-vm-provisioner/main/helm/wireguard.yaml
+        kubectl wait deployment -n wireguard wireguard --for condition=Available=True --timeout=300s

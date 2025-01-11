@@ -17,7 +17,8 @@ resource "vultr_ssh_key" "my_ssh_key" {
 }
 
 resource "vultr_instance" "my_instance" {
-    plan = "vhf-4c-16gb" # 4 vCPUs, 16 GB, $0.133/hr
+    #plan = "vhf-4c-16gb" # 4 vCPUs, 16 GB, $0.133/hr
+    plan = "vc2-2c-4gb"
     region = "atl"
     os_id = 2136 # bookworm
     hostname = "instance1"

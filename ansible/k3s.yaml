@@ -1,0 +1,46 @@
+- name: install k3s
+  hosts: my_instance
+  gather_facts: false
+  become: true
+  become_user: root
+  tasks:
+    - name: Check if installed
+      ansible.builtin.command:
+        cmd: "which kubectl"
+      register: kubectl_check
+      ignore_errors: yes
+
+    - name: Download and install if not installed
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | sh -
+      when: kubectl_check.rc != 0
+
+- name: configure kubeconfig for user
+  hosts: my_instance
+  gather_facts: false
+  become: true
+  become_user: debian
+  tasks:
+    - name: Check if present
+      ansible.builtin.stat:
+        path: /home/debian/.kube/config
+      register: file_check
+
+    - name: get kubeconfig
+      when: not file_check.stat.exists
+      become: true
+      become_user: root
+      register: kubeconfig
+      ansible.builtin.shell: "k3s kubectl config view --raw"
+
+    - name: configure kubeconfig for user
+      when: not file_check.stat.exists    
+      ansible.builtin.shell: |
+        mkdir /home/debian/.kube 2> /dev/null
+        echo "{{ kubeconfig.stdout }}" > /home/debian/.kube/config
+        chmod 600 /home/debian/.kube/config
+
+    - name: add to .bashrc
+      when: not file_check.stat.exists    
+      ansible.builtin.shell: |
+        echo 'export KUBECONFIG=/home/debian/.kube/config' >> ~/.bashrc

@@ -1,0 +1,11 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: wireguard
+  namespace: kube-system
+spec:
+  repo: https://bryopsida.github.io/wireguard-chart/
+  chart: wireguard
+  targetNamespace: wireguard
+  valuesContent: |-
+    wireguard:

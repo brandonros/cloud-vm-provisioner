@@ -1,0 +1,52 @@
+- name: setup user
+  hosts: my_instance
+  become: true
+  become_user: root
+  gather_facts: false
+  vars:
+    hashed_password: "{{ 'foobar123' | password_hash('sha512') }}"
+  tasks:
+    - name: Ensure user "debian" exists
+      ansible.builtin.user:
+        name: debian
+        shell: /bin/bash
+        groups: sudo
+        create_home: true
+        home: /home/debian
+        append: yes
+        password: "{{ hashed_password }}"
+
+    - name: add ssh key
+      ansible.posix.authorized_key:
+        user: debian
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+
+- name: setup packages
+  hosts: my_instance
+  become: true
+  become_user: root
+  gather_facts: false
+  tasks:
+    - name: update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: safe upgrade
+      ansible.builtin.apt:
+        upgrade: safe
+
+    - name: dist upgrade
+      ansible.builtin.apt:
+        upgrade: dist
+
+    - name: install packages
+      ansible.builtin.apt:
+        pkg:
+          - acl
+          - htop
+          - psmisc
+
+    - name: auto remove
+      ansible.builtin.apt:
+        autoremove: yes
