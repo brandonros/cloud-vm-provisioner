@@ -6,20 +6,30 @@
   environment:
     KUBECONFIG: "/home/debian/.kube/config"
   tasks:
-    - name: Check if wireguard deployment exists
-      ansible.builtin.shell: |
-        kubectl get deployment -n wireguard wireguard --ignore-not-found
-      register: wireguard_deployment_check
-      failed_when: wireguard_deployment_check.rc not in [0, 1]
-
-    - name: create namespace
-      when: "'wireguard' not in wireguard_deployment_check.stdout"
-      ansible.builtin.shell: |
-        kubectl create namespace wireguard --dry-run=client -o yaml | kubectl apply -f -
-
     - name: rollout
       when: "'wireguard' not in wireguard_deployment_check.stdout"
       timeout: 300      
       ansible.builtin.shell: |
-        kubectl apply -f https://raw.githubusercontent.com/brandonros/cloud-vm-provisioner/refs/heads/master/helm/wireguard.yaml
+        cat << 'EOF' | kubectl apply -f -
+        apiVersion: helm.cattle.io/v1
+        kind: HelmChart
+        metadata:
+          name: wireguard
+          namespace: kube-system
+        spec:
+          repo: https://bryopsida.github.io/wireguard-chart/
+          chart: wireguard
+          targetNamespace: wireguard
+          valuesContent: |-
+            wireguard:
+              serverAddress: 10.34.0.1/24
+              serverCidr: 10.34.0.0/24
+              natAddSourceNet: true
+              interfaceOpts: {}
+              clients: 
+                - FriendlyName: client1
+                  AllowedIPs: 0.0.0.0/0
+                  PublicKey: QPL87TNT7cgO3k3iJsJtSz/RghyNSy6RIIOok//QABw=
+                  PersistentKeepalive: 25
+        EOF
         kubectl wait deployment -n wireguard wireguard --for condition=Available=True --timeout=300s
