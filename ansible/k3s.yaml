@@ -44,3 +44,21 @@
       when: not file_check.stat.exists    
       ansible.builtin.shell: |
         echo 'export KUBECONFIG=/home/debian/.kube/config' >> ~/.bashrc
+
+- name: wait for k3s to be rolled out
+  hosts: my_instance
+  gather_facts: false
+  environment:
+    KUBECONFIG: "/home/debian/.kube/config"
+  tasks:
+    - name: wait for k3s to be rolled out
+      ansible.builtin.shell: |
+        kubectl wait deployment -n kube-system coredns --for create --timeout=300s
+        kubectl wait deployment -n kube-system local-path-provisioner --for create --timeout=300s
+        kubectl wait deployment -n kube-system metrics-server --for create --timeout=300s
+        kubectl wait deployment -n kube-system traefik --for create --timeout=300s
+
+        kubectl wait deployment -n kube-system coredns --for condition=Available=True --timeout=300s
+        kubectl wait deployment -n kube-system local-path-provisioner --for condition=Available=True --timeout=300s
+        kubectl wait deployment -n kube-system metrics-server --for condition=Available=True --timeout=300s
+        kubectl wait deployment -n kube-system traefik --for condition=Available=True --timeout=300s

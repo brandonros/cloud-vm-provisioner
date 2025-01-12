@@ -21,5 +21,5 @@
         cat << 'EOF' | kubectl apply -f -
         {{ wireguard_yaml.content | b64decode }}
         EOF
-        kubectl wait deployment -n wireguard wireguard-wireguard --for create --timeout=300s
-        kubectl wait deployment -n wireguard wireguard-wireguard --for condition=Available=True --timeout=300s
+        kubectl wait daemonset -n wireguard wireguard-wireguard --for create --timeout=300s
+        kubectl wait daemonset -n wireguard wireguard-wireguard --for condition=Available=True --timeout=300s
