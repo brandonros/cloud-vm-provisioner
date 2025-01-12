@@ -97,4 +97,3 @@ echo "${instance_ipv4} ansible_user=${instance_username}" >> /tmp/hosts.ini
 # Run Ansible playbooks
 ansible-playbook -i /tmp/hosts.ini ./ansible/setup.yaml
 ansible-playbook -i /tmp/hosts.ini ./ansible/k3s.yaml
-ansible-playbook -i /tmp/hosts.ini ./ansible/wireguard.yaml

@@ -5,4 +5,5 @@ Terraform configurations for provisioning VMs across cloud providers
 
 ```shell
 ./scripts/provision.sh
+./scripts/connect.sh
 ```

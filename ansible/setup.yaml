@@ -30,6 +30,7 @@
   tasks:
     - name: update apt cache
       ansible.builtin.apt:
+        cache_valid_time: 3600
         update_cache: yes
 
     - name: safe upgrade
@@ -42,6 +43,7 @@
 
     - name: install packages
       ansible.builtin.apt:
+        state: present
         pkg:
           - acl
           - htop
