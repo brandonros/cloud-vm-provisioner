@@ -48,6 +48,7 @@
           - acl
           - htop
           - psmisc
+          - systemd-resolved
 
     - name: auto remove
       ansible.builtin.apt:

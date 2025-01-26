@@ -1,10 +1,10 @@
 #!/bin/bash
 
 SCRIPT=$(readlink -f "$0")
-SCRIPTPATH=$(dirname "$SCRIPT")
+SCRIPT_PATH=$(dirname "$SCRIPT")
 
 # load config
-. $SCRIPTPATH/config.sh
+. $SCRIPT_PATH/config.sh
 
 # get instance details
 cd terraform/$CLOUD_PROVIDER/

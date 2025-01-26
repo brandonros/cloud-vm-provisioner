@@ -12,7 +12,16 @@
 
     - name: Download and install if not installed
       ansible.builtin.shell: |
-        curl -sfL https://get.k3s.io | sh -
+        # install k3s
+        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --disable=traefik --disable=metrics-server" sh -
+
+        # trust cluster ssl
+        cp /var/lib/rancher/k3s/server/tls/server-ca.crt /usr/local/share/ca-certificates/
+        update-ca-certificates
+
+        # add coredns in the cluster to node dns resolution chain
+        echo "DNS=10.43.0.10" | tee -a /etc/systemd/resolved.conf
+        systemctl restart systemd-resolved
       when: kubectl_check.rc != 0
 
 - name: configure kubeconfig for user
@@ -55,10 +64,39 @@
       ansible.builtin.shell: |
         kubectl wait deployment -n kube-system coredns --for create --timeout=300s
         kubectl wait deployment -n kube-system local-path-provisioner --for create --timeout=300s
-        kubectl wait deployment -n kube-system metrics-server --for create --timeout=300s
-        kubectl wait deployment -n kube-system traefik --for create --timeout=300s
 
         kubectl wait deployment -n kube-system coredns --for condition=Available=True --timeout=300s
         kubectl wait deployment -n kube-system local-path-provisioner --for condition=Available=True --timeout=300s
-        kubectl wait deployment -n kube-system metrics-server --for condition=Available=True --timeout=300s
-        kubectl wait deployment -n kube-system traefik --for condition=Available=True --timeout=300s
+
+- name: fetch configuration files
+  hosts: my_instance
+  gather_facts: false
+  tasks:
+    - name: ensure local directory exists
+      delegate_to: localhost
+      ansible.builtin.file:
+        path: "{{playbook_dir}}/../server-files"
+        state: directory
+        mode: '0755'
+
+    - name: fetch kubeconfig
+      fetch:
+        src: /home/debian/.kube/config
+        dest: "{{playbook_dir}}/../server-files/kubeconfig"
+        flat: yes
+
+    - name: fetch server CA certificate
+      become: true
+      become_user: root
+      fetch:
+        src: /var/lib/rancher/k3s/server/tls/server-ca.crt
+        dest: "{{playbook_dir}}/../server-files/server-ca.crt"
+        flat: yes
+
+    - name: fetch server CA key
+      become: true
+      become_user: root
+      fetch:
+        src: /var/lib/rancher/k3s/server/tls/server-ca.key
+        dest: "{{playbook_dir}}/../server-files/server-ca.key"
+        flat: yes

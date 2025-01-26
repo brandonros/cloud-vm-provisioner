@@ -28,3 +28,6 @@ terraform.rc
 
 # MacOS files
 .DS_Store
+
+# Server files
+server-files/*

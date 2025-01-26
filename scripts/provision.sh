@@ -3,10 +3,10 @@
 set -e
 
 SCRIPT=$(readlink -f "$0")
-SCRIPTPATH=$(dirname "$SCRIPT")
+SCRIPT_PATH=$(dirname "$SCRIPT")
 
 # load config
-. $SCRIPTPATH/config.sh
+. $SCRIPT_PATH/config.sh
 
 # check for ssh key
 if [ ! -e "$HOME/.ssh/id_rsa.pub" ]
