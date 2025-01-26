@@ -101,5 +101,5 @@ echo "${instance_ipv4} ansible_user=${instance_username} ansible_port=${instance
 mkdir -p server-files
 
 # Run Ansible playbooks
-#ansible-playbook -i /tmp/hosts.ini ./ansible/setup.yaml
-#ansible-playbook -i /tmp/hosts.ini ./ansible/k3s.yaml
+ansible-playbook -i /tmp/hosts.ini ./ansible/setup.yaml
+ansible-playbook -i /tmp/hosts.ini ./ansible/k3s.yaml

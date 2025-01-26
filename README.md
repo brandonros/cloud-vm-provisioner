@@ -1,9 +1,14 @@
 # cloud-vm-provisioner
 Terraform configurations for provisioning VMs across cloud providers
 
-## Usage
+## How to use
 
 ```shell
 ./scripts/provision.sh
-./scripts/connect.sh
+./scripts/apply.sh
+```
+
+## Cleanup
+```shell
+./scripts/cleanup.sh
 ```
