@@ -20,8 +20,10 @@
         update-ca-certificates
 
         # add coredns in the cluster to node dns resolution chain
-        echo "DNS=10.43.0.10" | tee -a /etc/systemd/resolved.conf
-        systemctl restart systemd-resolved
+        if ! grep -q "nameserver 10.43.0.10" /etc/resolvconf/resolv.conf.d/tail; then
+          echo "nameserver 10.43.0.10" >> /etc/resolvconf/resolv.conf.d/tail
+          resolvconf -u
+        fi
       when: kubectl_check.rc != 0
 
 - name: configure kubeconfig for user
