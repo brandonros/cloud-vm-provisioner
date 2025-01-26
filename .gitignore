@@ -30,4 +30,4 @@ terraform.rc
 .DS_Store
 
 # Server files
-server-files/*
+server-files
