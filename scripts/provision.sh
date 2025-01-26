@@ -97,6 +97,9 @@ fi
 echo "[my_instance]" > /tmp/hosts.ini
 echo "${instance_ipv4} ansible_user=${instance_username} ansible_port=${instance_ssh_port}" >> /tmp/hosts.ini
 
+# create server-files directory
+mkdir -p server-files
+
 # Run Ansible playbooks
 ansible-playbook -i /tmp/hosts.ini ./ansible/setup.yaml
 ansible-playbook -i /tmp/hosts.ini ./ansible/k3s.yaml

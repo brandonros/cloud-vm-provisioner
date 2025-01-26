@@ -74,13 +74,6 @@
   hosts: my_instance
   gather_facts: false
   tasks:
-    - name: ensure local directory exists
-      delegate_to: localhost
-      ansible.builtin.file:
-        path: "{{playbook_dir}}/../server-files"
-        state: directory
-        mode: '0755'
-
     - name: fetch kubeconfig
       fetch:
         src: /home/debian/.kube/config
