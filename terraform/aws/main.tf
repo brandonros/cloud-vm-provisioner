@@ -99,3 +99,6 @@ output "instance_ipv4" {
   value = aws_instance.virtual_machine1.public_ip
 }
 
+output "ssh_port" {
+  value = 22
+}

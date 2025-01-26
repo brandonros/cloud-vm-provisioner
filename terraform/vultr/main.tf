@@ -48,3 +48,7 @@ output "instance_username" {
 output "instance_ipv4" {
   value = vultr_instance.my_instance.main_ip
 }
+
+output "ssh_port" {
+  value = 22
+}

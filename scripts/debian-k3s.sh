@@ -14,6 +14,7 @@ terraform init
 terraform apply -auto-approve
 instance_ipv4=$(terraform output -raw instance_ipv4)
 instance_username=$(terraform output -raw instance_username)
+instance_ssh_port=$(terraform output -raw ssh_port)
 cd ../../
 
 # clone debian-k3s
@@ -24,7 +25,7 @@ pushd /tmp/debian-k3s
 # check for existing tunnel and spawn if needed
 if ! pgrep -f "ssh.*-L 6443:localhost:6443.*$instance_ipv4" > /dev/null; then
     echo "Starting SSH tunnel..."
-    ssh -fN -L 6443:localhost:6443 $instance_username@$instance_ipv4
+    ssh -fN -L 6443:localhost:6443 -p $instance_ssh_port $instance_username@$instance_ipv4
 else
     echo "SSH tunnel already running"
 fi

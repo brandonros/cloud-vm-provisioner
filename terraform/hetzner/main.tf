@@ -51,3 +51,7 @@ output "instance_username" {
 output "instance_ipv4" {
   value = hcloud_server.server1.ipv4_address
 }
+
+output "ssh_port" {
+  value = 22
+}

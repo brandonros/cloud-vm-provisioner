@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 SCRIPT=$(readlink -f "$0")
 SCRIPT_PATH=$(dirname "$SCRIPT")
@@ -71,28 +71,31 @@ terraform init
 terraform apply -auto-approve
 instance_ipv4=$(terraform output -raw instance_ipv4)
 instance_username=$(terraform output -raw instance_username)
+instance_ssh_port=$(terraform output -raw ssh_port)
 cd ../../
 
 # Wait for the host to come alive on port 22
-echo "Waiting for ${instance_ipv4} to become available on port 22..."
-while ! nc -z ${instance_ipv4} 22
+echo "Waiting for ${instance_ipv4} to become available on port ${instance_ssh_port}..."
+while ! nc -z ${instance_ipv4} ${instance_ssh_port}
 do
   sleep 1
 done
 echo "${instance_ipv4} is now available."
 
-# Remove any old fingerprint from IPs being re-used
-ssh-keygen -R $instance_ipv4
+# Remove any old fingerprint from IPs being re-used, only if it exists
+if ssh-keygen -F $instance_ipv4 > /dev/null 2>&1; then
+  ssh-keygen -R $instance_ipv4
+fi
 
 # Accept the SSH fingerprint
 if ! ssh-keygen -F $instance_ipv4 > /dev/null
 then
-  ssh-keyscan -H $instance_ipv4 >> ~/.ssh/known_hosts
+  ssh-keyscan -H -p ${instance_ssh_port} $instance_ipv4 >> ~/.ssh/known_hosts
 fi
 
 # Create Ansible inventory file
 echo "[my_instance]" > /tmp/hosts.ini
-echo "${instance_ipv4} ansible_user=${instance_username}" >> /tmp/hosts.ini
+echo "${instance_ipv4} ansible_user=${instance_username} ansible_port=${instance_ssh_port}" >> /tmp/hosts.ini
 
 # Run Ansible playbooks
 ansible-playbook -i /tmp/hosts.ini ./ansible/setup.yaml

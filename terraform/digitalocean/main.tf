@@ -32,3 +32,7 @@ output "instance_username" {
 output "instance_ipv4" {
   value = digitalocean_droplet.droplet1.ipv4_address
 }
+
+output "ssh_port" {
+  value = 22
+}
