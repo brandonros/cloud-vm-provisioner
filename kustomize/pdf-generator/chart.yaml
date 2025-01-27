@@ -21,7 +21,7 @@ spec:
             enabled: false
         deployment:
           pdf-generator:
-            replicas: 5
+            replicas: 4
             annotations:
               linkerd.io/inject: enabled
               config.linkerd.io/proxy-log-level: debug
@@ -37,10 +37,12 @@ spec:
                       cpu: 2000m
                   image:
                     repository: ghcr.io/brandonros/pdf-generator
-                    tag: b152b6ff458f8b7a384806805a9d323dcd02815a
+                    tag: 329e2b7f410ab5212afa5975b68b64ff785349b9
                   env:
                     CHROMIUM_PATH:
                       value: /usr/bin/chromium
+                    MAX_CONCURRENCY:
+                      value: 15
                   ports:
                     http:
                       containerPort: 3000
