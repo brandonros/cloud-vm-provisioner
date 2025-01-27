@@ -63,6 +63,13 @@ then
     echo "AWS_SECRET_ACCESS_KEY is not set"
     exit 1
   fi
+elif [ "$CLOUD_PROVIDER" == "lima" ]
+then
+  if ! command -v limactl &> /dev/null
+  then
+    echo "limactl is not installed"
+    exit 1
+  fi
 fi
 
 # Apply the Terraform (create an instance) + Extract Terraform output (get created instance address)
