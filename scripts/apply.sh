@@ -8,6 +8,13 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 # load config
 . $SCRIPT_PATH/config.sh
 
+# check for kubectl
+if ! command -v kubectl &> /dev/null
+then
+  echo "kubectl is not installed"
+  exit 1
+fi
+
 KUSTOMIZE_PATH=$SCRIPT_PATH/../kustomize
 SERVER_FILES_PATH=$SCRIPT_PATH/../server-files
 
@@ -32,27 +39,42 @@ instance_ssh_port=$(terraform output -raw ssh_port)
 cd ../../
 
 # trust k3s-generated CA
-echo "trusting k3s-generated CA"
-CERT_NAME="k3s-server-ca"
-SYSTEM_KEYCHAIN="/Library/Keychains/System.keychain"
-if ! security find-certificate -c "$CERT_NAME" "$SYSTEM_KEYCHAIN" > /dev/null 2>&1; then
-  echo "Adding certificate to system keychain..."
-  sudo security add-trusted-cert -d -r trustRoot -k "$SYSTEM_KEYCHAIN" "$SERVER_FILES_PATH/server-ca.crt"
+if [[ "$OSTYPE" == "darwin"* ]]
+then
+    echo "trusting k3s-generated CA on macOS"
+    CERT_NAME="k3s-server-ca"
+    SYSTEM_KEYCHAIN="/Library/Keychains/System.keychain"
+    if ! security find-certificate -c "$CERT_NAME" "$SYSTEM_KEYCHAIN" > /dev/null 2>&1; then
+        echo "Adding certificate to system keychain..."
+        sudo security add-trusted-cert -d -r trustRoot -k "$SYSTEM_KEYCHAIN" "$SERVER_FILES_PATH/server-ca.crt"
+    fi
+else
+    echo "TODO: trust k3s-generated CA on non-macOS systems"
 fi
 
-# append exposed external services from ingress to /etc/hosts if not already present
-echo "adding to /etc/hosts"
-HOSTS_ENTRY="$instance_ipv4 grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s pdf-generator.debian-k3s"
-if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
-    echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts
+# update /etc/hosts file (macOS and Linux only)
+if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
+then
+    echo "Adding entries to /etc/hosts"
+    HOSTS_ENTRY="$instance_ipv4 grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s pdf-generator.debian-k3s"
+    if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
+        echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts
+    fi
+else
+    echo "TODO: /etc/hosts update for non-macOS and non-Linux systems"
 fi
 
 # check for existing tunnel and spawn if needed
-if ! pgrep -f "ssh.*-L 6443:localhost:6443.*$instance_ipv4" > /dev/null; then
-    echo "Starting SSH tunnel..."
-    ssh -fN -L 6443:localhost:6443 -p $instance_ssh_port $instance_username@$instance_ipv4
+if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
+then
+    if ! pgrep -f "ssh.*-L 6443:localhost:6443.*$instance_ipv4" > /dev/null; then
+        echo "Starting SSH tunnel..."
+        ssh -fN -L 6443:localhost:6443 -p $instance_ssh_port $instance_username@$instance_ipv4
+    else
+        echo "SSH tunnel already running"
+    fi
 else
-    echo "SSH tunnel already running"
+    echo "TODO: pgrep equivalent for windows"
 fi
 
 # copy certs for cert-manager

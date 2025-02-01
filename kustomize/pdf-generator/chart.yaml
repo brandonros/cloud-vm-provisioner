@@ -36,13 +36,15 @@ spec:
                       memory: 2048Mi
                       cpu: 2000m
                   image:
-                    repository: ghcr.io/brandonros/pdf-generator
-                    tag: 329e2b7f410ab5212afa5975b68b64ff785349b9
+                    repository: ghcr.io/avdeev99/puppeteer-pdf-generator
+                    tag: 93420ed874e6937871ce6a40449a960aa8738e86
                   env:
                     CHROMIUM_PATH:
                       value: /usr/bin/chromium
-                    MAX_CONCURRENCY:
+                    PUPPETEER_MAX_CONCURRENT_PAGES:
                       value: 15
+                    ASPNETCORE_URLS:
+                      value: http://0.0.0.0:3000
                   ports:
                     http:
                       containerPort: 3000

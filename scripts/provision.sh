@@ -8,6 +8,27 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 # load config
 . $SCRIPT_PATH/config.sh
 
+# check for terraform
+if ! command -v terraform &> /dev/null
+then
+  echo "terraform is not installed"
+  exit 1
+fi
+
+# check for ansible
+if ! command -v ansible &> /dev/null
+then
+  echo "ansible is not installed"
+  exit 1
+fi
+
+# check for nc
+if ! command -v nc &> /dev/null
+then
+  echo "nc is not installed"
+  exit 1
+fi
+
 # check for ssh key
 if [ ! -e "$HOME/.ssh/id_rsa.pub" ]
 then
