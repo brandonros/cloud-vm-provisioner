@@ -10,14 +10,12 @@ spec:
   valuesContent: |-
     global:
       kibanaEnabled: true
-    security:
-      enabled: true
     master:
       masterOnly: false
       replicaCount: 1
       resources:
         limits:
-            memory: 1Gi
+          memory: 1Gi
     data:
       replicaCount: 0
     coordinating:
@@ -25,9 +23,9 @@ spec:
     ingest:
       replicaCount: 0
     kibana:
-      security:
-        auth:
-          enabled: true
+      configuration:
+        server:
+          publicBaseUrl: https://kibana.debian-k3s
       resources:
         limits:
           memory: 1Gi

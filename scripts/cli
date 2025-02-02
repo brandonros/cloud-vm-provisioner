@@ -335,22 +335,29 @@ cmd_apply() {
     ## linkerd
     echo "deploying linkerd"
     kustomize build $KUSTOMIZE_PATH/linkerd | envsubst | kubectl apply -f -
-    # TODO: wait for linkerd to be ready
+    wait_for_deployment tap linkerd
+    wait_for_deployment tap-injector linkerd
+    wait_for_deployment web linkerd
+    wait_for_deployment metrics-api linkerd
 
     ## monitoring
     echo "deploying monitoring"
     kustomize build $KUSTOMIZE_PATH/monitoring | envsubst | kubectl apply -f -
-    # TODO: wait for monitoring to be ready
+    wait_for_deployment kube-prometheus-stack-grafana monitoring
+    wait_for_deployment kube-prometheus-stack-kube-state-metrics monitoring
+    wait_for_deployment kube-prometheus-stack-operator monitoring
 
     ## elasticsearch
     echo "deploying elasticsearch"
     kustomize build $KUSTOMIZE_PATH/elasticsearch | envsubst | kubectl apply -f -
-    wait_for_deployment elasticsearch-kibana elasticsearch 
+    wait_for_deployment elasticsearch-kibana elasticsearch 300s
 
     ## linkerd-control-plane
     echo "deploying linkerd-control-plane"
     kustomize build $KUSTOMIZE_PATH/linkerd-control-plane | envsubst | kubectl apply -f -
-    # TODO: wait for linkerd-control-plane to be ready
+    wait_for_deployment linkerd-destination linkerd
+    wait_for_deployment linkerd-identity linkerd
+    wait_for_deployment linkerd-proxy-injector linkerd
 
     ## traefik-routes
     echo "deploying traefik-routes"
