@@ -216,7 +216,7 @@ update_hosts_file() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
         echo "Adding entries to /etc/hosts"
-        HOSTS_ENTRY="$instance_ipv4 grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s"
+        HOSTS_ENTRY="$instance_ipv4 grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s kibana.debian-k3s"
         if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
             echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts
         fi
@@ -346,7 +346,7 @@ cmd_apply() {
     ## elasticsearch
     echo "deploying elasticsearch"
     kustomize build $KUSTOMIZE_PATH/elasticsearch | envsubst | kubectl apply -f -
-    # TODO: wait for elasticsearch to be ready
+    wait_for_deployment elasticsearch elasticsearch-kibana
 
     ## linkerd-control-plane
     echo "deploying linkerd-control-plane"

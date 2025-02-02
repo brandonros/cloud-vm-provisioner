@@ -6,3 +6,4 @@ resources:
   - ./tempo.yaml
   - ./linkerd-viz.yaml
   - ./graphite.yaml
+  - ./kibana.yaml
