@@ -1,0 +1,21 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: elasticsearch
+  namespace: kube-system
+spec:
+  repo: https://charts.bitnami.com/bitnami
+  chart: elasticsearch
+  targetNamespace: elasticsearch
+  valuesContent: |-
+    global:
+      kibanaEnabled: true
+    master:
+      masterOnly: false
+      replicaCount: 1
+    data:
+      replicaCount: 0
+    coordinating:
+      replicaCount: 0
+    ingest:
+      replicaCount: 0

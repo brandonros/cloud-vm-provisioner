@@ -27,4 +27,3 @@ spec:
           matchNames:
             - {{ .Release.Namespace }}
             - traefik
-            - pdf-generator

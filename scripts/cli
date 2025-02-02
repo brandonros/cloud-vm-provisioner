@@ -216,7 +216,7 @@ update_hosts_file() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
         echo "Adding entries to /etc/hosts"
-        HOSTS_ENTRY="$instance_ipv4 grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s pdf-generator.debian-k3s"
+        HOSTS_ENTRY="$instance_ipv4 grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s"
         if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
             echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts
         fi
@@ -343,10 +343,10 @@ cmd_apply() {
     kustomize build $KUSTOMIZE_PATH/monitoring | envsubst | kubectl apply -f -
     # TODO: wait for monitoring to be ready
 
-    ## pdf-generator
-    echo "deploying pdf-generator"
-    kustomize build $KUSTOMIZE_PATH/pdf-generator | envsubst | kubectl apply -f -
-    wait_for_deployment pdf-generator pdf-generator
+    ## elasticsearch
+    echo "deploying elasticsearch"
+    kustomize build $KUSTOMIZE_PATH/elasticsearch | envsubst | kubectl apply -f -
+    # TODO: wait for elasticsearch to be ready
 
     ## linkerd-control-plane
     echo "deploying linkerd-control-plane"
@@ -357,8 +357,6 @@ cmd_apply() {
     echo "deploying traefik-routes"
     kustomize build $KUSTOMIZE_PATH/traefik-routes | envsubst | kubectl apply -f -
     # TODO: wait for traefik-routes to be ready
-
-
 }
 
 load_instance_details() {
@@ -395,9 +393,9 @@ usage() {
     echo "Usage: cli <command>"
     echo ""
     echo "Commands:"
-    echo "  create      Create a new cloud instance"
-    echo "  apply       Apply Kubernetes manifests to the cluster"
-    echo "  connect     SSH into the cloud instance"
+    echo "  create      Create a new instance"
+    echo "  apply       Apply Kubernetes manifests to the instance"
+    echo "  connect     SSH into the instance"
     echo "  cleanup     Destroy the instance and clean up local files"
     echo "  help        Show this help message"
 }
