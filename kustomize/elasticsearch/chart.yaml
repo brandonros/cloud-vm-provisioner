@@ -19,3 +19,9 @@ spec:
       replicaCount: 0
     ingest:
       replicaCount: 0
+    kibana:
+      resources:
+        limits:
+          memory: "1Gi"
+        requests:
+          memory: "512Mi"
