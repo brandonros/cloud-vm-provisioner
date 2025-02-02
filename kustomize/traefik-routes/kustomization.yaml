@@ -7,3 +7,4 @@ resources:
   - ./linkerd-viz.yaml
   - ./graphite.yaml
   - ./kibana.yaml
+  - ./elasticsearch.yaml
