@@ -4,11 +4,11 @@ Terraform configurations for provisioning VMs across cloud providers
 ## How to use
 
 ```shell
-./scripts/provision.sh
-./scripts/apply.sh
+./scripts/cli provision
+./scripts/cli apply
 ```
 
 ## Cleanup
 ```shell
-./scripts/cleanup.sh
+./scripts/cli cleanup
 ```

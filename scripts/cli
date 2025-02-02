@@ -7,13 +7,13 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 
 # pick cloud provider
 #CLOUD_PROVIDER="google_cloud"
-CLOUD_PROVIDER="vultr"
+#CLOUD_PROVIDER="vultr"
 #CLOUD_PROVIDER="azure"
 #CLOUD_PROVIDER="digitalocean"
 #CLOUD_PROVIDER="aws"
 #CLOUD_PROVIDER="oracle"
 #CLOUD_PROVIDER="hetzner"
-#CLOUD_PROVIDER="lima"
+CLOUD_PROVIDER="lima"
 
 check_dependencies() {
     # Define required dependencies
@@ -100,9 +100,6 @@ terraform_apply() {
     pushd terraform/$CLOUD_PROVIDER/
     terraform init
     terraform apply -auto-approve
-    instance_ipv4=$(terraform output -raw instance_ipv4)
-    instance_username=$(terraform output -raw instance_username)
-    instance_ssh_port=$(terraform output -raw ssh_port)
     popd
 }
 
@@ -261,6 +258,7 @@ cmd_provision() {
     check_ssh_key
     check_cloud_credentials
     terraform_apply
+    load_instance_details
     wait_for_host
     accept_ssh_key
     create_ansible_inventory
@@ -269,6 +267,7 @@ cmd_provision() {
 
 cmd_apply() {
     check_dependencies
+    load_instance_details
 
     KUSTOMIZE_PATH=$SCRIPT_PATH/../kustomize
     SERVER_FILES_PATH=$SCRIPT_PATH/../server-files
@@ -362,12 +361,16 @@ cmd_apply() {
 
 }
 
-cmd_connect() {
+load_instance_details() {
     pushd terraform/$CLOUD_PROVIDER/
     instance_ipv4=$(terraform output -raw instance_ipv4)
     instance_username=$(terraform output -raw instance_username)
     instance_ssh_port=$(terraform output -raw ssh_port)
     popd
+}
+
+cmd_connect() {
+    load_instance_details
 
     # TODO: make sure we have provisioned and these variables are set correctly
 
