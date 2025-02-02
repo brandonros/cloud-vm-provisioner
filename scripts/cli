@@ -155,7 +155,6 @@ uninstall_certificate() {
         CERTS=$(security find-certificate -a -c "k3s-server-ca" | grep "alis" | cut -d'"' -f4)
         if [ -z "$CERTS" ]; then
             echo "No k3s-server-ca certificates found"
-            exit 0
         fi
         for cert in $CERTS; do
             echo "Found certificate: $cert"
