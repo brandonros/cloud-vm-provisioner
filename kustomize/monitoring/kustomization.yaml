@@ -6,3 +6,4 @@ resources:
   - ./loki-stack.yaml
   - ./tempo.yaml
   - ./graphite.yaml
+
