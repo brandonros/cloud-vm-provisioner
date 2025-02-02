@@ -346,7 +346,7 @@ cmd_apply() {
     ## elasticsearch
     echo "deploying elasticsearch"
     kustomize build $KUSTOMIZE_PATH/elasticsearch | envsubst | kubectl apply -f -
-    wait_for_deployment elasticsearch elasticsearch-kibana
+    wait_for_deployment elasticsearch-kibana elasticsearch 
 
     ## linkerd-control-plane
     echo "deploying linkerd-control-plane"
