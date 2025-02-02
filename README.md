@@ -3,12 +3,14 @@ Terraform configurations for provisioning VMs across cloud providers
 
 ## How to use
 
-```shell
-./scripts/cli provision
-./scripts/cli apply
 ```
+$ ./scripts/cli help
+Usage: cli <command>
 
-## Cleanup
-```shell
-./scripts/cli cleanup
+Commands:
+  create      Create a new cloud instance
+  apply       Apply Kubernetes manifests to the cluster
+  connect     SSH into the cloud instance
+  cleanup     Destroy the instance and clean up local files
+  help        Show this help message
 ```

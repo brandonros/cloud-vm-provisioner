@@ -253,7 +253,7 @@ deploy_gateway_api() {
     fi
 }
 
-cmd_provision() {
+cmd_create() {
     check_dependencies
     check_ssh_key
     check_cloud_credentials
@@ -395,7 +395,7 @@ usage() {
     echo "Usage: cli <command>"
     echo ""
     echo "Commands:"
-    echo "  provision   Create and provision a new cloud instance"
+    echo "  create      Create a new cloud instance"
     echo "  apply       Apply Kubernetes manifests to the cluster"
     echo "  connect     SSH into the cloud instance"
     echo "  cleanup     Destroy the instance and clean up local files"
@@ -404,8 +404,8 @@ usage() {
 
 # route commands
 case $1 in
-    provision)
-        cmd_provision
+    create)
+        cmd_create
         ;;
     apply)
         cmd_apply
