@@ -13,9 +13,11 @@ spec:
     master:
       masterOnly: false
       replicaCount: 1
+      heapSize: 1024m
       resources:
         limits:
-          memory: 1Gi
+          cpu: 4
+          memory: 4Gi
     data:
       replicaCount: 0
     coordinating:
@@ -28,6 +30,6 @@ spec:
           publicBaseUrl: https://kibana.debian-k3s
       resources:
         limits:
-          memory: 1Gi
+          memory: 2Gi
         requests:
           memory: 512Mi
