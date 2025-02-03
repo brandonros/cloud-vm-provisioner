@@ -4,7 +4,7 @@ Terraform configurations for provisioning VMs across cloud providers
 ## How to use
 
 ```
-$ ./scripts/cli help
+$ ./cli help
 Usage: cli <command>
 
 Commands:
