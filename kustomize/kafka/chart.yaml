@@ -1,0 +1,44 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: kafka
+  namespace: kube-system
+spec:
+  repo: https://charts.bitnami.com/bitnami
+  chart: kafka
+  targetNamespace: kafka
+  valuesContent: |-
+    kraft:
+      enabled: true # Use KRaft instead of Zookeeper
+      
+    # Minimal single-node setup
+    controller:
+      replicaCount: 1
+      heapOpts: -Xmx1024m -Xms1024m
+      resources:
+        limits:
+          cpu: 1
+          memory: 2Gi
+    
+    broker:
+      replicaCount: 1
+      heapOpts: -Xmx1024m -Xms1024m
+      resources:
+        limits:
+          cpu: 1
+          memory: 2Gi
+    
+    # Disable persistence for local testing
+    persistence:
+      enabled: false
+    
+    # Minimal resource usage
+    resources:
+      limits:
+        memory: 2Gi
+      requests:
+        memory: 512Mi
+    
+    # Allow auto-creation of topics
+    extraConfig: |
+      auto.create.topics.enable=true

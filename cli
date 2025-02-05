@@ -185,15 +185,34 @@ remove_hosts_entry() {
     fi
 }
 
+wait_for_resource() {
+    local type=$1
+    local name=$2
+    local namespace=$3
+    local timeout=${4:-120s}
+
+    echo "Waiting for $type $name in namespace $namespace..."
+    kubectl wait --for=create $type/$name -n $namespace --timeout=$timeout || return 1
+    if [ "$type" = "deployment" ]; then
+        kubectl wait --for=condition=available $type/$name -n $namespace --timeout=$timeout || return 1
+    fi
+    kubectl rollout status $type/$name -n $namespace --watch || return 1
+}
+
 wait_for_deployment() {
-    local deployment=$1
+    local name=$1
     local namespace=$2
     local timeout=${3:-120s}
 
-    echo "Waiting for deployment $deployment in namespace $namespace..."
-    kubectl wait --for=create deployment/$deployment -n $namespace --timeout=$timeout || return 1
-    kubectl wait --for=condition=available deployment/$deployment -n $namespace --timeout=$timeout || return 1
-    kubectl rollout status deployment/$deployment -n $namespace --watch || return 1
+    wait_for_resource deployment $name $namespace $timeout
+}
+
+wait_for_statefulset() {
+    local name=$1
+    local namespace=$2
+    local timeout=${3:-120s}
+
+    wait_for_resource statefulset $name $namespace $timeout
 }
 
 trust_k3s_ca() {
@@ -215,7 +234,7 @@ update_hosts_file() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
         echo "Adding entries to /etc/hosts"
-        HOSTS_ENTRY="$instance_ipv4 grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s kibana.debian-k3s elasticsearch.debian-k3s"
+        HOSTS_ENTRY="$instance_ipv4 grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s kafka.debian-k3s"
         if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
             echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts
         fi
@@ -268,8 +287,8 @@ cmd_apply() {
     check_dependencies
     load_instance_details
 
-    KUSTOMIZE_PATH=$SCRIPT_PATH/../kustomize
-    SERVER_FILES_PATH=$SCRIPT_PATH/../server-files
+    KUSTOMIZE_PATH=$SCRIPT_PATH/kustomize
+    SERVER_FILES_PATH=$SCRIPT_PATH/server-files
 
     # trust k3s-generated CA
     trust_k3s_ca
@@ -347,10 +366,11 @@ cmd_apply() {
     wait_for_deployment kube-prometheus-stack-kube-state-metrics monitoring
     wait_for_deployment kube-prometheus-stack-operator monitoring
 
-    ## elasticsearch
-    echo "deploying elasticsearch"
-    kustomize build $KUSTOMIZE_PATH/elasticsearch | envsubst | kubectl apply -f -
-    wait_for_deployment elasticsearch-kibana elasticsearch 300s
+    ## kafka
+    echo "deploying kafka"
+    kustomize build $KUSTOMIZE_PATH/kafka | envsubst | kubectl apply -f -
+    wait_for_statefulset kafka-broker kafka
+    wait_for_statefulset kafka-controller kafka    
 
     ## linkerd-control-plane
     echo "deploying linkerd-control-plane"
@@ -385,10 +405,10 @@ cmd_cleanup() {
     terraform_destroy
 
     # Cleanup server-files
-    rm -rf $SCRIPT_PATH/../server-files
+    rm -rf $SCRIPT_PATH/server-files
 
     # Cleanup kustomize certs
-    rm -rf $SCRIPT_PATH/../kustomize/cert-manager/certs
+    rm -rf $SCRIPT_PATH/kustomize/cert-manager/certs
 
     uninstall_certificate
     remove_hosts_entry

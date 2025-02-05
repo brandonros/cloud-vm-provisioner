@@ -6,5 +6,4 @@ resources:
   - ./tempo.yaml
   - ./linkerd-viz.yaml
   - ./graphite.yaml
-  - ./kibana.yaml
-  - ./elasticsearch.yaml
+  - ./kafka.yaml
