@@ -8,11 +8,25 @@ spec:
   listeners:
   - name: kafka-external
     port: 9095
-    protocol: TCP  
+    protocol: TCP
+
+  - name: redis
+    port: 6379
+    protocol: TCP
+
+  - name: rabbitmq
+    port: 5672
+    protocol: TCP
+
+  - name: postgresql
+    port: 5432
+    protocol: TCP
+
   - name: web
     port: 8000
     protocol: HTTP
     hostname: "*.debian-k3s"
+
   - name: websecure
     port: 8443
     protocol: HTTPS

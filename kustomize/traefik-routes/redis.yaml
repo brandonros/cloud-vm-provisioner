@@ -1,0 +1,33 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: redis-reference-grant
+  namespace: redis
+spec:
+  from:
+  - group: gateway.networking.k8s.io
+    kind: TCPRoute
+    namespace: traefik
+  to:
+  - group: ""
+    kind: Service
+    name: redis
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: redis-tcproute
+  namespace: traefik
+spec:
+  parentRefs:
+  - name: debian-k3s-gateway
+    namespace: traefik
+    kind: Gateway
+    sectionName: redis
+  rules:
+    - backendRefs:
+      - name: redis-master
+        namespace: redis
+        port: 6379
+        kind: Service
+        weight: 100
