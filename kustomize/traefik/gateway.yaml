@@ -6,13 +6,13 @@ metadata:
 spec:
   gatewayClassName: traefik
   listeners:
+  - name: kafka-external
+    port: 9095
+    protocol: TCP  
   - name: web
     port: 8000
     protocol: HTTP
     hostname: "*.debian-k3s"
-  - name: kafka-external
-    port: 9095
-    protocol: TCP
   - name: websecure
     port: 8443
     protocol: HTTPS

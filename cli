@@ -369,7 +369,6 @@ cmd_apply() {
     ## kafka
     echo "deploying kafka"
     kustomize build $KUSTOMIZE_PATH/kafka | envsubst | kubectl apply -f -
-    wait_for_statefulset kafka-broker kafka
     wait_for_statefulset kafka-controller kafka    
 
     ## linkerd-control-plane

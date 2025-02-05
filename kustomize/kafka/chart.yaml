@@ -21,6 +21,14 @@ spec:
           cpu: 1
           memory: 2Gi
 
+    listeners:
+      advertisedListeners: 'CLIENT://kafka.debian-k3s:9092,INTERNAL://kafka.debian-k3s:9094,EXTERNAL://kafka.debian-k3s:9095'
+
+    extraConfigYaml:
+      auto.create.topics.enable: true
+      default.replication.factor: 1
+      offsets.topic.replication.factor: 1
+
     externalAccess:
       enabled: true
       autoDiscovery:
@@ -39,7 +47,3 @@ spec:
         memory: 2Gi
       requests:
         memory: 512Mi
-    
-    # Allow auto-creation of topics
-    extraConfig: |
-      auto.create.topics.enable=true

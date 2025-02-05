@@ -23,7 +23,7 @@ spec:
   - name: debian-k3s-gateway
     namespace: traefik
     kind: Gateway
-    sectionName: kafka
+    sectionName: kafka-external
   rules:
     - backendRefs:
       - name: kafka
