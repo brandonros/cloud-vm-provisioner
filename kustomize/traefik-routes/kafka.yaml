@@ -6,34 +6,28 @@ metadata:
 spec:
   from:
   - group: gateway.networking.k8s.io
-    kind: HTTPRoute
+    kind: TCPRoute
     namespace: traefik
   to:
   - group: ""
     kind: Service
     name: kafka
 ---
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
 metadata:
-  name: kafka-httproute
+  name: kafka-tcproute
   namespace: traefik
 spec:
   parentRefs:
   - name: debian-k3s-gateway
     namespace: traefik
     kind: Gateway
-    sectionName: websecure
-  hostnames:
-  - kafka.debian-k3s
+    sectionName: kafka
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /
-    backendRefs:
-    - name: kafka
-      namespace: kafka
-      port: 9092
-      kind: Service
-      weight: 100
+    - backendRefs:
+      - name: kafka
+        namespace: kafka
+        port: 9092
+        kind: Service
+        weight: 100

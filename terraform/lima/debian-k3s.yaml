@@ -30,16 +30,25 @@ disk: "100GiB"
 
 # port forwards
 portForwards:
+# kafka
+- guestPort: 9092
+  hostPort: 9092
+  guestIP: "127.0.0.1"
+  hostIP: "127.0.0.1"
+  proto: tcp
+# kubernetes api
 - guestPort: 6443
   hostPort: 6443
   guestIP: "127.0.0.1"
   hostIP: "127.0.0.1"
   proto: tcp
+# https
 - guestPort: 443
   hostPort: 443
   guestIP: "127.0.0.1"
   hostIP: "127.0.0.1"
   proto: tcp
+# http
 - guestPort: 80
   hostPort: 80
   guestIP: "127.0.0.1"
