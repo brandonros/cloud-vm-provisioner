@@ -1,0 +1,11 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: rabbitmq
+  namespace: kube-system
+spec:
+  repo: https://charts.bitnami.com/bitnami
+  chart: rabbitmq
+  targetNamespace: rabbitmq
+  valuesContent: |-
+    replicaCount: 1
