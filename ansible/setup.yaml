@@ -48,6 +48,7 @@
           - acl
           - htop
           - psmisc
+          - netcat-traditional
 
     - name: auto remove
       ansible.builtin.apt:

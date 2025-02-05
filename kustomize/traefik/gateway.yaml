@@ -10,6 +10,9 @@ spec:
     port: 8000
     protocol: HTTP
     hostname: "*.debian-k3s"
+  - name: kafka
+    port: 9092
+    protocol: TCP
   - name: websecure
     port: 8443
     protocol: HTTPS

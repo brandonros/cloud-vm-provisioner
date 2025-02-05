@@ -9,48 +9,48 @@ spec:
   targetNamespace: traefik
   version: 33.0.0
   valuesContent: |-
+    ports:
+      web:
+        port: 8000
+        expose:
+          default: true
+        exposedPort: 8000
+        protocol: TCP
+      
+      websecure:
+        port: 8443
+        expose:
+          default: true
+        exposedPort: 8443
+        protocol: TCP
+        tls:
+          enabled: true
+          
+      kafka:
+        port: 9092
+        expose:
+          default: true
+        exposedPort: 9092
+        protocol: TCP
+
+    gateway:
+      enabled: false
+
     deployment:
       podAnnotations:
         linkerd.io/inject: enabled
         config.linkerd.io/proxy-log-level: debug
+
     logs:
       general:
         level: TRACE
       access:
         enabled: true
+
     providers:
       kubernetesIngress:
         enabled: false
+
       kubernetesGateway:
         enabled: true
         experimentalChannel: true
-        gateway:
-          namespacePolicy: All
-          listeners:
-            web:
-              port: 8000
-              protocol: HTTP
-              namespacePolicy: All
-              allowedRoutes:
-                namespaces:
-                  from: Same
-
-            kafka:
-              port: 9092
-              protocol: TCP
-              namespacePolicy: All
-              allowedRoutes:
-                namespaces:
-                  from: Same
-
-            websecure:
-              port: 8443
-              protocol: HTTPS
-              namespacePolicy: All
-              allowedRoutes:
-                namespaces:
-                  from: Same
-              certificateRefs:
-                - kind: Secret
-                  name: debian-k3s-gateway-tls
-                  namespace: traefik
