@@ -10,23 +10,24 @@ spec:
   valuesContent: |-
     kraft:
       enabled: true # Use KRaft instead of Zookeeper
-      
+
     # Minimal single-node setup
     controller:
+      automountServiceAccountToken: true
       replicaCount: 1
       heapOpts: -Xmx1024m -Xms1024m
       resources:
         limits:
           cpu: 1
           memory: 2Gi
-    
-    broker:
-      replicaCount: 1
-      heapOpts: -Xmx1024m -Xms1024m
-      resources:
-        limits:
-          cpu: 1
-          memory: 2Gi
+
+    externalAccess:
+      enabled: true
+      autoDiscovery:
+        enabled: true
+
+    rbac:
+      create: true
     
     # Disable persistence for local testing
     persistence:

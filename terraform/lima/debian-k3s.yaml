@@ -30,9 +30,9 @@ disk: "100GiB"
 
 # port forwards
 portForwards:
-# kafka
-- guestPort: 9092
-  hostPort: 9092
+# kafka-external
+- guestPort: 9095
+  hostPort: 9095
   guestIP: "127.0.0.1"
   hostIP: "127.0.0.1"
   proto: tcp

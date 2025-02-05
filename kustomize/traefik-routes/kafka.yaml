@@ -28,6 +28,6 @@ spec:
     - backendRefs:
       - name: kafka
         namespace: kafka
-        port: 9092
+        port: 9095
         kind: Service
         weight: 100

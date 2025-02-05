@@ -26,11 +26,11 @@ spec:
         tls:
           enabled: true
           
-      kafka:
-        port: 9092
+      kafka-external:
+        port: 9095
         expose:
           default: true
-        exposedPort: 9092
+        exposedPort: 9095
         protocol: TCP
 
     gateway:
