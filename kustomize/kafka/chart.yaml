@@ -22,7 +22,7 @@ spec:
           memory: 2Gi
 
     listeners:
-      advertisedListeners: 'CLIENT://kafka.debian-k3s:9092,INTERNAL://kafka.debian-k3s:9094,EXTERNAL://kafka.debian-k3s:9095'
+      advertisedListeners: 'CLIENT://debian-k3s:9092,INTERNAL://debian-k3s:9094,EXTERNAL://debian-k3s:9095'
 
     extraConfigYaml:
       auto.create.topics.enable: true

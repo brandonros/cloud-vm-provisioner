@@ -4,14 +4,18 @@ metadata:
   name: debian-k3s-gateway-tls
   namespace: traefik
 spec:
-  dnsNames:
-    - grafana.debian-k3s
-    - tempo.debian-k3s
-    - prometheus.debian-k3s
-    - linkerd-viz.debian-k3s
-    - graphite.debian-k3s
-    - kafka.debian-k3s
   secretName: debian-k3s-gateway-tls
+
   issuerRef:
     name: debian-k3s-ca-issuer
     kind: ClusterIssuer
+
+  dnsNames:
+    # monitoring
+    - grafana.debian-k3s
+    - tempo.debian-k3s
+    - prometheus.debian-k3s
+    - graphite.debian-k3s
+
+    # linkerd-viz
+    - linkerd-viz.debian-k3s
