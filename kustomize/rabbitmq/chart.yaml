@@ -8,4 +8,19 @@ spec:
   chart: rabbitmq
   targetNamespace: rabbitmq
   valuesContent: |-
+    clustering:
+      enabled: false
+
+    ldap:
+      enabled: false
+
+    persistence:
+      enabled: false
+
+    auth:
+      username: user
+      password: rabbitmq123
+      securePassword: false
+      enableLoopbackUser: false
+
     replicaCount: 1

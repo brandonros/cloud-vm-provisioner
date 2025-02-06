@@ -174,11 +174,11 @@ remove_hosts_entry() {
     # remove entries from /etc/hosts
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
-        if grep -q "grafana.debian-k3s" /etc/hosts; then
-            sudo sed -i '' "/grafana.debian-k3s/d" /etc/hosts
-            echo "Removed hosts entries containing grafana.debian-k3s"
+        if grep -q "debian-k3s" /etc/hosts; then
+            sudo sed -i '' "/debian-k3s/d" /etc/hosts
+            echo "Removed hosts entries containing debian-k3s"
         else
-            echo "No hosts entries containing grafana.debian-k3s found"
+            echo "No hosts entries containing debian-k3s found"
         fi
     else
         echo "TODO: remove entries from /etc/hosts on non-macOS and non-Linux systems"
@@ -234,7 +234,7 @@ update_hosts_file() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
         echo "Adding entries to /etc/hosts"
-        HOSTS_ENTRY="$instance_ipv4 grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s"
+        HOSTS_ENTRY="$instance_ipv4 debian-k3s grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s"
         if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
             echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts
         fi
