@@ -21,3 +21,6 @@ resources:
 
   # rabbitmq
   - ./rabbitmq.yaml
+
+  # minio
+  - ./minio.yaml

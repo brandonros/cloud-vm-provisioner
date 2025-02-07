@@ -22,6 +22,10 @@ spec:
     port: 5432
     protocol: TCP
 
+  - name: minio
+    port: 9000
+    protocol: TCP
+
   - name: web
     port: 8000
     protocol: HTTP

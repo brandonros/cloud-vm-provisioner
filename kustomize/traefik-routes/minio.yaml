@@ -1,0 +1,33 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: minio-reference-grant
+  namespace: minio
+spec:
+  from:
+  - group: gateway.networking.k8s.io
+    kind: TCPRoute
+    namespace: traefik
+  to:
+  - group: ""
+    kind: Service
+    name: minio
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: minio-tcproute
+  namespace: traefik
+spec:
+  parentRefs:
+  - name: debian-k3s-gateway
+    namespace: traefik
+    kind: Gateway
+    sectionName: minio
+  rules:
+    - backendRefs:
+      - name: minio
+        namespace: minio
+        port: 9000
+        kind: Service
+        weight: 100
