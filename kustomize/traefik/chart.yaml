@@ -11,17 +11,17 @@ spec:
   valuesContent: |-
     ports:
       web:
-        port: 8000
+        port: 80
         expose:
           default: true
-        exposedPort: 8000
+        exposedPort: 80
         protocol: TCP
       
       websecure:
-        port: 8443
+        port: 443
         expose:
           default: true
-        exposedPort: 8443
+        exposedPort: 443
         protocol: TCP
         tls:
           enabled: true
@@ -52,13 +52,6 @@ spec:
         expose:
           default: true
         exposedPort: 5432
-        protocol: TCP
-
-      minio:
-        port: 9000
-        expose:
-          default: true
-        exposedPort: 9000
         protocol: TCP
         
     gateway:

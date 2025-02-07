@@ -14,6 +14,19 @@ spec:
     replicas: 1
     persistence:
       size: 10Gi
+    buckets:
+      - name: default-bucket
+        policy: upload
+        purge: false
+        versioning: false
+        objectlocking: false
+    users:
+      - accessKey: console
+        secretKey: console123
+        policy: consoleAdmin
+      - accessKey: miniouser1
+        secretKey: minio123
+        policy: readwrite
     resources:
       requests:
         memory: 512Mi

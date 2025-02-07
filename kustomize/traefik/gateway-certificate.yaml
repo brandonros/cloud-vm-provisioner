@@ -19,3 +19,6 @@ spec:
 
     # linkerd-viz
     - linkerd-viz.debian-k3s
+
+    # minio
+    - minio.debian-k3s

@@ -234,7 +234,7 @@ update_hosts_file() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
         echo "Adding entries to /etc/hosts"
-        HOSTS_ENTRY="$instance_ipv4 debian-k3s grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s"
+        HOSTS_ENTRY="$instance_ipv4 debian-k3s grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s minio.debian-k3s"
         if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
             echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts
         fi
@@ -385,6 +385,11 @@ cmd_apply() {
     echo "deploying rabbitmq"
     kustomize build $KUSTOMIZE_PATH/rabbitmq | envsubst | kubectl apply -f -
     wait_for_statefulset rabbitmq rabbitmq
+
+    ## minio
+    echo "deploying minio"
+    kustomize build $KUSTOMIZE_PATH/minio | envsubst | kubectl apply -f -
+    wait_for_deployment minio minio
 
     ## linkerd-control-plane
     #echo "deploying linkerd-control-plane"

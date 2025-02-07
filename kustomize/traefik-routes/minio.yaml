@@ -6,28 +6,34 @@ metadata:
 spec:
   from:
   - group: gateway.networking.k8s.io
-    kind: TCPRoute
+    kind: HTTPRoute
     namespace: traefik
   to:
   - group: ""
     kind: Service
     name: minio
 ---
-apiVersion: gateway.networking.k8s.io/v1alpha2
-kind: TCPRoute
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
 metadata:
-  name: minio-tcproute
+  name: minio-httproute
   namespace: traefik
 spec:
   parentRefs:
   - name: debian-k3s-gateway
     namespace: traefik
     kind: Gateway
-    sectionName: minio
+    sectionName: websecure
+  hostnames:
+  - minio.debian-k3s
   rules:
-    - backendRefs:
-      - name: minio
-        namespace: minio
-        port: 9000
-        kind: Service
-        weight: 100
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: minio
+      namespace: minio
+      port: 9000
+      kind: Service
+      weight: 100

@@ -54,12 +54,6 @@ portForwards:
   guestIP: "127.0.0.1"
   hostIP: "127.0.0.1"
   proto: tcp
-# minio
-- guestPort: 9000
-  hostPort: 9000
-  guestIP: "127.0.0.1"
-  hostIP: "127.0.0.1"
-  proto: tcp
 # kubernetes api
 - guestPort: 6443
   hostPort: 6443
