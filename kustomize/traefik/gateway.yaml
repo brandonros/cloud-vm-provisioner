@@ -23,12 +23,12 @@ spec:
     protocol: TCP
 
   - name: web
-    port: 80
+    port: 8000
     protocol: HTTP
     hostname: "*.debian-k3s"
 
   - name: websecure
-    port: 443
+    port: 8443
     protocol: HTTPS
     hostname: "*.debian-k3s"
     tls:
