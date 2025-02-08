@@ -8,5 +8,25 @@ spec:
   chart: postgresql
   targetNamespace: postgresql
   valuesContent: |-
+    global:
+      security:
+        allowInsecureImages: true
+
+    image:
+      registry: ghcr.io
+      repository: brandonros/pgsql-http-docker
+      tag: ee2078ad4365d1122a610d7d0526c12ce45edd30
+
+    primary:
+      extendedConfiguration: |
+        shared_preload_libraries = 'http'
+      
+      initdb:
+        user: postgres
+        password: ${POSTGRES_PASSWORD}
+        scripts:
+          create-extensions.sql: |
+            CREATE EXTENSION http;
+
     auth:
       postgresPassword: postgres123
