@@ -12,6 +12,9 @@ spec:
       security:
         allowInsecureImages: true
 
+    auth:
+      postgresPassword: postgres123
+
     image:
       registry: ghcr.io
       repository: brandonros/pgsql-http-docker
@@ -20,13 +23,10 @@ spec:
     primary:
       extendedConfiguration: |
         shared_preload_libraries = 'http'
-      
+        robinhood.bearer_token = '${ROBINHOOD_BEARER_TOKEN}'
+        robinhood.account_number = '${ROBINHOOD_ACCOUNT_NUMBER}'
+
       initdb:
-        user: postgres
-        password: ${POSTGRES_PASSWORD}
         scripts:
           create-extensions.sql: |
             CREATE EXTENSION http;
-
-    auth:
-      postgresPassword: postgres123
