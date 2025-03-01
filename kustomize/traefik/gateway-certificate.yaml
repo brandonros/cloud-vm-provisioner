@@ -22,3 +22,6 @@ spec:
 
     # minio
     - minio.debian-k3s
+
+    # wordpress
+    - wordpress.debian-k3s

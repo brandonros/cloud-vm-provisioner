@@ -234,7 +234,7 @@ update_hosts_file() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
         echo "Adding entries to /etc/hosts"
-        HOSTS_ENTRY="$instance_ipv4 debian-k3s grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s minio.debian-k3s"
+        HOSTS_ENTRY="$instance_ipv4 debian-k3s grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s minio.debian-k3s wordpress.debian-k3s"
         if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
             echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts
         fi
@@ -367,29 +367,34 @@ cmd_apply() {
     #wait_for_deployment kube-prometheus-stack-operator monitoring
 
     ## kafka
-    echo "deploying kafka"
-    kustomize build $KUSTOMIZE_PATH/kafka | envsubst | kubectl apply -f -
-    wait_for_statefulset kafka-controller kafka
+    #echo "deploying kafka"
+    #kustomize build $KUSTOMIZE_PATH/kafka | envsubst | kubectl apply -f -
+    #wait_for_statefulset kafka-controller kafka
 
     ## postgresql
-    echo "deploying postgresql"
-    kustomize build $KUSTOMIZE_PATH/postgresql | envsubst | kubectl apply -f -
-    wait_for_statefulset postgresql postgresql    
+    #echo "deploying postgresql"
+    #kustomize build $KUSTOMIZE_PATH/postgresql | envsubst | kubectl apply -f -
+    #wait_for_statefulset postgresql postgresql    
 
     ## redis
-    echo "deploying redis"
-    kustomize build $KUSTOMIZE_PATH/redis | envsubst | kubectl apply -f -
-    wait_for_statefulset redis-master redis
+    #echo "deploying redis"
+    #kustomize build $KUSTOMIZE_PATH/redis | envsubst | kubectl apply -f -
+    #wait_for_statefulset redis-master redis
 
     ## rabbitmq
-    echo "deploying rabbitmq"
-    kustomize build $KUSTOMIZE_PATH/rabbitmq | envsubst | kubectl apply -f -
-    wait_for_statefulset rabbitmq rabbitmq
+    #echo "deploying rabbitmq"
+    #kustomize build $KUSTOMIZE_PATH/rabbitmq | envsubst | kubectl apply -f -
+    #wait_for_statefulset rabbitmq rabbitmq
 
     ## minio
-    echo "deploying minio"
-    kustomize build $KUSTOMIZE_PATH/minio | envsubst | kubectl apply -f -
-    wait_for_deployment minio minio
+    #echo "deploying minio"
+    #kustomize build $KUSTOMIZE_PATH/minio | envsubst | kubectl apply -f -
+    #wait_for_deployment minio minio
+
+    ## wordpress
+    echo "deploying wordpress"
+    kustomize build $KUSTOMIZE_PATH/wordpress | envsubst | kubectl apply -f -
+    wait_for_deployment wordpress wordpress
 
     ## linkerd-control-plane
     #echo "deploying linkerd-control-plane"

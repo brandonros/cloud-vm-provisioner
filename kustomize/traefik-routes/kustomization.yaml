@@ -11,16 +11,19 @@ resources:
   #- ./linkerd-viz.yaml
 
   # kafka
-  - ./kafka.yaml
+  #- ./kafka.yaml
 
   # redis
-  - ./redis.yaml
+  #- ./redis.yaml
 
   # postgresql
-  - ./postgresql.yaml
+  #- ./postgresql.yaml
 
   # rabbitmq
-  - ./rabbitmq.yaml
+  #- ./rabbitmq.yaml
 
   # minio
-  - ./minio.yaml
+  #- ./minio.yaml
+
+  # wordpress
+  - ./wordpress.yaml
