@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wordpresstest5555-certificate
+  namespace: traefik
+spec:
+  secretName: wordpresstest5555-tls
+  issuerRef:
+    name: letsencrypt-prod-issuer
+    kind: Issuer
+    group: cert-manager.io
+  dnsNames:
+  - wordpresstest5555.duckdns.org

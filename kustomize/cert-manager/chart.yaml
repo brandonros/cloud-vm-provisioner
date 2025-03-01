@@ -7,7 +7,7 @@ spec:
   repo: https://charts.jetstack.io
   chart: cert-manager
   targetNamespace: cert-manager
-  version: v1.16.1
+  version: v1.15.3 # https://github.com/cert-manager/cert-manager/issues/7337
   valuesContent: |-
     crds:
       enabled: true

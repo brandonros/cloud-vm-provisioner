@@ -5,3 +5,6 @@ resources:
   - ./gateway-certificate.yaml    
   - ./chart.yaml
   - ./gateway.yaml
+  - ./external-gateway.yaml
+  - ./issuer.yaml
+  - ./letsencrypt-certificate.yaml

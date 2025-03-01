@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: debian-k3s-gateway-tls
+  name: debian-k3s-gateway-tls-cert
   namespace: traefik
 spec:
   secretName: debian-k3s-gateway-tls

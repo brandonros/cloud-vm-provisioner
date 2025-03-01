@@ -18,8 +18,8 @@ resource "vultr_ssh_key" "my_ssh_key" {
 
 resource "vultr_instance" "my_instance" {
     #plan = "vhf-4c-16gb" # 4 vCPUs, 16 GB
-    #plan = "vc2-2c-4gb" # 2 vCPUs, 4 GB
-    plan = "voc-c-8c-16gb-150s-amd" # CPU Optimized Cloud, 8 vCPUs, 16 GB
+    plan = "vc2-2c-4gb" # 2 vCPUs, 4 GB
+    #plan = "voc-c-8c-16gb-150s-amd" # CPU Optimized Cloud, 8 vCPUs, 16 GB
     region = "atl"
     os_id = 2136 # bookworm
     hostname = "debian-k3s"
