@@ -27,3 +27,4 @@ resources:
 
   # wordpress
   - ./wordpress.yaml
+  - ./wordpress-external.yaml

@@ -1,0 +1,28 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: external-gateway
+  namespace: traefik
+  annotations:
+    cert-manager.io/issuer: letsencrypt-prod-issuer
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: web
+      hostname: wordpresstest5555.duckdns.org
+      port: 8000 # must match exposed port in traefik chart
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: websecure
+      hostname: wordpresstest5555.duckdns.org
+      port: 8443 # must match exposed port in traefik chart
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wordpresstest5555-prod-tls

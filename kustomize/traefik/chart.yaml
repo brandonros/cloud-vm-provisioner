@@ -7,7 +7,7 @@ spec:
   repo: https://traefik.github.io/charts
   chart: traefik
   targetNamespace: traefik
-  version: 33.0.0
+  version: 34.4.0
   valuesContent: |-
     ports:
       web:
@@ -74,4 +74,3 @@ spec:
 
       kubernetesGateway:
         enabled: true
-        experimentalChannel: true

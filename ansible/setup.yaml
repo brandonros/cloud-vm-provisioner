@@ -69,9 +69,9 @@
       when: k9s_check.rc != 0
       ansible.builtin.shell: |
         {% if system_arch.stdout == 'arm64' %}
-        wget https://github.com/derailed/k9s/releases/download/v0.32.7/k9s_linux_arm64.deb
+        wget https://github.com/derailed/k9s/releases/download/v0.40.5/k9s_linux_arm64.deb
         {% else %}
-        wget https://github.com/derailed/k9s/releases/download/v0.32.7/k9s_linux_amd64.deb
+        wget https://github.com/derailed/k9s/releases/download/v0.40.5/k9s_linux_amd64.deb
         {% endif %}
         apt install -y ./k9s_linux_*.deb
         rm k9s_linux_*.deb

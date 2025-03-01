@@ -265,16 +265,24 @@ spawn_ssh_tunnel() {
 }
 
 # workaround traefik needing v1.1.1 gateway-api and linkerd needing v0.8.1 gateway-api crds
+# deploy_gateway_api() {
+#     if ! kubectl get crd gatewayclasses.gateway.networking.k8s.io -o json | jq -e '.status.storedVersions | contains(["v1beta1"])' >/dev/null
+#     then
+#         kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v0.8.1/experimental-install.yaml
+#         kubectl wait --for condition=established --timeout=60s crd/httproutes.gateway.networking.k8s.io
+#         kubectl wait --for condition=available --timeout=60s deployment/gateway-api-admission-server -n gateway-system
+#         kubectl rollout status deployment/gateway-api-admission-server -n gateway-system --watch
+
+#         kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.1/experimental-install.yaml
+#         kubectl wait --for condition=established --timeout=60s crd/backendlbpolicies.gateway.networking.k8s.io
+#     fi
+# }
+
 deploy_gateway_api() {
     if ! kubectl get crd gatewayclasses.gateway.networking.k8s.io -o json | jq -e '.status.storedVersions | contains(["v1beta1"])' >/dev/null
     then
-        kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v0.8.1/experimental-install.yaml
-        kubectl wait --for condition=established --timeout=60s crd/httproutes.gateway.networking.k8s.io
-        kubectl wait --for condition=available --timeout=60s deployment/gateway-api-admission-server -n gateway-system
-        kubectl rollout status deployment/gateway-api-admission-server -n gateway-system --watch
-
-        kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.1/experimental-install.yaml
-        kubectl wait --for condition=established --timeout=60s crd/backendlbpolicies.gateway.networking.k8s.io
+        kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml
+        kubectl wait --for condition=established --timeout=60s crd/gatewayclasses.gateway.networking.k8s.io
     fi
 }
 
@@ -364,8 +372,11 @@ cmd_apply() {
     echo "Waiting for traefik CA secret to be created..."
     kubectl wait --for=create secret/debian-k3s-gateway-tls -n traefik --timeout=60s
 
-    ## foo
-    kubectl wait --for=condition=Ready issuer/letsencrypt-prod-issuer --namespace traefik --timeout=300s
+    ## traefik-certs
+    echo "deploying traefik-certs"
+    kustomize build $KUSTOMIZE_PATH/traefik-certs | envsubst | kubectl apply -f -
+    echo "Waiting for traefik CA secret to be created..."
+    kubectl wait --for=create secret/wordpresstest5555-prod-tls -n traefik --timeout=60s
 
     ## linkerd
     #echo "deploying linkerd"

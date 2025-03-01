@@ -9,5 +9,9 @@ spec:
   targetNamespace: cert-manager
   version: v1.15.3 # https://github.com/cert-manager/cert-manager/issues/7337
   valuesContent: |-
+    config:
+      apiVersion: controller.config.cert-manager.io/v1alpha1
+      kind: ControllerConfiguration
+      enableGatewayAPI: true
     crds:
       enabled: true
