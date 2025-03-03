@@ -147,43 +147,6 @@ terraform_destroy() {
     popd
 }
 
-uninstall_certificate() {
-    # delete k3s-server-ca certificates
-    if [[ "$OSTYPE" == "darwin"* ]]
-    then
-        CERTS=$(security find-certificate -a -c "k3s-server-ca" | grep "alis" | cut -d'"' -f4)
-        if [ -z "$CERTS" ]; then
-            echo "No k3s-server-ca certificates found"
-        fi
-        for cert in $CERTS; do
-            echo "Found certificate: $cert"
-            echo "Deleting..."
-            if sudo security delete-certificate -c "$cert"; then
-                echo "Successfully deleted $cert"
-            else
-                echo "Failed to delete $cert"
-            fi
-        done
-    else
-        echo "TODO: delete k3s-server-ca certificates on non-macOS systems"
-    fi
-}
-
-remove_hosts_entry() {
-    # remove entries from /etc/hosts
-    if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
-    then
-        if grep -q "debian-k3s" /etc/hosts; then
-            sudo sed -i '' "/debian-k3s/d" /etc/hosts
-            echo "Removed hosts entries containing debian-k3s"
-        else
-            echo "No hosts entries containing debian-k3s found"
-        fi
-    else
-        echo "TODO: remove entries from /etc/hosts on non-macOS and non-Linux systems"
-    fi
-}
-
 wait_for_resource() {
     local type=$1
     local name=$2
@@ -222,34 +185,6 @@ wait_for_job() {
     wait_for_resource job $name $namespace $timeout
 }
 
-trust_k3s_ca() {
-    if [[ "$OSTYPE" == "darwin"* ]]
-    then
-        echo "trusting k3s-generated CA on macOS"
-        CERT_NAME="k3s-server-ca"
-        SYSTEM_KEYCHAIN="/Library/Keychains/System.keychain"
-        if ! security find-certificate -c "$CERT_NAME" "$SYSTEM_KEYCHAIN" > /dev/null 2>&1; then
-            echo "Adding certificate to system keychain..."
-            sudo security add-trusted-cert -d -r trustRoot -k "$SYSTEM_KEYCHAIN" "$SERVER_FILES_PATH/server-ca.crt"
-        fi
-    else
-        echo "TODO: trust k3s-generated CA on non-macOS systems"
-    fi
-}
-
-update_hosts_file() {
-    if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
-    then
-        echo "Adding entries to /etc/hosts"
-        HOSTS_ENTRY="$instance_ipv4 debian-k3s grafana.debian-k3s tempo.debian-k3s prometheus.debian-k3s linkerd-viz.debian-k3s graphite.debian-k3s minio.debian-k3s wordpress.debian-k3s"
-        if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
-            echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts
-        fi
-    else
-        echo "TODO: /etc/hosts update for non-macOS and non-Linux systems"
-    fi
-}
-
 spawn_ssh_tunnel() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
@@ -261,28 +196,6 @@ spawn_ssh_tunnel() {
         fi
     else
         echo "TODO: pgrep equivalent for windows"
-    fi
-}
-
-# workaround traefik needing v1.1.1 gateway-api and linkerd needing v0.8.1 gateway-api crds
-# deploy_gateway_api() {
-#     if ! kubectl get crd gatewayclasses.gateway.networking.k8s.io -o json | jq -e '.status.storedVersions | contains(["v1beta1"])' >/dev/null
-#     then
-#         kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v0.8.1/experimental-install.yaml
-#         kubectl wait --for condition=established --timeout=60s crd/httproutes.gateway.networking.k8s.io
-#         kubectl wait --for condition=available --timeout=60s deployment/gateway-api-admission-server -n gateway-system
-#         kubectl rollout status deployment/gateway-api-admission-server -n gateway-system --watch
-
-#         kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.1/experimental-install.yaml
-#         kubectl wait --for condition=established --timeout=60s crd/backendlbpolicies.gateway.networking.k8s.io
-#     fi
-# }
-
-deploy_gateway_api() {
-    if ! kubectl get crd gatewayclasses.gateway.networking.k8s.io -o json | jq -e '.status.storedVersions | contains(["v1beta1"])' >/dev/null
-    then
-        kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml
-        kubectl wait --for condition=established --timeout=60s crd/gatewayclasses.gateway.networking.k8s.io
     fi
 }
 
@@ -299,47 +212,44 @@ cmd_create() {
 }
 
 cmd_apply() {
+    # check dependencies
     check_dependencies
+
+    # load instance details
     load_instance_details
 
+    # set paths
     KUSTOMIZE_PATH=$SCRIPT_PATH/kustomize
     SERVER_FILES_PATH=$SCRIPT_PATH/server-files
 
-    # trust k3s-generated CA
-    trust_k3s_ca
-
-    # update /etc/hosts file (macOS and Linux only)
-    update_hosts_file
-
     # check for existing tunnel and spawn if needed
     spawn_ssh_tunnel
-
-    # copy certs for cert-manager
-    mkdir -p $KUSTOMIZE_PATH/cert-manager/certs
-    cp $SERVER_FILES_PATH/server-ca.crt $KUSTOMIZE_PATH/cert-manager/certs/server-ca.crt
-    cp $SERVER_FILES_PATH/server-ca.key $KUSTOMIZE_PATH/cert-manager/certs/server-ca.key
 
     # set kubeconfig path
     KUBECONFIG_PATH=$(readlink -f "$SERVER_FILES_PATH/kubeconfig")
     export KUBECONFIG="$KUBECONFIG_PATH"
 
     ## gateway-api
-    deploy_gateway_api
+    if ! kubectl get crd gatewayclasses.gateway.networking.k8s.io -o json | jq -e '.status.storedVersions | contains(["v1"])' >/dev/null
+    then
+        kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml
+        kubectl wait --for condition=established --timeout=60s crd/gatewayclasses.gateway.networking.k8s.io
+    fi
 
-    ## metrics-server
+    ## 000-metrics-server
     echo "deploying metrics-server"
-    kustomize build $KUSTOMIZE_PATH/metrics-server | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/000-metrics-server | envsubst | kubectl apply -f -
     wait_for_deployment metrics-server kube-system
 
-    ## duckdns
+    ## 001-duckdns
     echo "deploying duckdns"
-    kustomize build $KUSTOMIZE_PATH/duckdns | envsubst '${DUCKDNS_TOKEN}'| kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/001-duckdns | envsubst '${DUCKDNS_TOKEN}'| kubectl apply -f -
     kubectl wait --for=create job/duckdns-updater --timeout=300s
     kubectl wait --for=condition=complete job/duckdns-updater --timeout=300s
 
-    ## cert-manager
+    ## 002-cert-manager
     echo "deploying cert-manager"
-    kustomize build $KUSTOMIZE_PATH/cert-manager | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/002-cert-manager | envsubst | kubectl apply -f -
     echo "Waiting for cert-manager deployments to be created..."
     wait_for_deployment cert-manager cert-manager
     wait_for_deployment cert-manager-webhook cert-manager
@@ -348,91 +258,26 @@ cmd_apply() {
     kubectl wait --for=condition=established --timeout=120s crd/clusterissuers.cert-manager.io
     kubectl wait --for=condition=established --timeout=120s crd/certificates.cert-manager.io
     kubectl wait --for=condition=established --timeout=120s crd/certificaterequests.cert-manager.io
-    echo "Waiting for cert-manager CA secret to be created..."
-    kubectl wait --for=create secret/debian-k3s-tls -n cert-manager --timeout=60s
 
-    ## cert-manager-ca
-    echo "deploying cert-manager-ca"
-    kustomize build $KUSTOMIZE_PATH/cert-manager-ca | envsubst | kubectl apply -f -
-    echo "Waiting for ClusterIssuer to be ready..."
-    kubectl wait --for=condition=ready clusterissuer/debian-k3s-ca-issuer --timeout=60s
-
-    ## trust-manager
-    echo "deploying trust-manager"
-    kustomize build $KUSTOMIZE_PATH/trust-manager | envsubst | kubectl apply -f -
-    echo "Waiting for trust-manager deployments to be created..."
-    wait_for_deployment trust-manager trust-manager
-    echo "Waiting for trust-manager CRDs to be established..."
-    kubectl wait --for=condition=established --timeout=120s crd/bundles.trust.cert-manager.io
-
-    ## traefik
+    ## 003-traefik
     echo "deploying traefik"
-    kustomize build $KUSTOMIZE_PATH/traefik | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/003-traefik | envsubst | kubectl apply -f -
     wait_for_deployment traefik traefik
-    echo "Waiting for traefik CA secret to be created..."
-    kubectl wait --for=create secret/debian-k3s-gateway-tls -n traefik --timeout=60s
 
-    ## traefik-certs
-    echo "deploying traefik-certs"
-    kustomize build $KUSTOMIZE_PATH/traefik-certs | envsubst | kubectl apply -f -
-    echo "Waiting for traefik CA secret to be created..."
-    kubectl wait --for=create secret/wordpresstest5555-prod-tls -n traefik --timeout=60s
+    ## 004-traefik-gateway
+    echo "deploying traefik-gateway"
+    kustomize build $KUSTOMIZE_PATH/004-traefik-gateway | envsubst | kubectl apply -f -
+    echo "Waiting for traefik gateway secret to be created..."
+    kubectl wait --for=create secret/wordpresstest5555-prod-tls -n traefik --timeout=300s
 
-    ## linkerd
-    #echo "deploying linkerd"
-    #kustomize build $KUSTOMIZE_PATH/linkerd | envsubst | kubectl apply -f -
-    #wait_for_deployment tap linkerd
-    #wait_for_deployment tap-injector linkerd
-    #wait_for_deployment web linkerd
-    #wait_for_deployment metrics-api linkerd
-
-    ## monitoring
-    #echo "deploying monitoring"
-    #kustomize build $KUSTOMIZE_PATH/monitoring | envsubst | kubectl apply -f -
-    #wait_for_deployment kube-prometheus-stack-grafana monitoring
-    #wait_for_deployment kube-prometheus-stack-kube-state-metrics monitoring
-    #wait_for_deployment kube-prometheus-stack-operator monitoring
-
-    ## kafka
-    #echo "deploying kafka"
-    #kustomize build $KUSTOMIZE_PATH/kafka | envsubst | kubectl apply -f -
-    #wait_for_statefulset kafka-controller kafka
-
-    ## postgresql
-    #echo "deploying postgresql"
-    #kustomize build $KUSTOMIZE_PATH/postgresql | envsubst | kubectl apply -f -
-    #wait_for_statefulset postgresql postgresql    
-
-    ## redis
-    #echo "deploying redis"
-    #kustomize build $KUSTOMIZE_PATH/redis | envsubst | kubectl apply -f -
-    #wait_for_statefulset redis-master redis
-
-    ## rabbitmq
-    #echo "deploying rabbitmq"
-    #kustomize build $KUSTOMIZE_PATH/rabbitmq | envsubst | kubectl apply -f -
-    #wait_for_statefulset rabbitmq rabbitmq
-
-    ## minio
-    #echo "deploying minio"
-    #kustomize build $KUSTOMIZE_PATH/minio | envsubst | kubectl apply -f -
-    #wait_for_deployment minio minio
-
-    ## wordpress
+    ## 005-wordpress
     echo "deploying wordpress"
-    kustomize build $KUSTOMIZE_PATH/wordpress | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/005-wordpress | envsubst | kubectl apply -f -
     wait_for_deployment wordpress wordpress
 
-    ## linkerd-control-plane
-    #echo "deploying linkerd-control-plane"
-    #kustomize build $KUSTOMIZE_PATH/linkerd-control-plane | envsubst | kubectl apply -f -
-    #wait_for_deployment linkerd-destination linkerd
-    #wait_for_deployment linkerd-identity linkerd
-    #wait_for_deployment linkerd-proxy-injector linkerd
-
-    ## traefik-routes
+    ## 006-traefik-routes
     echo "deploying traefik-routes"
-    kustomize build $KUSTOMIZE_PATH/traefik-routes | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/006-traefik-routes | envsubst | kubectl apply -f -
     # TODO: wait for traefik-routes to be ready
 }
 
@@ -457,12 +302,6 @@ cmd_cleanup() {
 
     # Cleanup server-files
     rm -rf $SCRIPT_PATH/server-files
-
-    # Cleanup kustomize certs
-    rm -rf $SCRIPT_PATH/kustomize/cert-manager/certs
-
-    uninstall_certificate
-    remove_hosts_entry
 }
 
 # usage

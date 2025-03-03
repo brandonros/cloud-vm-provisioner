@@ -1,0 +1,48 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  repo: https://traefik.github.io/charts
+  chart: traefik
+  targetNamespace: traefik
+  version: 34.4.0
+  valuesContent: |-
+    ports:
+      web:
+        port: 8000
+        expose:
+          default: true
+        exposedPort: 80
+        protocol: TCP
+      
+      websecure:
+        port: 8443
+        expose:
+          default: true
+        exposedPort: 443
+        protocol: TCP
+        tls:
+          enabled: true
+        
+    gateway:
+      enabled: false
+
+    deployment:
+      podAnnotations:
+        linkerd.io/inject: enabled
+        config.linkerd.io/proxy-log-level: debug
+
+    logs:
+      general:
+        level: TRACE
+      access:
+        enabled: true
+
+    providers:
+      kubernetesIngress:
+        enabled: false
+
+      kubernetesGateway:
+        enabled: true

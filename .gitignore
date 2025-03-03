@@ -31,6 +31,3 @@ terraform.rc
 
 # Server files
 server-files
-
-# kustomize
-kustomize/cert-manager/certs/

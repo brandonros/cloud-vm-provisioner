@@ -79,19 +79,3 @@
         src: /home/debian/.kube/config
         dest: "{{playbook_dir}}/../server-files/kubeconfig"
         flat: yes
-
-    - name: fetch server CA certificate
-      become: true
-      become_user: root
-      fetch:
-        src: /var/lib/rancher/k3s/server/tls/server-ca.crt
-        dest: "{{playbook_dir}}/../server-files/server-ca.crt"
-        flat: yes
-
-    - name: fetch server CA key
-      become: true
-      become_user: root
-      fetch:
-        src: /var/lib/rancher/k3s/server/tls/server-ca.key
-        dest: "{{playbook_dir}}/../server-files/server-ca.key"
-        flat: yes
