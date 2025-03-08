@@ -15,10 +15,6 @@ CLOUD_PROVIDER="vultr"
 #CLOUD_PROVIDER="hetzner"
 #CLOUD_PROVIDER="lima"
 
-# pick duckdns domains
-[ -z "$WORDPRESS_DUCKDNS_DOMAIN" ] && export WORDPRESS_DUCKDNS_DOMAIN="wordpresstest5555.duckdns.org"
-[ -z "$PDF_GENERATOR_DUCKDNS_DOMAIN" ] && export PDF_GENERATOR_DUCKDNS_DOMAIN="pdf-generator5555.duckdns.org"
-
 check_dependencies() {
     # Define required dependencies
     dependencies=("terraform" "ansible" "kubectl" "ssh" "nc")
@@ -53,6 +49,16 @@ check_cloud_credentials() {
     if [ -z "${DUCKDNS_TOKEN}" ]
     then
         echo "DUCKDNS_TOKEN is not set"
+        exit 1
+    fi
+    if [ -z "${WORDPRESS_DUCKDNS_DOMAIN}" ]
+    then
+        echo "WORDPRESS_DUCKDNS_DOMAIN is not set"
+        exit 1
+    fi
+    if [ -z "${PDF_GENERATOR_DUCKDNS_DOMAIN}" ]
+    then
+        echo "PDF_GENERATOR_DUCKDNS_DOMAIN is not set"
         exit 1
     fi
 
