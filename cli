@@ -290,7 +290,7 @@ cmd_apply() {
 
     ## 002-cert-manager
     echo "deploying cert-manager"
-    kustomize build $KUSTOMIZE_PATH/002-cert-manager | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/002-cert-manager | kubectl apply -f -
     echo "Waiting for cert-manager deployments to be created..."
     wait_for_deployment cert-manager cert-manager
     wait_for_deployment cert-manager-webhook cert-manager
@@ -302,29 +302,29 @@ cmd_apply() {
 
     ## 003-traefik
     echo "deploying traefik"
-    kustomize build $KUSTOMIZE_PATH/003-traefik | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/003-traefik | kubectl apply -f -
     wait_for_deployment traefik traefik
 
     ## 004-traefik-gateway
     echo "deploying traefik-gateway"
-    kustomize build $KUSTOMIZE_PATH/004-traefik-gateway | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/004-traefik-gateway | kubectl apply -f -
     echo "Waiting for traefik gateway secrets to be created..."
     kubectl wait --for=create secret/wordpress-prod-tls -n traefik --timeout=300s
     kubectl wait --for=create secret/pdf-generator-prod-tls -n traefik --timeout=300s
 
     ## 005-wordpress
     echo "deploying wordpress"
-    kustomize build $KUSTOMIZE_PATH/005-wordpress | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/005-wordpress | kubectl apply -f -
     wait_for_deployment wordpress wordpress
 
     ## 006-pdf-generator
     echo "deploying pdf-generator"
-    kustomize build $KUSTOMIZE_PATH/006-pdf-generator | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/006-pdf-generator | kubectl apply -f -
     wait_for_deployment pdf-generator pdf-generator
 
     ## 007-traefik-routes
     echo "deploying traefik-routes"
-    kustomize build $KUSTOMIZE_PATH/007-traefik-routes | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/007-traefik-routes | kubectl apply -f -
     wait_for_httproute pdf-generator-httproute traefik
     wait_for_httproute wordpress-httproute traefik
 }
