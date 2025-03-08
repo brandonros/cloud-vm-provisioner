@@ -47,8 +47,6 @@ Commands:
 ### Hetzner
 * `HCLOUD_TOKEN`
 
-### Lima
-
 ### Oracle
 * `OCI_PRIVATE_KEY_PATH`
 * `OCI_FINGERPRINT`
