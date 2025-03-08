@@ -8,16 +8,16 @@ metadata:
 spec:
   gatewayClassName: traefik
   listeners:
-    # wordpresstest5555
+    # wordpress
     - name: wordpress-http
-      hostname: wordpresstest5555.duckdns.org
+      hostname: ${WORDPRESS_DUCKDNS_DOMAIN}
       port: 8000 # must match exposed port in traefik chart
       protocol: HTTP
       allowedRoutes:
         namespaces:
           from: All
     - name: wordpress-https
-      hostname: wordpresstest5555.duckdns.org
+      hostname: ${WORDPRESS_DUCKDNS_DOMAIN}
       port: 8443 # must match exposed port in traefik chart
       protocol: HTTPS
       allowedRoutes:
@@ -26,18 +26,18 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: wordpresstest5555-prod-tls
+          - name: wordpresss-prod-tls
 
-    # pdf-generator5555
+    # pdf-generator
     - name: pdf-generator-http
-      hostname: pdf-generator5555.duckdns.org
+      hostname: ${PDF_GENERATOR_DUCKDNS_DOMAIN}
       port: 8000 # must match exposed port in traefik chart
       protocol: HTTP
       allowedRoutes:
         namespaces:
           from: All
     - name: pdf-generator-https
-      hostname: pdf-generator5555.duckdns.org
+      hostname: ${PDF_GENERATOR_DUCKDNS_DOMAIN}
       port: 8443 # must match exposed port in traefik chart
       protocol: HTTPS
       allowedRoutes:
@@ -46,4 +46,4 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: pdf-generator5555-prod-tls
+          - name: pdf-generator-prod-tls

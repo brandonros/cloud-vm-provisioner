@@ -24,7 +24,7 @@ spec:
     kind: Gateway
     sectionName: wordpress-https
   hostnames:
-  - wordpresstest5555.duckdns.org
+  - ${WORDPRESS_DUCKDNS_DOMAIN}
   rules:
   - matches:
     - path:

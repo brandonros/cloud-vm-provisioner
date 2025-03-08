@@ -11,8 +11,8 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
-            echo "Updating DuckDNS record for ${DUCKDNS_DOMAIN}..."
-            response=$(curl -sSL "https://www.duckdns.org/update?domains=${DUCKDNS_DOMAIN}&token=${DUCKDNS_TOKEN}")
+            echo "Updating DuckDNS record for ${WORDPRESS_DUCKDNS_DOMAIN}..."
+            response=$(curl -sSL "https://www.duckdns.org/update?domains=${WORDPRESS_DUCKDNS_DOMAIN}&token=${DUCKDNS_TOKEN}")
             if [ "$response" = "OK" ]; then
                 echo "Successfully updated DuckDNS record"
                 exit 0
@@ -20,7 +20,4 @@ spec:
                 echo "Failed to update DuckDNS record. Response: ${response}"
                 exit 1
             fi
-        env:
-        - name: DUCKDNS_DOMAIN
-          value: "wordpresstest5555.duckdns.org"
       restartPolicy: OnFailure

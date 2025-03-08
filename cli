@@ -15,6 +15,9 @@ CLOUD_PROVIDER="vultr"
 #CLOUD_PROVIDER="hetzner"
 #CLOUD_PROVIDER="lima"
 
+export WORDPRESS_DUCKDNS_DOMAIN="wordpresstest5555.duckdns.org"
+export PDF_GENERATOR_DUCKDNS_DOMAIN="pdf-generator5555.duckdns.org"
+
 check_dependencies() {
     # Define required dependencies
     dependencies=("terraform" "ansible" "kubectl" "ssh" "nc")
@@ -250,7 +253,7 @@ cmd_apply() {
 
     ## 001-duckdns
     echo "deploying duckdns"
-    kustomize build $KUSTOMIZE_PATH/001-duckdns | envsubst '${DUCKDNS_TOKEN}'| kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/001-duckdns | envsubst '${DUCKDNS_TOKEN},${PDF_GENERATOR_DUCKDNS_DOMAIN},${WORDPRESS_DUCKDNS_DOMAIN}'| kubectl apply -f -
     kubectl wait --for=create job/duckdns-updater-wordpress --timeout=300s
     kubectl wait --for=create job/duckdns-updater-pdf-generator --timeout=300s
     kubectl wait --for=condition=complete job/duckdns-updater-wordpress --timeout=300s
@@ -277,8 +280,8 @@ cmd_apply() {
     echo "deploying traefik-gateway"
     kustomize build $KUSTOMIZE_PATH/004-traefik-gateway | envsubst | kubectl apply -f -
     echo "Waiting for traefik gateway secret to be created..."
-    kubectl wait --for=create secret/wordpresstest5555-prod-tls -n traefik --timeout=300s
-    kubectl wait --for=create secret/pdf-generator5555-prod-tls -n traefik --timeout=300s
+    kubectl wait --for=create secret/wordpresstest-prod-tls -n traefik --timeout=300s
+    kubectl wait --for=create secret/pdf-generator-prod-tls -n traefik --timeout=300s
 
     ## 005-wordpress
     echo "deploying wordpress"
