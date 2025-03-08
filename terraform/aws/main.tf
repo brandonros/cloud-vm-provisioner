@@ -83,12 +83,20 @@ resource "aws_key_pair" "my_ssh_key" {
 }
 
 resource "aws_instance" "virtual_machine1" {
-  ami                    = data.aws_ami.debian.id
-  instance_type          = "t3.xlarge" # 4 vCPUs, 16.0 GiB, $0.1664/hr
-  key_name               = aws_key_pair.my_ssh_key.key_name
-  subnet_id              = aws_subnet.subnet1.id
-  vpc_security_group_ids = [aws_security_group.security_group1.id]
+  ami                         = data.aws_ami.debian.id
+  instance_type              = "t3.xlarge" # 4 vCPUs, 16.0 GiB, $0.1664/hr
+  key_name                   = aws_key_pair.my_ssh_key.key_name
+  subnet_id                  = aws_subnet.subnet1.id
+  vpc_security_group_ids     = [aws_security_group.security_group1.id]
   associate_public_ip_address = true
+  
+  # Add spot instance configuration
+  instance_market_options {
+    market_type = "spot"
+    spot_options {
+      max_price = "0.17"
+    }
+  }
 }
 
 output "instance_username" {
