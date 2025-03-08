@@ -307,7 +307,7 @@ cmd_apply() {
 
     ## 004-traefik-gateway
     echo "deploying traefik-gateway"
-    kustomize build $KUSTOMIZE_PATH/004-traefik-gateway | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/004-traefik-gateway | envsubst '${DUCKDNS_PDF_GENERATOR_DOMAIN},${DUCKDNS_WORDPRESS_DOMAIN}'| kubectl apply -f -
     echo "Waiting for traefik gateway secrets to be created..."
     kubectl wait --for=create secret/wordpress-prod-tls -n traefik --timeout=300s
     kubectl wait --for=create secret/pdf-generator-prod-tls -n traefik --timeout=300s
@@ -324,7 +324,7 @@ cmd_apply() {
 
     ## 007-traefik-routes
     echo "deploying traefik-routes"
-    kustomize build $KUSTOMIZE_PATH/007-traefik-routes | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/007-traefik-routes | envsubst '${DUCKDNS_PDF_GENERATOR_DOMAIN},${DUCKDNS_WORDPRESS_DOMAIN}'| kubectl apply -f -
     wait_for_httproute pdf-generator-httproute traefik
     wait_for_httproute wordpress-httproute traefik
 }
