@@ -201,6 +201,15 @@ wait_for_job() {
     fi
 }
 
+wait_for_httproute() {
+    local name=$1
+    local namespace=$2
+    local timeout=${3:-120s}
+
+    kubectl wait --for=create httproute/$name -n $namespace --timeout=$timeout || return 1
+    kubectl wait --for=jsonpath='{.status.parents[0].conditions[?(@.type=="Accepted")].status}'=True httproute/$name -n $namespace --timeout=$timeout || return 1
+}
+
 spawn_ssh_tunnel() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
@@ -302,7 +311,8 @@ cmd_apply() {
     ## 007-traefik-routes
     echo "deploying traefik-routes"
     kustomize build $KUSTOMIZE_PATH/007-traefik-routes | envsubst | kubectl apply -f -
-    # TODO: wait for traefik-routes to be ready
+    wait_for_httproute pdf-generator-httproute traefik
+    wait_for_httproute wordpress-httproute traefik
 }
 
 load_instance_details() {
