@@ -38,6 +38,13 @@ check_ssh_key() {
 }
 
 check_cloud_credentials() {
+    # duckdns
+    if [ -z "${DUCKDNS_TOKEN}" ]
+    then
+        echo "DUCKDNS_TOKEN is not set"
+        exit 1
+    fi
+
     # check for env var
     if [ "$CLOUD_PROVIDER" == "google_cloud" ]
     then
@@ -244,8 +251,10 @@ cmd_apply() {
     ## 001-duckdns
     echo "deploying duckdns"
     kustomize build $KUSTOMIZE_PATH/001-duckdns | envsubst '${DUCKDNS_TOKEN}'| kubectl apply -f -
-    kubectl wait --for=create job/duckdns-updater --timeout=300s
-    kubectl wait --for=condition=complete job/duckdns-updater --timeout=300s
+    kubectl wait --for=create job/duckdns-updater-wordpress --timeout=300s
+    kubectl wait --for=create job/duckdns-updater-pdf-generator --timeout=300s
+    kubectl wait --for=condition=complete job/duckdns-updater-wordpress --timeout=300s
+    kubectl wait --for=condition=complete job/duckdns-updater-pdf-generator --timeout=300s
 
     ## 002-cert-manager
     echo "deploying cert-manager"
