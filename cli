@@ -224,6 +224,14 @@ spawn_ssh_tunnel() {
     fi
 }
 
+check_kubectl_connection() {
+    echo "Checking kubectl connection..."
+    if ! kubectl get nodes &>/dev/null; then
+        echo "Error: Cannot connect to kubernetes cluster"
+        exit 1
+    fi
+}
+
 cmd_create() {
     check_dependencies
     check_ssh_key
@@ -253,6 +261,9 @@ cmd_apply() {
     # set kubeconfig path
     KUBECONFIG_PATH=$(readlink -f "$SERVER_FILES_PATH/kubeconfig")
     export KUBECONFIG="$KUBECONFIG_PATH"
+
+    # verify kubectl connection
+    check_kubectl_connection
 
     ## gateway-api
     if ! kubectl get crd gatewayclasses.gateway.networking.k8s.io -o json | jq -e '.status.storedVersions | contains(["v1"])' >/dev/null
