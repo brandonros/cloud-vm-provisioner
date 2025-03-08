@@ -278,6 +278,7 @@ cmd_apply() {
     kustomize build $KUSTOMIZE_PATH/004-traefik-gateway | envsubst | kubectl apply -f -
     echo "Waiting for traefik gateway secret to be created..."
     kubectl wait --for=create secret/wordpresstest5555-prod-tls -n traefik --timeout=300s
+    kubectl wait --for=create secret/pdf-generator5555-prod-tls -n traefik --timeout=300s
 
     ## 005-wordpress
     echo "deploying wordpress"

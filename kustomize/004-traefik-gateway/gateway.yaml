@@ -9,14 +9,14 @@ spec:
   gatewayClassName: traefik
   listeners:
     # wordpresstest5555
-    - name: web
+    - name: wordpress-http
       hostname: wordpresstest5555.duckdns.org
       port: 8000 # must match exposed port in traefik chart
       protocol: HTTP
       allowedRoutes:
         namespaces:
           from: All
-    - name: websecure
+    - name: wordpress-https
       hostname: wordpresstest5555.duckdns.org
       port: 8443 # must match exposed port in traefik chart
       protocol: HTTPS
@@ -29,14 +29,14 @@ spec:
           - name: wordpresstest5555-prod-tls
 
     # pdf-generator5555
-    - name: web
+    - name: pdf-generator-http
       hostname: pdf-generator5555.duckdns.org
       port: 8000 # must match exposed port in traefik chart
       protocol: HTTP
       allowedRoutes:
         namespaces:
           from: All
-    - name: websecure
+    - name: pdf-generator-https
       hostname: pdf-generator5555.duckdns.org
       port: 8443 # must match exposed port in traefik chart
       protocol: HTTPS
