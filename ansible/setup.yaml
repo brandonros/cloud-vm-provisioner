@@ -20,7 +20,7 @@
       ansible.posix.authorized_key:
         user: debian
         state: present
-        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
 - name: setup packages
   hosts: my_instance

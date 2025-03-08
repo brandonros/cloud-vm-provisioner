@@ -7,7 +7,7 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 
 check_dependencies() {
     # Define required dependencies
-    dependencies=("terraform" "ansible" "kubectl" "ssh" "nc")
+    dependencies=("python" "terraform" "ansible" "kubectl" "ssh" "nc")
 
     # Check each dependency
     for cmd in "${dependencies[@]}"; do
@@ -16,6 +16,9 @@ check_dependencies() {
             exit 1
         fi
     done
+
+    # ansible passlib?
+    python -c "try: import passlib; print('Passlib is installed'); exit(0)\nexcept ImportError: print('Passlib is NOT installed'); exit(1)"
 }
 
 check_ssh_key() {
@@ -328,9 +331,18 @@ cmd_apply() {
 
 load_instance_details() {
     pushd terraform/$CLOUD_PROVIDER/
-    instance_ipv4=$(terraform output -raw instance_ipv4)
-    instance_username=$(terraform output -raw instance_username)
-    instance_ssh_port=$(terraform output -raw ssh_port)
+
+    # Check if terraform outputs exist and are not empty
+    if [ "$(terraform output -json 2>/dev/null)" = "{}" ]; then
+        echo "Error: No terraform outputs found."
+        exit 1
+    fi
+    
+    # Get and verify each output
+    instance_ipv4=$(terraform output -raw instance_ipv4 2>/dev/null) || { echo "Error: instance_ipv4 output not found"; exit 1; }
+    instance_username=$(terraform output -raw instance_username 2>/dev/null) || { echo "Error: instance_username output not found"; exit 1; }
+    instance_ssh_port=$(terraform output -raw ssh_port 2>/dev/null) || { echo "Error: ssh_port output not found"; exit 1; }
+    
     popd
 }
 
@@ -354,6 +366,10 @@ cmd_cleanup() {
 
     # Cleanup server-files
     rm -rf $SCRIPT_PATH/server-files
+
+    # cleanup temp files
+    rm -rf /tmp/hosts.ini
+    rm -rf /tmp/vm_info.txt
 }
 
 # usage
