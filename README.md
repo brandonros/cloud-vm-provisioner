@@ -1,6 +1,15 @@
 # cloud-vm-provisioner
 Terraform configurations for provisioning VMs across cloud providers
 
+## Requirements
+
+* Terraform
+* Ansible
+* kubectl
+* ssh
+* nc
+* kustomize
+
 ## How to use
 
 ```
