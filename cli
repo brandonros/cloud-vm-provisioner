@@ -16,8 +16,8 @@ CLOUD_PROVIDER="vultr"
 #CLOUD_PROVIDER="lima"
 
 # pick duckdns domains
-export WORDPRESS_DUCKDNS_DOMAIN="wordpresstest5555.duckdns.org"
-export PDF_GENERATOR_DUCKDNS_DOMAIN="pdf-generator5555.duckdns.org"
+[ -z "$WORDPRESS_DUCKDNS_DOMAIN" ] && export WORDPRESS_DUCKDNS_DOMAIN="wordpresstest5555.duckdns.org"
+[ -z "$PDF_GENERATOR_DUCKDNS_DOMAIN" ] && export PDF_GENERATOR_DUCKDNS_DOMAIN="pdf-generator5555.duckdns.org"
 
 check_dependencies() {
     # Define required dependencies
