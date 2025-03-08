@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: duckdns-updater
+  name: duckdns-updater-pdf-generator
 spec:
   template:
     spec:
@@ -22,5 +22,5 @@ spec:
             fi
         env:
         - name: DUCKDNS_DOMAIN
-          value: "wordpresstest5555.duckdns.org"
+          value: "pdf-generator5555.duckdns.org"
       restartPolicy: OnFailure
