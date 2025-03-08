@@ -107,6 +107,9 @@ check_cloud_credentials() {
             echo "limactl is not installed"
             exit 1
         fi
+    elif [ "$CLOUD_PROVIDER" == "oracle" ]
+    then
+        echo "TODO: check for private key file"
     else
         echo "unknown cloud provider: $CLOUD_PROVIDER"
         exit 1
