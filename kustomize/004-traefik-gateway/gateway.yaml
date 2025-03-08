@@ -10,14 +10,14 @@ spec:
   listeners:
     # wordpress
     - name: wordpress-http
-      hostname: ${WORDPRESS_DUCKDNS_DOMAIN}
+      hostname: ${DUCKDNS_WORDPRESS_DOMAIN}
       port: 8000 # must match exposed port in traefik chart
       protocol: HTTP
       allowedRoutes:
         namespaces:
           from: All
     - name: wordpress-https
-      hostname: ${WORDPRESS_DUCKDNS_DOMAIN}
+      hostname: ${DUCKDNS_WORDPRESS_DOMAIN}
       port: 8443 # must match exposed port in traefik chart
       protocol: HTTPS
       allowedRoutes:
@@ -30,14 +30,14 @@ spec:
 
     # pdf-generator
     - name: pdf-generator-http
-      hostname: ${PDF_GENERATOR_DUCKDNS_DOMAIN}
+      hostname: ${DUCKDNS_PDF_GENERATOR_DOMAIN}
       port: 8000 # must match exposed port in traefik chart
       protocol: HTTP
       allowedRoutes:
         namespaces:
           from: All
     - name: pdf-generator-https
-      hostname: ${PDF_GENERATOR_DUCKDNS_DOMAIN}
+      hostname: ${DUCKDNS_PDF_GENERATOR_DOMAIN}
       port: 8443 # must match exposed port in traefik chart
       protocol: HTTPS
       allowedRoutes:

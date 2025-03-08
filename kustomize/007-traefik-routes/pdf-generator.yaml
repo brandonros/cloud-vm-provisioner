@@ -24,7 +24,7 @@ spec:
     kind: Gateway
     sectionName: pdf-generator-https
   hostnames:
-  - ${PDF_GENERATOR_DUCKDNS_DOMAIN}
+  - ${DUCKDNS_PDF_GENERATOR_DOMAIN}
   rules:
   - matches:
     - path:

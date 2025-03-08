@@ -14,3 +14,43 @@ Commands:
   cleanup     Destroy the instance and clean up local files
   help        Show this help message
 ```
+
+## Supported cloud providers
+
+* AWS
+* Azure
+* DigitalOcean
+* Google Cloud
+* Hetzner
+* Lima (VM)
+* Oracle
+* Vultr
+
+## Environment variables
+
+### Cloud provider
+* `CLOUD_PROVIDER`
+
+### DuckDNS
+* `DUCKDNS_TOKEN`
+* `DUCKDNS_WORDPRESS_DOMAIN`
+* `DUCKDNS_PDF_GENERATOR_DOMAIN`
+
+### Google Cloud
+* `GOOGLE_APPLICATION_CREDENTIALS`
+
+### Vultr
+* `VULTR_API_KEY`
+
+### Azure
+* `ARM_SUBSCRIPTION_ID`
+
+### Digital Ocean
+* `DIGITALOCEAN_TOKEN`
+
+### Hetzner
+* `HCLOUD_TOKEN`
+
+### AWS
+* `AWS_ACCESS_KEY_ID`
+* `AWS_SECRET_ACCESS_KEY`

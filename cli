@@ -41,14 +41,14 @@ check_cloud_credentials() {
         echo "DUCKDNS_TOKEN is not set"
         exit 1
     fi
-    if [ -z "${WORDPRESS_DUCKDNS_DOMAIN}" ]
+    if [ -z "${DUCKDNS_WORDPRESS_DOMAIN}" ]
     then
-        echo "WORDPRESS_DUCKDNS_DOMAIN is not set"
+        echo "DUCKDNS_WORDPRESS_DOMAIN is not set"
         exit 1
     fi
-    if [ -z "${PDF_GENERATOR_DUCKDNS_DOMAIN}" ]
+    if [ -z "${DUCKDNS_PDF_GENERATOR_DOMAIN}" ]
     then
-        echo "PDF_GENERATOR_DUCKDNS_DOMAIN is not set"
+        echo "DUCKDNS_PDF_GENERATOR_DOMAIN is not set"
         exit 1
     fi
 
@@ -281,7 +281,7 @@ cmd_apply() {
     echo "deploying duckdns"
     kubectl delete job duckdns-updater-wordpress --ignore-not-found=true
     kubectl delete job duckdns-updater-pdf-generator --ignore-not-found=true
-    kustomize build $KUSTOMIZE_PATH/001-duckdns | envsubst '${DUCKDNS_TOKEN},${PDF_GENERATOR_DUCKDNS_DOMAIN},${WORDPRESS_DUCKDNS_DOMAIN}'| kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/001-duckdns | envsubst '${DUCKDNS_TOKEN},${DUCKDNS_PDF_GENERATOR_DOMAIN},${DUCKDNS_WORDPRESS_DOMAIN}'| kubectl apply -f -
     wait_for_job duckdns-updater-wordpress
     wait_for_job duckdns-updater-pdf-generator
 
