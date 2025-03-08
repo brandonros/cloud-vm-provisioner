@@ -290,9 +290,9 @@ cmd_apply() {
     kustomize build $KUSTOMIZE_PATH/006-pdf-generator | envsubst | kubectl apply -f -
     wait_for_deployment pdf-generator pdf-generator
 
-    ## 006-traefik-routes
+    ## 007-traefik-routes
     echo "deploying traefik-routes"
-    kustomize build $KUSTOMIZE_PATH/006-traefik-routes | envsubst | kubectl apply -f -
+    kustomize build $KUSTOMIZE_PATH/007-traefik-routes | envsubst | kubectl apply -f -
     # TODO: wait for traefik-routes to be ready
 }
 
