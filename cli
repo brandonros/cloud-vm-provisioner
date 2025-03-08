@@ -15,6 +15,7 @@ CLOUD_PROVIDER="vultr"
 #CLOUD_PROVIDER="hetzner"
 #CLOUD_PROVIDER="lima"
 
+# pick duckdns domains
 export WORDPRESS_DUCKDNS_DOMAIN="wordpresstest5555.duckdns.org"
 export PDF_GENERATOR_DUCKDNS_DOMAIN="pdf-generator5555.duckdns.org"
 
@@ -41,6 +42,13 @@ check_ssh_key() {
 }
 
 check_cloud_credentials() {
+    # CLOUD_PROVIDER
+    if [ -z "${CLOUD_PROVIDER}" ]
+    then
+        echo "CLOUD_PROVIDER is not set"
+        exit 1
+    fi
+
     # duckdns
     if [ -z "${DUCKDNS_TOKEN}" ]
     then
@@ -179,20 +187,18 @@ wait_for_deployment() {
     wait_for_resource deployment $name $namespace $timeout
 }
 
-wait_for_statefulset() {
-    local name=$1
-    local namespace=$2
-    local timeout=${3:-120s}
-
-    wait_for_resource statefulset $name $namespace $timeout
-}
-
 wait_for_job() {
     local name=$1
     local namespace=$2
     local timeout=${3:-120s}
 
-    wait_for_resource job $name $namespace $timeout
+    kubectl wait --for=create job/$name --timeout=$timeout || return 1
+    kubectl wait --for=condition=complete job/$name --timeout=$timeout || return 1
+    if [[ $(kubectl get job $name -o jsonpath='{.status.succeeded}') != "1" ]]; then
+        echo "$name job failed"
+        kubectl logs job/$name
+        exit 1
+    fi
 }
 
 spawn_ssh_tunnel() {
@@ -253,11 +259,11 @@ cmd_apply() {
 
     ## 001-duckdns
     echo "deploying duckdns"
+    kubectl delete job duckdns-updater-wordpress --ignore-not-found=true
+    kubectl delete job duckdns-updater-pdf-generator --ignore-not-found=true
     kustomize build $KUSTOMIZE_PATH/001-duckdns | envsubst '${DUCKDNS_TOKEN},${PDF_GENERATOR_DUCKDNS_DOMAIN},${WORDPRESS_DUCKDNS_DOMAIN}'| kubectl apply -f -
-    kubectl wait --for=create job/duckdns-updater-wordpress --timeout=300s
-    kubectl wait --for=create job/duckdns-updater-pdf-generator --timeout=300s
-    kubectl wait --for=condition=complete job/duckdns-updater-wordpress --timeout=300s
-    kubectl wait --for=condition=complete job/duckdns-updater-pdf-generator --timeout=300s
+    wait_for_job duckdns-updater-wordpress
+    wait_for_job duckdns-updater-pdf-generator
 
     ## 002-cert-manager
     echo "deploying cert-manager"
