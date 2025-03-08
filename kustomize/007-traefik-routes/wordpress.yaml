@@ -1,4 +1,18 @@
 apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-traefik-to-wordpress
+  namespace: wordpress
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: traefik
+  to:
+    - group: ""
+      kind: Service
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
 metadata:
   name: wordpress-httproute
@@ -8,7 +22,7 @@ spec:
   - name: gateway
     namespace: traefik
     kind: Gateway
-    sectionName: websecure
+    sectionName: wordpress-https
   hostnames:
   - wordpresstest5555.duckdns.org
   rules:
