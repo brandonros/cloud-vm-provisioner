@@ -7,7 +7,7 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 
 check_dependencies() {
     # Define required dependencies
-    dependencies=("python" "terraform" "ansible" "kubectl" "ssh" "nc")
+    dependencies=("terraform" "ansible" "kubectl" "ssh" "nc")
 
     # Check each dependency
     for cmd in "${dependencies[@]}"; do
@@ -16,9 +16,6 @@ check_dependencies() {
             exit 1
         fi
     done
-
-    # ansible passlib?
-    python -c "try: import passlib; print('Passlib is installed'); exit(0)\nexcept ImportError: print('Passlib is NOT installed'); exit(1)"
 }
 
 check_ssh_key() {
