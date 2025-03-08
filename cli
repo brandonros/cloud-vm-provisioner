@@ -7,7 +7,7 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 
 check_dependencies() {
     # Define required dependencies
-    dependencies=("terraform" "ansible" "kubectl" "ssh" "nc" "kustomize")
+    dependencies=("terraform" "ansible" "kubectl" "ssh" "nc" "kustomize" "jq")
 
     # Check each dependency
     for cmd in "${dependencies[@]}"; do
