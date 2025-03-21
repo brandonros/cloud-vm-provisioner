@@ -7,3 +7,14 @@ variable "instance_username" {
   type = string
   description = "Username for SSH connection"
 } 
+
+variable "duckdns_token" {
+  type = string
+  description = "DuckDNS token"
+}
+
+variable "duckdns_domain" {
+  type = string
+  description = "DuckDNS domain"
+}
+

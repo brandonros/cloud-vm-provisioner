@@ -1,14 +1,23 @@
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
-metadata:
-  name: pdf-generator
-  namespace: pdf-generator
-spec:
-  repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
-  chart: hull-wrapper
-  targetNamespace: pdf-generator
-  version: 0.2.0
-  valuesContent: |-
+resource "kubernetes_namespace" "pdf_generator" {
+  metadata {
+    name = "pdf-generator"
+  }
+}
+
+resource "helm_release" "pdf_generator" {
+  depends_on = [
+    kubernetes_namespace.pdf_generator,
+    helm_release.traefik
+  ]
+  
+  name       = "pdf-generator"
+  repository = "https://raw.githubusercontent.com/brandonros/hull-wrapper/master/"
+  chart      = "hull-wrapper"
+  namespace  = "pdf-generator"
+  version    = "0.2.0"
+
+  values = [
+    <<-EOT
     hull:
       config:
         general:
@@ -55,3 +64,6 @@ spec:
               http:
                 port: 3000
                 targetPort: 3000
+    EOT
+  ]
+}

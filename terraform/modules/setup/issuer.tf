@@ -1,3 +1,8 @@
+resource "kubernetes_manifest" "letsencrypt_prod_issuer" {
+  depends_on = [
+    helm_release.traefik,
+  ]
+  manifest = yamldecode(<<YAML
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -16,3 +21,6 @@ spec:
             - name: gateway
               namespace: traefik
               kind: Gateway
+YAML
+  )
+}
