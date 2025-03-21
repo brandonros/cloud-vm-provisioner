@@ -1,14 +1,23 @@
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
-metadata:
-  name: traefik
-  namespace: kube-system
-spec:
-  repo: https://traefik.github.io/charts
-  chart: traefik
-  targetNamespace: traefik
-  version: 34.4.0
-  valuesContent: |-
+resource "kubernetes_namespace" "traefik" {
+  metadata {
+    name = "traefik"
+  }
+}
+
+resource "helm_release" "traefik" {
+  depends_on = [
+    helm_release.cert_manager,
+    kubernetes_namespace.traefik
+  ]
+  
+  name       = "traefik"
+  repository = "https://traefik.github.io/charts"
+  chart      = "traefik"
+  namespace  = "traefik"
+  version    = "34.4.0"
+
+  values = [
+    <<-EOT
     ports:
       web:
         port: 8000
@@ -16,7 +25,6 @@ spec:
           default: true
         exposedPort: 80
         protocol: TCP
-      
       websecure:
         port: 8443
         expose:
@@ -25,7 +33,7 @@ spec:
         protocol: TCP
         tls:
           enabled: true
-        
+    
     gateway:
       enabled: false
 
@@ -43,6 +51,9 @@ spec:
     providers:
       kubernetesIngress:
         enabled: false
-
       kubernetesGateway:
         enabled: true
+    EOT
+  ]
+} 
+

@@ -146,70 +146,10 @@ wait_for_host() {
 }
 
 terraform_destroy() {
-    pushd terraform/$CLOUD_PROVIDER/
+    pushd terraform/
     terraform init
     terraform destroy -auto-approve
     popd
-}
-
-wait_for_resource() {
-    local type=$1
-    local name=$2
-    local namespace=$3
-    local timeout=${4:-120s}
-
-    echo "Waiting for $type $name in namespace $namespace..."
-    kubectl wait --for=create $type/$name -n $namespace --timeout=$timeout || return 1
-    if [ "$type" = "deployment" ]; then
-        kubectl wait --for=condition=available $type/$name -n $namespace --timeout=$timeout || return 1
-    fi
-    kubectl rollout status $type/$name -n $namespace --watch || return 1
-}
-
-wait_for_deployment() {
-    local name=$1
-    local namespace=$2
-    local timeout=${3:-120s}
-
-    wait_for_resource deployment $name $namespace $timeout
-}
-
-wait_for_job() {
-    local name=$1
-    local namespace=$2
-    local timeout=${3:-120s}
-
-    kubectl wait --for=create job/$name --timeout=$timeout || return 1
-    kubectl wait --for=condition=complete job/$name --timeout=$timeout || return 1
-    if [[ $(kubectl get job $name -o jsonpath='{.status.succeeded}') != "1" ]]; then
-        echo "$name job failed"
-        kubectl logs job/$name
-        exit 1
-    fi
-}
-
-wait_for_httproute() {
-    local name=$1
-    local namespace=$2
-    local timeout=${3:-120s}
-
-    kubectl wait --for=create httproute/$name -n $namespace --timeout=$timeout || return 1
-    kubectl wait --for=jsonpath='{.status.parents[0].conditions[?(@.type=="Accepted")].status}'=True httproute/$name -n $namespace --timeout=$timeout || return 1
-}
-
-spawn_ssh_tunnel() {
-    if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
-    then
-        if ! pgrep -f "ssh.*-L 6443:localhost:6443.*$instance_ipv4" > /dev/null; then
-            echo "Starting SSH tunnel..."
-            ssh -fN -L 6443:localhost:6443 -p $instance_ssh_port $instance_username@$instance_ipv4
-            pgrep -f "ssh.*-L 6443:localhost:6443.*$instance_ipv4" > /tmp/ssh_tunnel.pid
-        else
-            echo "SSH tunnel already running"
-        fi
-    else
-        echo "TODO: pgrep equivalent for windows"
-    fi
 }
 
 check_kubectl_connection() {
@@ -230,90 +170,8 @@ cmd_create() {
     accept_ssh_key
 }
 
-cmd_apply() {
-    # check dependencies
-    check_dependencies
-
-    # load instance details
-    load_instance_details
-
-    # set paths
-    KUSTOMIZE_PATH=$SCRIPT_PATH/kustomize
-    SERVER_FILES_PATH=$SCRIPT_PATH/server-files
-
-    # check for existing tunnel and spawn if needed
-    spawn_ssh_tunnel
-
-    # set kubeconfig path
-    KUBECONFIG_PATH=$(readlink -f "$SERVER_FILES_PATH/kubeconfig")
-    export KUBECONFIG="$KUBECONFIG_PATH"
-
-    # verify kubectl connection
-    check_kubectl_connection
-
-    ## gateway-api
-    if ! kubectl get crd gatewayclasses.gateway.networking.k8s.io -o json | jq -e '.status.storedVersions | contains(["v1"])' >/dev/null
-    then
-        kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml
-        kubectl wait --for condition=established --timeout=60s crd/gatewayclasses.gateway.networking.k8s.io
-    fi
-
-    ## 000-metrics-server
-    echo "deploying metrics-server"
-    kustomize build $KUSTOMIZE_PATH/000-metrics-server | envsubst | kubectl apply -f -
-    wait_for_deployment metrics-server kube-system
-
-    ## 001-duckdns
-    echo "deploying duckdns"
-    kubectl delete job duckdns-updater-wordpress --ignore-not-found=true
-    kubectl delete job duckdns-updater-pdf-generator --ignore-not-found=true
-    kustomize build $KUSTOMIZE_PATH/001-duckdns | envsubst '${DUCKDNS_TOKEN},${DUCKDNS_PDF_GENERATOR_DOMAIN},${DUCKDNS_WORDPRESS_DOMAIN}'| kubectl apply -f -
-    wait_for_job duckdns-updater-wordpress
-    wait_for_job duckdns-updater-pdf-generator
-
-    ## 002-cert-manager
-    echo "deploying cert-manager"
-    kustomize build $KUSTOMIZE_PATH/002-cert-manager | kubectl apply -f -
-    echo "Waiting for cert-manager deployments to be created..."
-    wait_for_deployment cert-manager cert-manager
-    wait_for_deployment cert-manager-webhook cert-manager
-    wait_for_deployment cert-manager-cainjector cert-manager
-    echo "Waiting for cert-manager CRDs to be established..."
-    kubectl wait --for=condition=established --timeout=120s crd/clusterissuers.cert-manager.io
-    kubectl wait --for=condition=established --timeout=120s crd/certificates.cert-manager.io
-    kubectl wait --for=condition=established --timeout=120s crd/certificaterequests.cert-manager.io
-
-    ## 003-traefik
-    echo "deploying traefik"
-    kustomize build $KUSTOMIZE_PATH/003-traefik | kubectl apply -f -
-    wait_for_deployment traefik traefik
-
-    ## 004-traefik-gateway
-    echo "deploying traefik-gateway"
-    kustomize build $KUSTOMIZE_PATH/004-traefik-gateway | envsubst '${DUCKDNS_PDF_GENERATOR_DOMAIN},${DUCKDNS_WORDPRESS_DOMAIN}'| kubectl apply -f -
-    echo "Waiting for traefik gateway secrets to be created..."
-    kubectl wait --for=create secret/wordpress-prod-tls -n traefik --timeout=300s
-    kubectl wait --for=create secret/pdf-generator-prod-tls -n traefik --timeout=300s
-
-    ## 005-wordpress
-    echo "deploying wordpress"
-    kustomize build $KUSTOMIZE_PATH/005-wordpress | kubectl apply -f -
-    wait_for_deployment wordpress wordpress
-
-    ## 006-pdf-generator
-    echo "deploying pdf-generator"
-    kustomize build $KUSTOMIZE_PATH/006-pdf-generator | kubectl apply -f -
-    wait_for_deployment pdf-generator pdf-generator
-
-    ## 007-traefik-routes
-    echo "deploying traefik-routes"
-    kustomize build $KUSTOMIZE_PATH/007-traefik-routes | envsubst '${DUCKDNS_PDF_GENERATOR_DOMAIN},${DUCKDNS_WORDPRESS_DOMAIN}'| kubectl apply -f -
-    wait_for_httproute pdf-generator-httproute traefik
-    wait_for_httproute wordpress-httproute traefik
-}
-
 load_instance_details() {
-    pushd terraform/$CLOUD_PROVIDER/
+    pushd terraform/
 
     # Check if terraform outputs exist and are not empty
     if [ "$(terraform output -json 2>/dev/null)" = "{}" ]; then
@@ -337,18 +195,8 @@ cmd_connect() {
     ssh -p $instance_ssh_port $instance_username@$instance_ipv4
 }
 
-cmd_tunnel() {
-    load_instance_details
-    spawn_ssh_tunnel
-}
 
 cmd_cleanup() {
-    # kill ssh tunnel
-    if [ -f /tmp/ssh_tunnel.pid ]; then
-        kill $(cat /tmp/ssh_tunnel.pid)
-        rm /tmp/ssh_tunnel.pid
-    fi
-
     # terraform destroy
     terraform_destroy
 
@@ -366,8 +214,6 @@ usage() {
     echo ""
     echo "Commands:"
     echo "  create      Create a new instance"
-    echo "  tunnel      Tunnel to the instance"
-    echo "  apply       Apply Kubernetes manifests to the instance"
     echo "  connect     SSH into the instance"
     echo "  cleanup     Destroy the instance and clean up local files"
     echo "  help        Show this help message"
@@ -378,14 +224,8 @@ case $1 in
     create)
         cmd_create
         ;;
-    apply)
-        cmd_apply
-        ;;
     connect)
         cmd_connect
-        ;;
-    tunnel)
-        cmd_tunnel
         ;;
     cleanup)
         cmd_cleanup
