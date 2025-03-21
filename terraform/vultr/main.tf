@@ -17,8 +17,9 @@ resource "vultr_ssh_key" "my_ssh_key" {
 }
 
 resource "vultr_instance" "my_instance" {
+    plan = "vc2-1c-1gb" # 1 vCPU, 1 GB
+    #plan = "vc2-2c-4gb" # 2 vCPUs, 4 GB
     #plan = "vhf-4c-16gb" # 4 vCPUs, 16 GB
-    plan = "vc2-2c-4gb" # 2 vCPUs, 4 GB
     #plan = "voc-c-8c-16gb-150s-amd" # CPU Optimized Cloud, 8 vCPUs, 16 GB
     region = "atl"
     os_id = 2136 # bookworm
@@ -39,6 +40,47 @@ users:
     ssh_authorized_keys:
       - ${file("~/.ssh/id_rsa.pub")}
 EOF
+}
+
+resource "null_resource" "setup_ssh" {
+  depends_on = [vultr_instance.my_instance]
+
+  provisioner "remote-exec" {
+    script = "${path.module}/../../scripts/setup.sh"
+
+    connection {
+      type        = "ssh"
+      user        = "debian"
+      private_key = file("~/.ssh/id_rsa")
+      host        = vultr_instance.my_instance.main_ip
+    }
+  }
+}
+
+resource "null_resource" "fetch_kubeconfig" {
+  depends_on = [null_resource.setup_ssh]
+  
+  # First, make sure the kubeconfig exists
+  provisioner "remote-exec" {
+    inline = [
+      "test -f /home/debian/.kube/config || echo 'Kubeconfig not found!'"
+    ]
+    
+    connection {
+      type        = "ssh"
+      user        = "debian"
+      private_key = file("~/.ssh/id_rsa")
+      host        = vultr_instance.my_instance.main_ip
+    }
+  }
+  
+  # Then fetch the kubeconfig and save it locally
+  provisioner "local-exec" {
+    command = <<-EOT
+      mkdir -p ${path.module}/../../server-files
+      scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no debian@${vultr_instance.my_instance.main_ip}:/home/debian/.kube/config ${path.module}/../../server-files/kubeconfig
+    EOT
+  }
 }
 
 output "instance_username" {

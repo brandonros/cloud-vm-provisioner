@@ -7,7 +7,7 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 
 check_dependencies() {
     # Define required dependencies
-    dependencies=("terraform" "ansible" "kubectl" "ssh" "nc" "kustomize" "jq")
+    dependencies=("terraform" "ssh" "nc")
 
     # Check each dependency
     for cmd in "${dependencies[@]}"; do
@@ -136,21 +136,6 @@ accept_ssh_key() {
     fi
 }
 
-create_ansible_inventory() {
-    # Create Ansible inventory file
-    echo "[my_instance]" > /tmp/hosts.ini
-    echo "${instance_ipv4} ansible_user=${instance_username} ansible_port=${instance_ssh_port}" >> /tmp/hosts.ini
-}
-
-run_ansible_playbooks() {
-  # create server-files directory
-  mkdir -p server-files
-
-  # Run Ansible playbooks
-  ansible-playbook -i /tmp/hosts.ini ./ansible/setup.yaml
-  ansible-playbook -i /tmp/hosts.ini ./ansible/k3s.yaml
-}
-
 wait_for_host() {
     echo "Waiting for ${instance_ipv4} to become available on port ${instance_ssh_port}..."
     while ! nc -z ${instance_ipv4} ${instance_ssh_port}
@@ -243,8 +228,6 @@ cmd_create() {
     load_instance_details
     wait_for_host
     accept_ssh_key
-    create_ansible_inventory
-    run_ansible_playbooks
 }
 
 cmd_apply() {
