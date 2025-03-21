@@ -117,7 +117,7 @@ check_cloud_credentials() {
 }
 
 terraform_apply() {
-    pushd terraform/$CLOUD_PROVIDER/
+    pushd terraform
     terraform init
     terraform apply -auto-approve
     popd
@@ -337,6 +337,11 @@ cmd_connect() {
     ssh -p $instance_ssh_port $instance_username@$instance_ipv4
 }
 
+cmd_tunnel() {
+    load_instance_details
+    spawn_ssh_tunnel
+}
+
 cmd_cleanup() {
     # kill ssh tunnel
     if [ -f /tmp/ssh_tunnel.pid ]; then
@@ -361,6 +366,7 @@ usage() {
     echo ""
     echo "Commands:"
     echo "  create      Create a new instance"
+    echo "  tunnel      Tunnel to the instance"
     echo "  apply       Apply Kubernetes manifests to the instance"
     echo "  connect     SSH into the instance"
     echo "  cleanup     Destroy the instance and clean up local files"
@@ -377,6 +383,9 @@ case $1 in
         ;;
     connect)
         cmd_connect
+        ;;
+    tunnel)
+        cmd_tunnel
         ;;
     cleanup)
         cmd_cleanup
