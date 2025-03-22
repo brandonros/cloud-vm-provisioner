@@ -223,14 +223,23 @@ cmd_connect() {
 
 cmd_cleanup() {
     # terraform destroy
-    terraform_destroy 00-vultr
+    terraform_destroy 00-infrastructure
 
     # Cleanup server-files
-    rm -rf $SCRIPT_PATH/server-files
+    rm -rf $SCRIPT_PATH/terraform/01-kubernetes/kubeconfig
 
     # cleanup temp files
     rm -rf /tmp/hosts.ini
     rm -rf /tmp/vm_info.txt
+
+    # cleanup all tfstate files
+    pushd terraform
+    find ./00-infrastructure ./01-kubernetes ./02-base ./03-applications \
+    -type d -name ".terraform" -exec rm -rf {} \; -prune \
+    -o -type f -name ".terraform.lock.hcl" -delete \
+    -o -type f -name "*.tfstate" -delete \
+    -o -type f -name "*.tfstate.backup" -delete
+    popd
 }
 
 # usage
