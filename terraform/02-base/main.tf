@@ -25,16 +25,6 @@ data "terraform_remote_state" "kubernetes" {
   }
 }
 
-variable "duckdns_token" {
-  type = string
-  description = "DuckDNS token"
-}
-
-variable "duckdns_domain" {
-  type = string
-  description = "DuckDNS domain"
-}
-
 provider "kubernetes" {
   config_path = data.terraform_remote_state.kubernetes.outputs.kubeconfig_path
 }
@@ -61,36 +51,7 @@ module "cert_manager" {
   depends_on = [module.gateway_api]
 }
 
-module "duckdns_updater" {
-  source = "./modules/03-duckdns-updater"
-  depends_on = [module.cert_manager]
-  duckdns_token = var.duckdns_token
-  duckdns_domain = var.duckdns_domain
-}
-
 module "traefik" {
-  source = "./modules/04-traefik"
-  depends_on = [module.duckdns_updater]
-}
-
-module "issuer" {
-  source = "./modules/05-issuer"
-  depends_on = [module.traefik]
-}
-
-module "gateway" {
-  source = "./modules/06-gateway"
-  depends_on = [module.issuer]
-  duckdns_domain = var.duckdns_domain
-}
-
-module "pdf_generator" {
-  source = "./modules/07-pdf-generator"
-  depends_on = [module.gateway]
-}
-
-module "traefik_routes" {
-  source = "./modules/08-traefik-routes"
-  depends_on = [module.pdf_generator]
-  duckdns_domain = var.duckdns_domain
+  source = "./modules/03-traefik"
+  depends_on = [module.cert_manager]
 }

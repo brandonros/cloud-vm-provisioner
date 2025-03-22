@@ -155,7 +155,7 @@ terraform_apply() {
     popd
 }
 
-create_ssh_tunnel() {
+create_cluster_ssh_tunnel() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
         if ! pgrep -f "ssh.*-L 6443:localhost:6443.*${instance_ipv4}" > /dev/null
@@ -177,29 +177,22 @@ cmd_create() {
     check_dependencies
     check_ssh_key
     check_cloud_credentials
+
+    # create vm
     terraform_apply 00-infrastructure
     load_instance_details
     wait_for_host
     accept_ssh_key
 
+    # install kubernetes
     terraform_apply 01-kubernetes
 
-    create_ssh_tunnel
-    #mkdir -p server-files
+    # create ssh tunne
+    create_cluster_ssh_tunnel
 
-    terraform_apply 02-applications
-    
-        
-    # terraform_apply 02-tunnel
-    # terraform_apply 03-metrics-server
-    # terraform_apply 04-gateway-api
-    # terraform_apply 05-cert-manager
-    # terraform_apply 06-duckdns-updater
-    # terraform_apply 07-traefik
-    # terraform_apply 08-issuer
-    # terraform_apply 09-gateway
-    # terraform_apply 10-pdf-generator
-    # terraform_apply 11-traefik-routes
+    # setup base
+    terraform_apply 02-base
+    terraform_apply 03-applications
 }
 
 load_instance_details() {
