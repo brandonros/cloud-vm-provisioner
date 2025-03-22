@@ -138,8 +138,10 @@ wait_for_host() {
     echo "${instance_ipv4} is now available."
 }
 
-terraform_destroy_vultr() {
-    pushd terraform/vultr/
+terraform_destroy() {
+    module=$1
+
+    pushd terraform/$module/
     terraform init
     terraform destroy -auto-approve
     popd
@@ -217,7 +219,7 @@ cmd_connect() {
 
 cmd_cleanup() {
     # terraform destroy
-    terraform_destroy
+    terraform_destroy 00-vultr
 
     # Cleanup server-files
     rm -rf $SCRIPT_PATH/server-files

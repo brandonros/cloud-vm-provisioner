@@ -1,6 +1,6 @@
 resource "null_resource" "dependencies" {
   provisioner "remote-exec" {
-    script = "${path.module}/../../scripts/dependencies.sh"
+    script = "${path.module}/dependencies.sh"
 
     connection {
       type        = "ssh"
@@ -15,7 +15,7 @@ resource "null_resource" "k3s" {
   depends_on = [null_resource.dependencies]
 
   provisioner "remote-exec" {
-    script = "${path.module}/../../scripts/k3s.sh"
+    script = "${path.module}/k3s.sh"
 
     connection {
       type        = "ssh"

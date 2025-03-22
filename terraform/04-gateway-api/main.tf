@@ -10,7 +10,7 @@ variable "instance_ip" {
 
 resource "null_resource" "install_gateway_api" {
   provisioner "remote-exec" {
-    script = "${path.module}/../../scripts/install-gateway-api.sh"
+    script = "${path.module}/install-gateway-api.sh"
 
     connection {
       type        = "ssh"
