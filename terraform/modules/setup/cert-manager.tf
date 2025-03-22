@@ -6,8 +6,8 @@ resource "kubernetes_namespace" "cert_manager" {
 
 resource "helm_release" "cert_manager" {
   depends_on = [
+    kubernetes_namespace.cert_manager,
     helm_release.metrics_server,
-    kubernetes_namespace.cert_manager
   ]
   
   name       = "cert-manager"

@@ -117,6 +117,9 @@ check_cloud_credentials() {
 }
 
 terraform_apply() {
+    export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
+    export TF_VAR_duckdns_domain="$DUCKDNS_PDF_GENERATOR_DOMAIN"
+
     pushd terraform
     terraform init
     terraform apply -auto-approve
@@ -146,9 +149,12 @@ wait_for_host() {
 }
 
 terraform_destroy() {
+    export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
+    export TF_VAR_duckdns_domain="$DUCKDNS_PDF_GENERATOR_DOMAIN"
+
     pushd terraform/
     terraform init
-    terraform destroy -auto-approve
+    terraform destroy -target=module.vultr -auto-approve
     popd
 }
 
@@ -182,7 +188,7 @@ load_instance_details() {
     # Get and verify each output
     instance_ipv4=$(terraform output -raw instance_ipv4 2>/dev/null) || { echo "Error: instance_ipv4 output not found"; exit 1; }
     instance_username=$(terraform output -raw instance_username 2>/dev/null) || { echo "Error: instance_username output not found"; exit 1; }
-    instance_ssh_port=$(terraform output -raw ssh_port 2>/dev/null) || { echo "Error: ssh_port output not found"; exit 1; }
+    instance_ssh_port=$(terraform output -raw instance_ssh_port 2>/dev/null) || { echo "Error: instance_ssh_port output not found"; exit 1; }
     
     popd
 }

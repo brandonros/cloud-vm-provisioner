@@ -12,13 +12,3 @@ variable "instance_ssh_port" {
   type = number
   description = "SSH port of the Vultr instance"
 }
-
-variable "duckdns_token" {
-  type = string
-  description = "DuckDNS token"
-}
-
-variable "duckdns_domain" {
-  type = string
-  description = "DuckDNS domain"
-}

@@ -1,6 +1,6 @@
 resource "kubernetes_manifest" "gateway" {
   depends_on = [
-    helm_release.letsencrypt_prod_issuer,
+    kubernetes_manifest.letsencrypt_prod_issuer,
   ]
   
   manifest = yamldecode(<<YAML

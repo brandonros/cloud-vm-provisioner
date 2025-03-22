@@ -1,7 +1,9 @@
 resource "kubernetes_manifest" "letsencrypt_prod_issuer" {
   depends_on = [
     helm_release.traefik,
+    helm_release.duckdns_updater
   ]
+
   manifest = yamldecode(<<YAML
 apiVersion: cert-manager.io/v1
 kind: Issuer

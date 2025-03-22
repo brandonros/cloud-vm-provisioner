@@ -8,6 +8,7 @@ resource "kubernetes_namespace" "duckdns_updater" {
 resource "kubernetes_secret" "duckdns_token" {
   depends_on = [
     kubernetes_namespace.duckdns_updater,
+    helm_release.cert_manager,
   ]
 
   metadata {

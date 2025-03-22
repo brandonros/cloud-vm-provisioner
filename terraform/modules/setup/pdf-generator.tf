@@ -7,7 +7,9 @@ resource "kubernetes_namespace" "pdf_generator" {
 resource "helm_release" "pdf_generator" {
   depends_on = [
     kubernetes_namespace.pdf_generator,
-    helm_release.traefik
+    helm_release.traefik,
+    kubernetes_manifest.letsencrypt_prod_issuer,
+    kubernetes_manifest.gateway,
   ]
   
   name       = "pdf-generator"
