@@ -1,17 +1,33 @@
+terraform {
+  required_providers {
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+      version = "2.36.0"
+    }
+    helm = {
+      source = "hashicorp/helm"
+      version = "2.17.0"
+    }
+  }
+}
+
+provider "kubernetes" {
+  config_path = "${path.module}/../../server-files/kubeconfig"
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = "${path.module}/../../server-files/kubeconfig"
+  }
+}
+
 resource "kubernetes_namespace" "pdf_generator" {
   metadata {
     name = "pdf-generator"
   }
 }
 
-resource "helm_release" "pdf_generator" {
-  depends_on = [
-    kubernetes_namespace.pdf_generator,
-    helm_release.traefik,
-    kubernetes_manifest.letsencrypt_prod_issuer,
-    kubernetes_manifest.gateway,
-  ]
-  
+resource "helm_release" "pdf_generator" {  
   name       = "pdf-generator"
   repository = "https://raw.githubusercontent.com/brandonros/hull-wrapper/master/"
   chart      = "hull-wrapper"

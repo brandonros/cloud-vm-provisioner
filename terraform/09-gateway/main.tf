@@ -1,8 +1,32 @@
-resource "kubernetes_manifest" "gateway" {
-  depends_on = [
-    kubernetes_manifest.letsencrypt_prod_issuer,
-  ]
-  
+terraform {
+  required_providers {
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+      version = "2.36.0"
+    }
+    helm = {
+      source = "hashicorp/helm"
+      version = "2.17.0"
+    }
+  }
+}
+
+provider "kubernetes" {
+  config_path = "${path.module}/../../server-files/kubeconfig"
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = "${path.module}/../../server-files/kubeconfig"
+  }
+}
+
+variable "duckdns_domain" {
+  type = string
+  description = "DuckDNS domain"
+}
+
+resource "kubernetes_manifest" "gateway" {  
   manifest = yamldecode(<<YAML
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: Gateway

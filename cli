@@ -162,6 +162,9 @@ terraform_apply() {
 }
 
 cmd_create() {
+    export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
+    export TF_VAR_duckdns_domain="$DUCKDNS_PDF_GENERATOR_DOMAIN"
+
     check_dependencies
     check_ssh_key
     check_cloud_credentials
@@ -176,10 +179,14 @@ cmd_create() {
     terraform_apply 01-dependencies
     terraform_apply 02-tunnel
     terraform_apply 03-metrics-server
-    terraform_apply 04-cert-manager
-    export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
-    export TF_VAR_duckdns_domain="$DUCKDNS_PDF_GENERATOR_DOMAIN"
-    terraform_apply 05-duckdns-updater
+    terraform_apply 04-gateway-api
+    terraform_apply 05-cert-manager
+    terraform_apply 06-duckdns-updater
+    terraform_apply 07-traefik
+    terraform_apply 08-issuer
+    terraform_apply 09-gateway
+    terraform_apply 10-pdf-generator
+    terraform_apply 11-traefik-routes
 }
 
 load_instance_details() {
