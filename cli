@@ -235,10 +235,10 @@ cmd_cleanup() {
     # cleanup all tfstate files
     pushd terraform
     find ./00-infrastructure ./01-kubernetes ./02-base ./03-applications \
-    -type d -name ".terraform" -exec rm -rf {} \; -prune \
-    -o -type f -name ".terraform.lock.hcl" -delete \
-    -o -type f -name "*.tfstate" -delete \
-    -o -type f -name "*.tfstate.backup" -delete
+        -type d -name ".terraform" -exec rm -rf {} \; -prune \
+        -o -type f -name ".terraform.lock.hcl" -delete \
+        -o -type f -name "*.tfstate" -delete \
+        -o -type f -name "*.tfstate.backup" -delete
     popd
 }
 
