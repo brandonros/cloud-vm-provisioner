@@ -1,3 +1,36 @@
+terraform {
+  required_providers {
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+      version = "2.36.0"
+    }
+    helm = {
+      source = "hashicorp/helm"
+      version = "2.17.0"
+    }
+  }
+}
+
+provider "kubernetes" {
+  config_path = "${path.module}/../../server-files/kubeconfig"
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = "${path.module}/../../server-files/kubeconfig"
+  }
+}
+
+variable "duckdns_token" {
+  type = string
+  description = "DuckDNS token"
+}
+
+variable "duckdns_domain" {
+  type = string
+  description = "DuckDNS domain"
+}
+
 resource "kubernetes_namespace" "duckdns_updater" {
   metadata {
     name = "duckdns-updater"
@@ -8,7 +41,6 @@ resource "kubernetes_namespace" "duckdns_updater" {
 resource "kubernetes_secret" "duckdns_token" {
   depends_on = [
     kubernetes_namespace.duckdns_updater,
-    helm_release.cert_manager,
   ]
 
   metadata {
@@ -47,6 +79,7 @@ resource "helm_release" "duckdns_updater" {
             enabled: false
         job:
           duckdns-updater:
+            enabled: true
             pod:
               containers:
                 main:
@@ -68,14 +101,14 @@ resource "helm_release" "duckdns_updater" {
                           exit 1
                       fi
                   env:
-                    - name: DUCKDNS_DOMAIN
+                    DUCKDNS_DOMAIN:
                       value: ${var.duckdns_domain}
-                    - name: DUCKDNS_TOKEN
+                    DUCKDNS_TOKEN:
                       valueFrom:
                         secretKeyRef:
                           name: duckdns-token
                           key: token
-              restartPolicy: Never
+              restartPolicy: Never 
     EOT
   ]
 }

@@ -12,11 +12,11 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path = "${path.module}/../../../server-files/kubeconfig"
+  config_path = "${path.module}/../../server-files/kubeconfig"
 }
 
 provider "helm" {
   kubernetes {
-    config_path = "${path.module}/../../../server-files/kubeconfig"
+    config_path = "${path.module}/../../server-files/kubeconfig"
   }
 }
