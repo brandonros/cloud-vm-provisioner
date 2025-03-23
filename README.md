@@ -4,11 +4,9 @@ Terraform configurations for provisioning VMs across cloud providers
 ## Requirements
 
 * Terraform
-* Ansible
-* kubectl
 * ssh
 * nc
-* kustomize
+* jq
 
 ## How to use
 
@@ -18,7 +16,6 @@ Usage: cli <command>
 
 Commands:
   create      Create a new instance
-  apply       Apply Kubernetes manifests to the instance
   connect     SSH into the instance
   cleanup     Destroy the instance and clean up local files
   help        Show this help message
@@ -68,5 +65,4 @@ Commands:
 
 ### DuckDNS
 * `DUCKDNS_TOKEN`
-* `DUCKDNS_WORDPRESS_DOMAIN`
-* `DUCKDNS_PDF_GENERATOR_DOMAIN`
+* `DUCKDNS_DOMAIN`

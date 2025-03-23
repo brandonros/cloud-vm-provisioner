@@ -41,14 +41,9 @@ check_cloud_credentials() {
         echo "DUCKDNS_TOKEN is not set"
         exit 1
     fi
-    if [ -z "${DUCKDNS_WORDPRESS_DOMAIN}" ]
+    if [ -z "${DUCKDNS_DOMAIN}" ]
     then
-        echo "DUCKDNS_WORDPRESS_DOMAIN is not set"
-        exit 1
-    fi
-    if [ -z "${DUCKDNS_PDF_GENERATOR_DOMAIN}" ]
-    then
-        echo "DUCKDNS_PDF_GENERATOR_DOMAIN is not set"
+        echo "DUCKDNS_DOMAIN is not set"
         exit 1
     fi
 
@@ -172,7 +167,7 @@ create_cluster_ssh_tunnel() {
 
 cmd_create() {
     export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
-    export TF_VAR_duckdns_domain="$DUCKDNS_PDF_GENERATOR_DOMAIN"
+    export TF_VAR_duckdns_domain="$DUCKDNS_DOMAIN"
 
     # check pre-requisites
     check_dependencies
