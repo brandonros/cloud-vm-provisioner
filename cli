@@ -7,7 +7,7 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 
 check_dependencies() {
     # Define required dependencies
-    dependencies=("terraform" "ansible" "kubectl" "ssh" "nc" "kustomize" "jq")
+    dependencies=("terraform" "ssh" "nc" "jq")
 
     # Check each dependency
     for cmd in "${dependencies[@]}"; do
@@ -116,13 +116,6 @@ check_cloud_credentials() {
     fi
 }
 
-terraform_apply() {
-    pushd terraform/$CLOUD_PROVIDER/
-    terraform init
-    terraform apply -auto-approve
-    popd
-}
-
 accept_ssh_key() {
     # Remove any old fingerprint from IPs being re-used, only if it exists
     if ssh-keygen -F $instance_ipv4 > /dev/null 2>&1; then
@@ -136,21 +129,6 @@ accept_ssh_key() {
     fi
 }
 
-create_ansible_inventory() {
-    # Create Ansible inventory file
-    echo "[my_instance]" > /tmp/hosts.ini
-    echo "${instance_ipv4} ansible_user=${instance_username} ansible_port=${instance_ssh_port}" >> /tmp/hosts.ini
-}
-
-run_ansible_playbooks() {
-  # create server-files directory
-  mkdir -p server-files
-
-  # Run Ansible playbooks
-  ansible-playbook -i /tmp/hosts.ini ./ansible/setup.yaml
-  ansible-playbook -i /tmp/hosts.ini ./ansible/k3s.yaml
-}
-
 wait_for_host() {
     echo "Waiting for ${instance_ipv4} to become available on port ${instance_ssh_port}..."
     while ! nc -z ${instance_ipv4} ${instance_ssh_port}
@@ -161,176 +139,73 @@ wait_for_host() {
 }
 
 terraform_destroy() {
-    pushd terraform/$CLOUD_PROVIDER/
+    module=$1
+
+    pushd terraform/$module/
     terraform init
     terraform destroy -auto-approve
     popd
 }
 
-wait_for_resource() {
-    local type=$1
-    local name=$2
-    local namespace=$3
-    local timeout=${4:-120s}
-
-    echo "Waiting for $type $name in namespace $namespace..."
-    kubectl wait --for=create $type/$name -n $namespace --timeout=$timeout || return 1
-    if [ "$type" = "deployment" ]; then
-        kubectl wait --for=condition=available $type/$name -n $namespace --timeout=$timeout || return 1
-    fi
-    kubectl rollout status $type/$name -n $namespace --watch || return 1
+terraform_apply() {
+    module=$1
+    pushd terraform/$module/
+    terraform init
+    terraform apply -auto-approve
+    popd
 }
 
-wait_for_deployment() {
-    local name=$1
-    local namespace=$2
-    local timeout=${3:-120s}
-
-    wait_for_resource deployment $name $namespace $timeout
-}
-
-wait_for_job() {
-    local name=$1
-    local namespace=$2
-    local timeout=${3:-120s}
-
-    kubectl wait --for=create job/$name --timeout=$timeout || return 1
-    kubectl wait --for=condition=complete job/$name --timeout=$timeout || return 1
-    if [[ $(kubectl get job $name -o jsonpath='{.status.succeeded}') != "1" ]]; then
-        echo "$name job failed"
-        kubectl logs job/$name
-        exit 1
-    fi
-}
-
-wait_for_httproute() {
-    local name=$1
-    local namespace=$2
-    local timeout=${3:-120s}
-
-    kubectl wait --for=create httproute/$name -n $namespace --timeout=$timeout || return 1
-    kubectl wait --for=jsonpath='{.status.parents[0].conditions[?(@.type=="Accepted")].status}'=True httproute/$name -n $namespace --timeout=$timeout || return 1
-}
-
-spawn_ssh_tunnel() {
+create_cluster_ssh_tunnel() {
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
     then
-        if ! pgrep -f "ssh.*-L 6443:localhost:6443.*$instance_ipv4" > /dev/null; then
+        if ! pgrep -f "ssh.*-L 6443:localhost:6443.*${instance_ipv4}" > /dev/null
+        then
             echo "Starting SSH tunnel..."
-            ssh -fN -L 6443:localhost:6443 -p $instance_ssh_port $instance_username@$instance_ipv4
-            pgrep -f "ssh.*-L 6443:localhost:6443.*$instance_ipv4" > /tmp/ssh_tunnel.pid
+            ssh -fN -L 6443:localhost:6443 ${instance_username}@${instance_ipv4}
         else
             echo "SSH tunnel already running"
         fi
     else
-        echo "TODO: pgrep equivalent for windows"
-    fi
-}
-
-check_kubectl_connection() {
-    echo "Checking kubectl connection..."
-    if ! kubectl get nodes &>/dev/null; then
-        echo "Error: Cannot connect to kubernetes cluster"
-        exit 1
+        echo "Windows SSH tunnel setup not implemented"
     fi
 }
 
 cmd_create() {
+    export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
+    export TF_VAR_duckdns_domain="$DUCKDNS_PDF_GENERATOR_DOMAIN"
+
+    # check pre-requisites
     check_dependencies
     check_ssh_key
     check_cloud_credentials
-    terraform_apply
-    load_instance_details
-    wait_for_host
-    accept_ssh_key
-    create_ansible_inventory
-    run_ansible_playbooks
-}
 
-cmd_apply() {
-    # check dependencies
-    check_dependencies
+    # create vm
+    terraform_apply 00-infrastructure
 
     # load instance details
     load_instance_details
 
-    # set paths
-    KUSTOMIZE_PATH=$SCRIPT_PATH/kustomize
-    SERVER_FILES_PATH=$SCRIPT_PATH/server-files
+    # wait for host to be ready
+    wait_for_host
 
-    # check for existing tunnel and spawn if needed
-    spawn_ssh_tunnel
+    # accept ssh key
+    accept_ssh_key
 
-    # set kubeconfig path
-    KUBECONFIG_PATH=$(readlink -f "$SERVER_FILES_PATH/kubeconfig")
-    export KUBECONFIG="$KUBECONFIG_PATH"
+    # install kubernetes
+    terraform_apply 01-kubernetes
 
-    # verify kubectl connection
-    check_kubectl_connection
+    # create ssh tunne
+    create_cluster_ssh_tunnel
 
-    ## gateway-api
-    if ! kubectl get crd gatewayclasses.gateway.networking.k8s.io -o json | jq -e '.status.storedVersions | contains(["v1"])' >/dev/null
-    then
-        kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml
-        kubectl wait --for condition=established --timeout=60s crd/gatewayclasses.gateway.networking.k8s.io
-    fi
+    # apply base
+    terraform_apply 02-base
 
-    ## 000-metrics-server
-    echo "deploying metrics-server"
-    kustomize build $KUSTOMIZE_PATH/000-metrics-server | envsubst | kubectl apply -f -
-    wait_for_deployment metrics-server kube-system
-
-    ## 001-duckdns
-    echo "deploying duckdns"
-    kubectl delete job duckdns-updater-wordpress --ignore-not-found=true
-    kubectl delete job duckdns-updater-pdf-generator --ignore-not-found=true
-    kustomize build $KUSTOMIZE_PATH/001-duckdns | envsubst '${DUCKDNS_TOKEN},${DUCKDNS_PDF_GENERATOR_DOMAIN},${DUCKDNS_WORDPRESS_DOMAIN}'| kubectl apply -f -
-    wait_for_job duckdns-updater-wordpress
-    wait_for_job duckdns-updater-pdf-generator
-
-    ## 002-cert-manager
-    echo "deploying cert-manager"
-    kustomize build $KUSTOMIZE_PATH/002-cert-manager | kubectl apply -f -
-    echo "Waiting for cert-manager deployments to be created..."
-    wait_for_deployment cert-manager cert-manager
-    wait_for_deployment cert-manager-webhook cert-manager
-    wait_for_deployment cert-manager-cainjector cert-manager
-    echo "Waiting for cert-manager CRDs to be established..."
-    kubectl wait --for=condition=established --timeout=120s crd/clusterissuers.cert-manager.io
-    kubectl wait --for=condition=established --timeout=120s crd/certificates.cert-manager.io
-    kubectl wait --for=condition=established --timeout=120s crd/certificaterequests.cert-manager.io
-
-    ## 003-traefik
-    echo "deploying traefik"
-    kustomize build $KUSTOMIZE_PATH/003-traefik | kubectl apply -f -
-    wait_for_deployment traefik traefik
-
-    ## 004-traefik-gateway
-    echo "deploying traefik-gateway"
-    kustomize build $KUSTOMIZE_PATH/004-traefik-gateway | envsubst '${DUCKDNS_PDF_GENERATOR_DOMAIN},${DUCKDNS_WORDPRESS_DOMAIN}'| kubectl apply -f -
-    echo "Waiting for traefik gateway secrets to be created..."
-    kubectl wait --for=create secret/wordpress-prod-tls -n traefik --timeout=300s
-    kubectl wait --for=create secret/pdf-generator-prod-tls -n traefik --timeout=300s
-
-    ## 005-wordpress
-    echo "deploying wordpress"
-    kustomize build $KUSTOMIZE_PATH/005-wordpress | kubectl apply -f -
-    wait_for_deployment wordpress wordpress
-
-    ## 006-pdf-generator
-    echo "deploying pdf-generator"
-    kustomize build $KUSTOMIZE_PATH/006-pdf-generator | kubectl apply -f -
-    wait_for_deployment pdf-generator pdf-generator
-
-    ## 007-traefik-routes
-    echo "deploying traefik-routes"
-    kustomize build $KUSTOMIZE_PATH/007-traefik-routes | envsubst '${DUCKDNS_PDF_GENERATOR_DOMAIN},${DUCKDNS_WORDPRESS_DOMAIN}'| kubectl apply -f -
-    wait_for_httproute pdf-generator-httproute traefik
-    wait_for_httproute wordpress-httproute traefik
+    # apply applications
+    terraform_apply 03-applications
 }
 
 load_instance_details() {
-    pushd terraform/$CLOUD_PROVIDER/
+    pushd terraform/00-infrastructure/
 
     # Check if terraform outputs exist and are not empty
     if [ "$(terraform output -json 2>/dev/null)" = "{}" ]; then
@@ -341,7 +216,7 @@ load_instance_details() {
     # Get and verify each output
     instance_ipv4=$(terraform output -raw instance_ipv4 2>/dev/null) || { echo "Error: instance_ipv4 output not found"; exit 1; }
     instance_username=$(terraform output -raw instance_username 2>/dev/null) || { echo "Error: instance_username output not found"; exit 1; }
-    instance_ssh_port=$(terraform output -raw ssh_port 2>/dev/null) || { echo "Error: ssh_port output not found"; exit 1; }
+    instance_ssh_port=$(terraform output -raw instance_ssh_port 2>/dev/null) || { echo "Error: instance_ssh_port output not found"; exit 1; }
     
     popd
 }
@@ -354,22 +229,26 @@ cmd_connect() {
     ssh -p $instance_ssh_port $instance_username@$instance_ipv4
 }
 
-cmd_cleanup() {
-    # kill ssh tunnel
-    if [ -f /tmp/ssh_tunnel.pid ]; then
-        kill $(cat /tmp/ssh_tunnel.pid)
-        rm /tmp/ssh_tunnel.pid
-    fi
 
+cmd_cleanup() {
     # terraform destroy
-    terraform_destroy
+    terraform_destroy 00-infrastructure
 
     # Cleanup server-files
-    rm -rf $SCRIPT_PATH/server-files
+    rm -rf $SCRIPT_PATH/terraform/01-kubernetes/kubeconfig
 
     # cleanup temp files
     rm -rf /tmp/hosts.ini
     rm -rf /tmp/vm_info.txt
+
+    # cleanup all tfstate files
+    pushd terraform
+    find ./00-infrastructure ./01-kubernetes ./02-base ./03-applications \
+        -type d -name ".terraform" -exec rm -rf {} \; -prune \
+        -o -type f -name ".terraform.lock.hcl" -delete \
+        -o -type f -name "*.tfstate" -delete \
+        -o -type f -name "*.tfstate.backup" -delete
+    popd
 }
 
 # usage
@@ -378,7 +257,6 @@ usage() {
     echo ""
     echo "Commands:"
     echo "  create      Create a new instance"
-    echo "  apply       Apply Kubernetes manifests to the instance"
     echo "  connect     SSH into the instance"
     echo "  cleanup     Destroy the instance and clean up local files"
     echo "  help        Show this help message"
@@ -388,9 +266,6 @@ usage() {
 case $1 in
     create)
         cmd_create
-        ;;
-    apply)
-        cmd_apply
         ;;
     connect)
         cmd_connect
