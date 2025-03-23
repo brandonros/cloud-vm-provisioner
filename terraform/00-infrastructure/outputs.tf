@@ -1,11 +1,11 @@
 output "instance_username" {
-  value = "debian"
+  value = module.vultr.instance_username
 }
 
 output "instance_ipv4" {
-  value = vultr_instance.my_instance.main_ip
+  value = module.vultr.instance_ipv4
 }
 
 output "instance_ssh_port" {
-  value = 22
+  value = module.vultr.instance_ssh_port
 }

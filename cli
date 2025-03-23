@@ -7,7 +7,7 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 
 check_dependencies() {
     # Define required dependencies
-    dependencies=("terraform" "ssh" "nc")
+    dependencies=("terraform" "ssh" "nc" "jq")
 
     # Check each dependency
     for cmd in "${dependencies[@]}"; do
@@ -174,14 +174,21 @@ cmd_create() {
     export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
     export TF_VAR_duckdns_domain="$DUCKDNS_PDF_GENERATOR_DOMAIN"
 
+    # check pre-requisites
     check_dependencies
     check_ssh_key
     check_cloud_credentials
 
     # create vm
     terraform_apply 00-infrastructure
+
+    # load instance details
     load_instance_details
+
+    # wait for host to be ready
     wait_for_host
+
+    # accept ssh key
     accept_ssh_key
 
     # install kubernetes
@@ -190,8 +197,10 @@ cmd_create() {
     # create ssh tunne
     create_cluster_ssh_tunnel
 
-    # setup base
+    # apply base
     terraform_apply 02-base
+
+    # apply applications
     terraform_apply 03-applications
 }
 
