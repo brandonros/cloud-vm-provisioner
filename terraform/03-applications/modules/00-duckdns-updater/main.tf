@@ -41,6 +41,7 @@ resource "helm_release" "duckdns_updater" {
   chart      = "hull-wrapper"
   namespace  = "duckdns-updater"
   version    = "0.2.0"
+  wait_for_jobs = true
 
   values = [
     <<-EOT
