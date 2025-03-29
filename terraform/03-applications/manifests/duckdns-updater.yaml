@@ -1,0 +1,54 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: ${app_name}-duckdns-updater
+  namespace: kube-system
+spec:
+  repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
+  chart: hull-wrapper
+  targetNamespace: ${app_name}-duckdns-updater
+  createNamespace: true
+  version: 0.2.0
+  valuesContent: |-
+    hull:
+      config:
+        general:
+          nameOverride: ${app_name}-duckdns-updater
+          rbac: false
+          noObjectNamePrefixes: true
+      objects:
+        serviceaccount:
+          default:
+            enabled: false
+        job:
+          ${app_name}-duckdns-updater:
+            enabled: true
+            pod:
+              containers:
+                main:
+                  image:
+                    repository: curlimages/curl
+                    tag: latest
+                  command:
+                    - /bin/sh
+                    - -c
+                  args:
+                    - |
+                      echo "Updating DuckDNS record for $DUCKDNS_DOMAIN..."
+                      response=$(curl -sSL "https://www.duckdns.org/update?domains=$DUCKDNS_DOMAIN&token=$DUCKDNS_TOKEN")
+                      if [ "$response" = "OK" ]; then
+                          echo "Successfully updated DuckDNS record"
+                          exit 0
+                      else
+                          echo "Failed to update DuckDNS record. response: $response"
+                          exit 1
+                      fi
+                  env:
+                    DUCKDNS_DOMAIN:
+                      value: ${duckdns_domain}
+                    DUCKDNS_TOKEN:
+                      valueFrom:
+                        secretKeyRef:
+                          name: duckdns-token
+                          key: token
+              restartPolicy: Never

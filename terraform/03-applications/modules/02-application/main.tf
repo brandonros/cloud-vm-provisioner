@@ -14,8 +14,21 @@ variable "container_port" {
 }
 
 variable "manifest" {
-  type = any
-  description = "Full Helm values configuration"
+  description = "The parsed manifest configuration"
+  type = object({
+    metadata = object({
+      name      = string
+      namespace = string
+    })
+    spec = object({
+      repo            = string
+      chart           = string
+      version         = string
+      targetNamespace = string
+      createNamespace = bool
+      valuesContent   = string
+    })
+  })
 }
 
 resource "helm_release" "app" {  
