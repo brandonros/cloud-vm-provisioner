@@ -45,20 +45,37 @@ provider "helm" {
   }
 }
 
-module "duckdns_updater" {
+module "pdf_generator_duckdns_updater" {
   source = "./modules/00-duckdns-updater"
   duckdns_token = var.duckdns_token
   duckdns_domain = var.duckdns_domain
+  app_name = "pdf-generator"
 }
 
-module "certificates" {
+module "pdf_generator_certificates" {
   source = "./modules/01-certificates"
-  depends_on = [module.duckdns_updater]
-  duckdns_domain = var.duckdns_domain
+  depends_on = [module.pdf_generator_duckdns_updater]
+  domain = var.duckdns_domain
+  app_name = "pdf-generator"
 }
 
-module "pdf_generator" {
-  source = "./modules/02-pdf-generator"
-  depends_on = [module.certificates]
-  duckdns_domain = var.duckdns_domain
+module "pdf_generator_app" {
+  source = "./modules/02-application"
+  depends_on = [module.pdf_generator_certificates]
+  domain = var.duckdns_domain
+  app_name = "pdf-generator"
+  image_repository = "ghcr.io/avdeev99/puppeteer-pdf-generator"
+  image_tag = "93420ed874e6937871ce6a40449a960aa8738e86"
+  container_port = 3000
+  environment_variables = {
+    CHROMIUM_PATH = {
+      value = "/usr/bin/chromium"
+    }
+    PUPPETEER_MAX_CONCURRENT_PAGES = {
+      value = "15"
+    }
+    ASPNETCORE_URLS = {
+      value = "http://0.0.0.0:3000"
+    }
+  }
 }

@@ -1,21 +1,25 @@
-variable "duckdns_domain" {
+variable "domain" {
   type = string
-  description = "DuckDNS domain"
+  description = "Domain"
 }
 
+variable "app_name" {
+  type = string
+  description = "Application name"
+}
 
 resource "kubernetes_manifest" "http_gateway" {
   manifest = yamldecode(<<YAML
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: Gateway
 metadata:
-  name: http-gateway
+  name: ${var.app_name}-http-gateway
   namespace: traefik
 spec:
   gatewayClassName: traefik
   listeners:
-    - name: domain-http
-      hostname: ${var.duckdns_domain}
+    - name: ${var.app_name}-http
+      hostname: ${var.domain}
       port: 8000
       protocol: HTTP
       allowedRoutes:
@@ -34,19 +38,19 @@ resource "kubernetes_manifest" "letsencrypt_prod_issuer" {
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: letsencrypt-prod-issuer
+  name: ${var.app_name}-letsencrypt-prod-issuer
   namespace: traefik
 spec:
   acme:
     email: test@gmail.com
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-      name: letsencrypt-prod-account-key
+      name: ${var.app_name}-letsencrypt-prod-account-key
     solvers:
     - http01:
         gatewayHTTPRoute:
           parentRefs:
-            - name: http-gateway
+            - name: ${var.app_name}-http-gateway
               namespace: traefik
               kind: Gateway
 YAML
@@ -67,15 +71,15 @@ resource "kubernetes_manifest" "domain_prod_tls_certificate" {
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: domain-prod-tls
+  name: ${var.app_name}-prod-tls
   namespace: traefik
 spec:
-  secretName: domain-prod-tls
+  secretName: ${var.app_name}-prod-tls
   issuerRef:
-    name: letsencrypt-prod-issuer
+    name: ${var.app_name}-letsencrypt-prod-issuer
     kind: Issuer
   dnsNames:
-  - ${var.duckdns_domain}
+  - ${var.domain}
 YAML
   )
 }
@@ -89,15 +93,15 @@ resource "kubernetes_manifest" "https_gateway" {
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: Gateway
 metadata:
-  name: https-gateway
+  name: ${var.app_name}-https-gateway
   namespace: traefik
   annotations:
-    cert-manager.io/issuer: letsencrypt-prod-issuer
+    cert-manager.io/issuer: ${var.app_name}-letsencrypt-prod-issuer
 spec:
   gatewayClassName: traefik
   listeners:
-    - name: domain-https
-      hostname: ${var.duckdns_domain}
+    - name: ${var.app_name}-https
+      hostname: ${var.domain}
       port: 8443
       protocol: HTTPS
       allowedRoutes:
@@ -106,7 +110,7 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: domain-prod-tls
+          - name: ${var.app_name}-prod-tls
 YAML
   )
 }

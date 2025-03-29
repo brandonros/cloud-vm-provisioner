@@ -1,23 +1,49 @@
-variable "duckdns_domain" {
+variable "domain" {
   type = string
-  description = "DuckDNS domain"
+  description = "Domain"
 }
 
-resource "kubernetes_namespace" "pdf_generator" {
+variable "app_name" {
+  type = string
+  description = "Application name"
+} 
+
+variable "image_repository" {
+  type = string
+  description = "Image repository"
+}
+
+variable "image_tag" {
+  type = string
+  description = "Image tag"
+}
+
+variable "environment_variables" {
+  type = map(string)
+  description = "Environment variables to pass to the container"
+  default = {}
+}
+
+variable "container_port" {
+  type = number
+  description = "Container port"
+}
+
+resource "kubernetes_namespace" "app" {
   metadata {
-    name = "pdf-generator"
+    name = var.app_name
   }
 }
 
-resource "helm_release" "pdf_generator" {  
+resource "helm_release" "app" {  
   depends_on = [
-    kubernetes_namespace.pdf_generator,
+    kubernetes_namespace.app,
   ]
 
-  name       = "pdf-generator"
+  name       = var.app_name
   repository = "https://raw.githubusercontent.com/brandonros/hull-wrapper/master/"
   chart      = "hull-wrapper"
-  namespace  = "pdf-generator"
+  namespace  = var.app_name
   version    = "0.2.0"
 
   values = [
@@ -25,7 +51,7 @@ resource "helm_release" "pdf_generator" {
     hull:
       config:
         general:
-          nameOverride: pdf-generator
+          nameOverride: ${var.app_name}
           rbac: false
           noObjectNamePrefixes: true
       objects:
@@ -33,11 +59,8 @@ resource "helm_release" "pdf_generator" {
           default:
             enabled: false
         deployment:
-          pdf-generator:
+          ${var.app_name}:
             replicas: 4
-            annotations:
-              linkerd.io/inject: enabled
-              config.linkerd.io/proxy-log-level: debug
             pod:
               containers:
                 main:
@@ -49,47 +72,42 @@ resource "helm_release" "pdf_generator" {
                       memory: 2048Mi
                       cpu: 2000m
                   image:
-                    repository: ghcr.io/avdeev99/puppeteer-pdf-generator
-                    tag: 93420ed874e6937871ce6a40449a960aa8738e86
+                    repository: ${var.image_repository}
+                    tag: ${var.image_tag}
                   env:
-                    CHROMIUM_PATH:
-                      value: /usr/bin/chromium
-                    PUPPETEER_MAX_CONCURRENT_PAGES:
-                      value: 15
-                    ASPNETCORE_URLS:
-                      value: http://0.0.0.0:3000
+                    ${yamlencode(var.environment_variables)}
                   ports:
                     http:
-                      containerPort: 3000
+                      containerPort: ${var.container_port}
         service:
-          pdf-generator:
+          ${var.app_name}:
             type: ClusterIP
             ports:
               http:
-                port: 3000
-                targetPort: 3000
+                port: ${var.container_port}
+                targetPort: ${var.container_port}
     EOT
   ]
 }
 
-resource "kubernetes_manifest" "pdf_generator_http_route" {
+resource "kubernetes_manifest" "app_http_route" {
   depends_on = [
-    helm_release.pdf_generator,
+    helm_release.app,
   ]
 
   manifest = yamldecode(<<YAML
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
 metadata:
-  name: http-to-https-redirect
+  name: ${var.app_name}-http-to-https-redirect
   namespace: traefik
 spec:
   parentRefs:
-  - name: http-gateway
+  - name: ${var.app_name}-http-gateway
     namespace: traefik
     kind: Gateway
   hostnames:
-  - ${var.duckdns_domain}
+  - ${var.domain}
   rules:
   - filters:
     - type: RequestRedirect
@@ -100,61 +118,61 @@ YAML
   )
 }
 
-resource "kubernetes_manifest" "pdf_generator_https_route" {  
+resource "kubernetes_manifest" "app_https_route" {  
   depends_on = [
-    helm_release.pdf_generator,
+    helm_release.app,
   ]
 
   manifest = yamldecode(<<YAML
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
 metadata:
-  name: pdf-generator-https-route
+  name: ${var.app_name}-https-route
   namespace: traefik
 spec:
   parentRefs:
-  - name: https-gateway
+  - name: ${var.app_name}-https-gateway
     namespace: traefik
     kind: Gateway
-    sectionName: domain-https
+    sectionName: ${var.app_name}-https
   hostnames:
-  - ${var.duckdns_domain}
+  - ${var.domain}
   rules:
   - matches:
     - path:
         type: PathPrefix
         value: /
     backendRefs:
-    - name: pdf-generator
-      namespace: pdf-generator
-      port: 3000
+    - name: ${var.app_name}
+      namespace: ${var.app_name}
+      port: ${var.container_port}
       kind: Service
       weight: 100
 YAML
   )
 }
 
-resource "kubernetes_manifest" "pdf_generator_reference_grant" {  
+resource "kubernetes_manifest" "app_reference_grant" {  
   depends_on = [
-    kubernetes_manifest.pdf_generator_https_route,
+    kubernetes_manifest.app_https_route,
   ]
 
   manifest = yamldecode(<<YAML
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: allow-traefik-to-pdf-generator
-  namespace: pdf-generator
+  name: ${var.app_name}-reference-grant
+  namespace: ${var.app_name}
 spec:
   from:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: traefik
-      name: pdf-generator-https-route
+      name: ${var.app_name}-https-route
   to:
     - group: ""
       kind: Service
-      name: pdf-generator
+      name: ${var.app_name}
 YAML
   )
 }

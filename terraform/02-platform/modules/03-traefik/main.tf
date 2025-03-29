@@ -36,11 +36,6 @@ resource "helm_release" "traefik" {
     gateway:
       enabled: false
 
-    deployment:
-      podAnnotations:
-        linkerd.io/inject: enabled
-        config.linkerd.io/proxy-log-level: debug
-
     logs:
       general:
         level: TRACE

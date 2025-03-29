@@ -8,9 +8,14 @@ variable "duckdns_domain" {
   description = "DuckDNS domain"
 }
 
+variable "app_name" {
+  type = string
+  description = "Application name"
+}
+
 resource "kubernetes_namespace" "duckdns_updater" {
   metadata {
-    name = "duckdns-updater"
+    name = "${var.app_name}-duckdns-updater"
   }
 }
 
@@ -22,7 +27,7 @@ resource "kubernetes_secret" "duckdns_token" {
 
   metadata {
     name      = "duckdns-token"
-    namespace = "duckdns-updater"
+    namespace = "${var.app_name}-duckdns-updater"
   }
 
   data = {
@@ -36,10 +41,10 @@ resource "helm_release" "duckdns_updater" {
     kubernetes_secret.duckdns_token,
   ]
   
-  name       = "duckdns-updater"
+  name       = "${var.app_name}-duckdns-updater"
   repository = "https://raw.githubusercontent.com/brandonros/hull-wrapper/master/"
   chart      = "hull-wrapper"
-  namespace  = "duckdns-updater"
+  namespace  = "${var.app_name}-duckdns-updater"
   version    = "0.2.0"
   wait_for_jobs = true
 
@@ -48,7 +53,7 @@ resource "helm_release" "duckdns_updater" {
     hull:
       config:
         general:
-          nameOverride: duckdns-updater
+          nameOverride: ${var.app_name}-duckdns-updater
           rbac: false
           noObjectNamePrefixes: true
       objects:
@@ -56,7 +61,7 @@ resource "helm_release" "duckdns_updater" {
           default:
             enabled: false
         job:
-          duckdns-updater:
+          ${var.app_name}-duckdns-updater:
             enabled: true
             pod:
               containers:
