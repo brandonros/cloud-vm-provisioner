@@ -74,15 +74,6 @@ module "duckdns_updater" {
   duckdns_token = var.duckdns_token
   duckdns_domain = each.value.domain
   app_name = each.value.app_name
-  manifest = yamldecode(
-    templatefile(
-      "${path.module}/manifests/duckdns-updater.yaml",
-      {
-        app_name = each.value.app_name
-        duckdns_domain = each.value.domain
-      }
-    )
-  )
 }
 
 module "certificate" {

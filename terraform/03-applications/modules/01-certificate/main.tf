@@ -9,23 +9,14 @@ variable "app_name" {
 }
 
 resource "kubernetes_manifest" "http_gateway" {
-  manifest = yamldecode(<<YAML
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: Gateway
-metadata:
-  name: ${var.app_name}-http-gateway
-  namespace: traefik
-spec:
-  gatewayClassName: traefik
-  listeners:
-    - name: ${var.app_name}-http
-      hostname: ${var.domain}
-      port: 8000
-      protocol: HTTP
-      allowedRoutes:
-        namespaces:
-          from: All
-YAML
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/manifests/http-gateway.yaml",
+      {
+        app_name = var.app_name
+        domain = var.domain
+      }
+    )
   )
 }
 
@@ -34,26 +25,14 @@ resource "kubernetes_manifest" "letsencrypt_prod_issuer" {
     kubernetes_manifest.http_gateway,
   ]
 
-  manifest = yamldecode(<<YAML
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: ${var.app_name}-letsencrypt-prod-issuer
-  namespace: traefik
-spec:
-  acme:
-    email: test@gmail.com
-    server: https://acme-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-      name: ${var.app_name}-letsencrypt-prod-account-key
-    solvers:
-    - http01:
-        gatewayHTTPRoute:
-          parentRefs:
-            - name: ${var.app_name}-http-gateway
-              namespace: traefik
-              kind: Gateway
-YAML
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/manifests/issuer.yaml",
+      {
+        app_name = var.app_name
+        domain = var.domain
+      }
+    )
   )
 }
 
@@ -67,20 +46,14 @@ resource "kubernetes_manifest" "domain_prod_tls_certificate" {
     update = "10m"
   }
 
-  manifest = yamldecode(<<YAML
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: ${var.app_name}-prod-tls
-  namespace: traefik
-spec:
-  secretName: ${var.app_name}-prod-tls
-  issuerRef:
-    name: ${var.app_name}-letsencrypt-prod-issuer
-    kind: Issuer
-  dnsNames:
-  - ${var.domain}
-YAML
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/manifests/certificate.yaml",
+      {
+        app_name = var.app_name
+        domain = var.domain
+      }
+    )
   )
 }
 
@@ -89,28 +62,13 @@ resource "kubernetes_manifest" "https_gateway" {
     kubernetes_manifest.domain_prod_tls_certificate,
   ]
 
-  manifest = yamldecode(<<YAML
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: Gateway
-metadata:
-  name: ${var.app_name}-https-gateway
-  namespace: traefik
-  annotations:
-    cert-manager.io/issuer: ${var.app_name}-letsencrypt-prod-issuer
-spec:
-  gatewayClassName: traefik
-  listeners:
-    - name: ${var.app_name}-https
-      hostname: ${var.domain}
-      port: 8443
-      protocol: HTTPS
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: ${var.app_name}-prod-tls
-YAML
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/manifests/https-gateway.yaml",
+      {
+        app_name = var.app_name
+        domain = var.domain
+      }
+    )
   )
 }

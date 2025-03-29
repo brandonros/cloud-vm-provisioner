@@ -49,26 +49,13 @@ resource "kubernetes_manifest" "app_http_route" {
     helm_release.app,
   ]
 
-  manifest = yamldecode(<<YAML
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: HTTPRoute
-metadata:
-  name: ${var.app_name}-http-to-https-redirect
-  namespace: traefik
-spec:
-  parentRefs:
-  - name: ${var.app_name}-http-gateway
-    namespace: traefik
-    kind: Gateway
-  hostnames:
-  - ${var.domain}
-  rules:
-  - filters:
-    - type: RequestRedirect
-      requestRedirect:
-        scheme: https
-        statusCode: 301
-YAML
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/manifests/http-route.yaml",
+      {
+        app_name = var.app_name
+      }
+    )
   )
 }
 
@@ -77,32 +64,14 @@ resource "kubernetes_manifest" "app_https_route" {
     helm_release.app,
   ]
 
-  manifest = yamldecode(<<YAML
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: HTTPRoute
-metadata:
-  name: ${var.app_name}-https-route
-  namespace: traefik
-spec:
-  parentRefs:
-  - name: ${var.app_name}-https-gateway
-    namespace: traefik
-    kind: Gateway
-    sectionName: ${var.app_name}-https
-  hostnames:
-  - ${var.domain}
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /
-    backendRefs:
-    - name: ${var.app_name}
-      namespace: ${var.app_name}
-      port: ${var.container_port}
-      kind: Service
-      weight: 100
-YAML
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/manifests/https-route.yaml",
+      {
+        app_name = var.app_name
+        domain = var.domain
+      }
+    )
   )
 }
 
@@ -111,22 +80,12 @@ resource "kubernetes_manifest" "app_reference_grant" {
     kubernetes_manifest.app_https_route,
   ]
 
-  manifest = yamldecode(<<YAML
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: ReferenceGrant
-metadata:
-  name: ${var.app_name}-reference-grant
-  namespace: ${var.app_name}
-spec:
-  from:
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: traefik
-      name: ${var.app_name}-https-route
-  to:
-    - group: ""
-      kind: Service
-      name: ${var.app_name}
-YAML
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/manifests/reference-grant.yaml",
+      {
+        app_name = var.app_name
+      }
+    )
   )
 }

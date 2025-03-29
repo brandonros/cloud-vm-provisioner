@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ${app_name}-prod-tls
+  namespace: traefik
+spec:
+  secretName: ${app_name}-prod-tls
+  issuerRef:
+    name: ${app_name}-letsencrypt-prod-issuer
+    kind: Issuer
+  dnsNames:
+  - ${domain}

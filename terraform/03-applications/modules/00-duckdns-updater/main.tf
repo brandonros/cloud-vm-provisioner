@@ -13,24 +13,6 @@ variable "app_name" {
   description = "Application name"
 }
 
-variable "manifest" {
-  description = "The parsed manifest configuration"
-  type = object({
-    metadata = object({
-      name      = string
-      namespace = string
-    })
-    spec = object({
-      repo            = string
-      chart           = string
-      version         = string
-      targetNamespace = string
-      createNamespace = bool
-      valuesContent   = string
-    })
-  })
-}
-
 resource "kubernetes_namespace" "duckdns_updater" {
   metadata {
     name = "${var.app_name}-duckdns-updater"
@@ -53,20 +35,32 @@ resource "kubernetes_secret" "duckdns_token" {
   }
 }
 
+locals {
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/manifests/duckdns-updater.yaml",
+      {
+        app_name = var.app_name
+        duckdns_domain = var.duckdns_domain
+      }
+    )
+  )
+}
+
 resource "helm_release" "duckdns_updater" {  
   depends_on = [
     kubernetes_namespace.duckdns_updater,
     kubernetes_secret.duckdns_token,
   ]
 
-  name       = var.manifest.metadata.name
-  repository = var.manifest.spec.repo
-  chart      = var.manifest.spec.chart
-  namespace  = var.manifest.spec.targetNamespace
-  version    = var.manifest.spec.version
+  name       = local.manifest.metadata.name
+  repository = local.manifest.spec.repo
+  chart      = local.manifest.spec.chart
+  namespace  = local.manifest.spec.targetNamespace
+  version    = local.manifest.spec.version
   values = [
-    var.manifest.spec.valuesContent
+    local.manifest.spec.valuesContent
   ]
-  create_namespace = var.manifest.spec.createNamespace
+  create_namespace = local.manifest.spec.createNamespace
   wait_for_jobs = true
 }
