@@ -4,7 +4,7 @@ metadata:
   name: rabbitmq
   namespace: kube-system
 spec:
-  repo: oci://registry-1.docker.io/bitnamicharts
+  repo: https://charts.bitnami.com/bitnami
   chart: rabbitmq
   targetNamespace: rabbitmq
   createNamespace: true
@@ -19,9 +19,6 @@ spec:
       username: guest
       password: guest
       securePassword: false
-
-    ## Disable TLS
-    auth:
       tls:
         enabled: false
 

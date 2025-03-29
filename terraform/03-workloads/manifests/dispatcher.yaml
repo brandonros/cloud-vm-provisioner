@@ -38,7 +38,7 @@ spec:
                     tag: 2640b9fc10f61ed9e5ff85f7231f82cef99d4f7b
                   env:
                     RABBITMQ_URI:
-                      value: amqp://rabbitmq:5672
+                      value: amqp://rabbitmq.rabbitmq.svc.cluster.local:5672
                     RABBITMQ_USER:
                       value: guest
                     RABBITMQ_PASSWORD:

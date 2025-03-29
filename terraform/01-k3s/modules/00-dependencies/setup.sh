@@ -31,3 +31,13 @@ if ! command -v k9s &> /dev/null; then
 else
     echo "k9s is already installed"
 fi
+
+# Install helm
+if ! command -v helm &> /dev/null; then
+    wget https://get.helm.sh/helm-v3.17.2-linux-amd64.tar.gz
+    tar -xf helm-v3.17.2-linux-amd64.tar.gz
+    sudo install -m 755 linux-amd64/helm /usr/local/bin/helm
+    rm -rf linux-amd64
+else
+    echo "helm is already installed"
+fi
