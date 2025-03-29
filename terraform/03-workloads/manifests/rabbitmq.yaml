@@ -1,0 +1,54 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: rabbitmq
+  namespace: kube-system
+spec:
+  repo: https://charts.bitnami.com/bitnami
+  chart: rabbitmq
+  targetNamespace: rabbitmq
+  createNamespace: true
+  version: 15.4.1
+  valuesContent: |-
+    ## Disable clustering since we're running a single instance
+    clustering:
+      enabled: false
+
+    ## Set a simple fixed password and disable secure password
+    auth:
+      username: guest
+      password: guest
+      securePassword: false
+
+    ## Disable TLS
+    auth:
+      tls:
+        enabled: false
+
+    ## Reduce resource usage for local development
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 200m
+
+    ## Use a smaller persistence size
+    persistence:
+      size: 1Gi
+
+    ## Expose service ports for local access
+    service:
+      type: ClusterIP
+
+    ## Disable metrics for simplicity
+    metrics:
+      enabled: false
+
+    ## Single replica for local development
+    replicaCount: 1
+
+    # Disable LDAP authentication
+    ldap:
+      enabled: false

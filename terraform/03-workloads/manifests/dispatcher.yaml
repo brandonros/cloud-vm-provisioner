@@ -1,19 +1,19 @@
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
-  name: pdf-generator2
+  name: dispatcher
   namespace: kube-system
 spec:
   repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
   chart: hull-wrapper
-  targetNamespace: pdf-generator2
+  targetNamespace: dispatcher
   createNamespace: true
   version: 0.2.0
   valuesContent: |-
     hull:
       config:
         general:
-          nameOverride: pdf-generator2
+          nameOverride: dispatcher
           rbac: false
           noObjectNamePrefixes: true
       objects:
@@ -21,8 +21,8 @@ spec:
           default:
             enabled: false
         deployment:
-          pdf-generator2:
-            replicas: 4
+          dispatcher:
+            replicas: 2
             pod:
               containers:
                 main:
@@ -34,20 +34,20 @@ spec:
                       memory: 2048Mi
                       cpu: 2000m
                   image:
-                    repository: ghcr.io/avdeev99/puppeteer-pdf-generator
-                    tag: 93420ed874e6937871ce6a40449a960aa8738e86
+                    repository: ghcr.io/brandonros/dotnet-dispatcher
+                    tag: 2640b9fc10f61ed9e5ff85f7231f82cef99d4f7b
                   env:
-                    CHROMIUM_PATH:
-                      value: /usr/bin/chromium
-                    PUPPETEER_MAX_CONCURRENT_PAGES:
-                      value: 15
-                    ASPNETCORE_URLS:
-                      value: http://0.0.0.0:3000
+                    RABBITMQ_URI:
+                      value: amqp://rabbitmq:5672
+                    RABBITMQ_USER:
+                      value: guest
+                    RABBITMQ_PASSWORD:
+                      value: guest
                   ports:
                     http:
                       containerPort: 3000
         service:
-          pdf-generator2:
+          dispatcher:
             type: ClusterIP
             ports:
               http:
