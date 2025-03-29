@@ -47,8 +47,5 @@ spec:
                     DUCKDNS_DOMAIN:
                       value: ${duckdns_domain}
                     DUCKDNS_TOKEN:
-                      valueFrom:
-                        secretKeyRef:
-                          name: duckdns-token
-                          key: token
+                      value: ${duckdns_token}
               restartPolicy: Never

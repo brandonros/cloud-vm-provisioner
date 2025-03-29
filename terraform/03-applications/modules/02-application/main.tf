@@ -53,7 +53,8 @@ resource "kubernetes_manifest" "app_http_route" {
     templatefile(
       "${path.module}/manifests/http-route.yaml",
       {
-        app_name = var.app_name
+        app_name = var.app_name,
+        domain = var.domain
       }
     )
   )
@@ -68,8 +69,9 @@ resource "kubernetes_manifest" "app_https_route" {
     templatefile(
       "${path.module}/manifests/https-route.yaml",
       {
-        app_name = var.app_name
-        domain = var.domain
+        app_name = var.app_name,
+        domain = var.domain,
+        container_port = var.container_port
       }
     )
   )
