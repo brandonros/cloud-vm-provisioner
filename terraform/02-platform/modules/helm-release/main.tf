@@ -6,10 +6,12 @@ variable "manifest" {
       namespace = string
     })
     spec = object({
-      repo           = string
-      chart          = string
-      version        = string
-      valuesContent  = string
+      repo            = string
+      chart           = string
+      version         = string
+      targetNamespace = string
+      createNamespace = bool
+      valuesContent   = string
     })
   })
 }
@@ -23,6 +25,6 @@ resource "helm_release" "release" {
   values = [
     var.manifest.spec.valuesContent
   ]
-  create_namespace = true
+  create_namespace = var.manifest.spec.createNamespace
   wait_for_jobs = true
 }

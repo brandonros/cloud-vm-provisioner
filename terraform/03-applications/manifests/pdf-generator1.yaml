@@ -2,7 +2,7 @@ apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: pdf-generator1
-  namespace: pdf-generator1
+  namespace: kube-system
 spec:
   repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
   chart: hull-wrapper

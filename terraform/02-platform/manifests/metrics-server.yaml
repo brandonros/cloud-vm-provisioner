@@ -7,6 +7,7 @@ spec:
   repo: https://kubernetes-sigs.github.io/metrics-server/
   chart: metrics-server
   targetNamespace: kube-system
+  createNamespace: false
   version: 3.12.2
   valuesContent: |-
     replicas: 1
