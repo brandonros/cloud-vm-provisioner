@@ -22,11 +22,13 @@ resource "helm_release" "app" {
   name       = var.manifest.metadata.name
   repository = var.manifest.spec.repo
   chart      = var.manifest.spec.chart
-  namespace  = var.manifest.metadata.namespace
+  namespace  = var.manifest.spec.targetNamespace
   version    = var.manifest.spec.version
   values = [
     var.manifest.spec.valuesContent
   ]
+  create_namespace = var.manifest.spec.createNamespace
+  wait_for_jobs = true
 }
 
 resource "kubernetes_manifest" "app_http_route" {
