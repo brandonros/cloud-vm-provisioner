@@ -8,7 +8,12 @@ variable "app_name" {
   description = "Application name"
 } 
 
-variable "helm_values" {
+variable "container_port" {
+  type = number
+  description = "Container port"
+}
+
+variable "manifest" {
   type = any
   description = "Full Helm values configuration"
 }
@@ -79,7 +84,7 @@ spec:
     backendRefs:
     - name: ${var.app_name}
       namespace: ${var.app_name}
-      port: ${var.helm_values.hull.objects.deployment[var.app_name].pod.containers.main.ports.http.containerPort}
+      port: ${var.container_port}
       kind: Service
       weight: 100
 YAML

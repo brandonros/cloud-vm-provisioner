@@ -47,11 +47,13 @@ locals {
       domain = var.duckdns_domain1
       app_name = "pdf-generator1"
       manifest = yamldecode(file("${path.module}/manifests/pdf-generator1.yaml"))
+      container_port = 3000
     }
     pdf_generator2 = {
       domain = var.duckdns_domain2
       app_name = "pdf-generator2"
       manifest = yamldecode(file("${path.module}/manifests/pdf-generator2.yaml"))
+      container_port = 3000
     }
   }
 }
@@ -88,5 +90,6 @@ module "application" {
   depends_on = [module.certificate]
   domain = each.value.domain
   app_name = each.value.app_name
-  helm_values = each.value.helm_values
+  manifest = each.value.manifest
+  container_port = each.value.container_port
 }
