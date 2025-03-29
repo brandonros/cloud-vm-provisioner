@@ -13,7 +13,7 @@ locals {
 
 resource "null_resource" "k3s_install" {
   provisioner "remote-exec" {
-    inline = [file("${path.module}/k3s.sh")]
+    inline = [file("${path.module}/install.sh")]
 
     connection {
       type        = "ssh"
