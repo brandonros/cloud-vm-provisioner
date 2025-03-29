@@ -31,22 +31,14 @@ variable "manifest" {
   })
 }
 
-resource "helm_release" "app" {  
-  name       = var.manifest.metadata.name
-  repository = var.manifest.spec.repo
-  chart      = var.manifest.spec.chart
-  namespace  = var.manifest.spec.targetNamespace
-  version    = var.manifest.spec.version
-  values = [
-    var.manifest.spec.valuesContent
-  ]
-  create_namespace = var.manifest.spec.createNamespace
-  wait_for_jobs = true
+module "app" {
+  source = "../helm-release"
+  manifest = var.manifest
 }
 
 resource "kubernetes_manifest" "app_http_route" {
   depends_on = [
-    helm_release.app,
+    module.app,
   ]
 
   manifest = yamldecode(
@@ -62,7 +54,7 @@ resource "kubernetes_manifest" "app_http_route" {
 
 resource "kubernetes_manifest" "app_https_route" {  
   depends_on = [
-    helm_release.app,
+    module.app,
   ]
 
   manifest = yamldecode(

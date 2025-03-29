@@ -13,7 +13,8 @@ variable "app_name" {
   description = "Application name"
 }
 
-locals {
+module "duckdns_updater" {
+  source = "../helm-release"
   manifest = yamldecode(
     templatefile(
       "${path.module}/manifests/duckdns-updater.yaml",
@@ -24,17 +25,4 @@ locals {
       }
     )
   )
-}
-
-resource "helm_release" "duckdns_updater" {  
-  name       = local.manifest.metadata.name
-  repository = local.manifest.spec.repo
-  chart      = local.manifest.spec.chart
-  namespace  = local.manifest.spec.targetNamespace
-  version    = local.manifest.spec.version
-  values = [
-    local.manifest.spec.valuesContent
-  ]
-  create_namespace = local.manifest.spec.createNamespace
-  wait_for_jobs = true
 }
