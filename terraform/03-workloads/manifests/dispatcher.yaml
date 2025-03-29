@@ -37,12 +37,14 @@ spec:
                     repository: ghcr.io/brandonros/dotnet-dispatcher
                     tag: 2640b9fc10f61ed9e5ff85f7231f82cef99d4f7b
                   env:
+                    ASPNETCORE_URLS:
+                      value: http://*:3000
                     RABBITMQ_URI:
                       value: amqp://rabbitmq.rabbitmq.svc.cluster.local:5672
                     RABBITMQ_USER:
-                      value: guest
+                      value: user
                     RABBITMQ_PASSWORD:
-                      value: guest
+                      value: password
                   ports:
                     http:
                       containerPort: 3000

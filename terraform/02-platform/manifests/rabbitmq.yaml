@@ -16,8 +16,9 @@ spec:
 
     ## Set a simple fixed password and disable secure password
     auth:
-      username: guest
-      password: guest
+      username: user
+      password: password
+      enableLoopbackUser: false
       securePassword: false
       tls:
         enabled: false
