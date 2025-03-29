@@ -58,3 +58,9 @@ module "traefik" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/traefik.yaml"))
 }
+
+module "rabbitmq" {
+  depends_on = [module.traefik]
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/rabbitmq.yaml"))
+}

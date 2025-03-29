@@ -42,16 +42,10 @@ variable "duckdns_token" {
 
 locals {
   applications = {
-    pdf_generator1 = {
-      domain = "pdf-generator5555.duckdns.org"
-      app_name = "pdf-generator1"
-      manifest = yamldecode(file("${path.module}/manifests/pdf-generator1.yaml"))
-      container_port = 3000
-    }
-    pdf_generator2 = {
-      domain = "pdf-generator5556.duckdns.org"
-      app_name = "pdf-generator2"
-      manifest = yamldecode(file("${path.module}/manifests/pdf-generator2.yaml"))
+    dispatcher = {
+      domain = "dispatcher5555.duckdns.org"
+      app_name = "dispatcher"
+      manifest = yamldecode(file("${path.module}/manifests/dispatcher.yaml"))
       container_port = 3000
     }
   }
