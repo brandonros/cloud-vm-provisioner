@@ -68,28 +68,34 @@ provider "helm" {
   }
 }
 
-module "duckdns_updater" {
+module "dns" {
   for_each = local.applications
-  source = "./modules/00-duckdns-updater"
+  source = "./modules/dns"
   duckdns_token = var.duckdns_token
   duckdns_domain = each.value.domain
   app_name = each.value.app_name
 }
 
-module "certificate" {
+module "tls" {
   for_each = local.applications
-  source = "./modules/01-certificate"
-  depends_on = [module.duckdns_updater]
+  source = "./modules/tls"
+  depends_on = [module.dns]
   domain = each.value.domain
   app_name = each.value.app_name
 }
 
-module "application" {
+module "app" {
   for_each = local.applications
-  source = "./modules/02-application"
-  depends_on = [module.certificate]
+  source = "./modules/helm-release"
+  depends_on = [module.tls]
+  manifest = each.value.manifest
+}
+
+module "routing" {
+  for_each = local.applications
+  source = "./modules/routing"
+  depends_on = [module.app]
   domain = each.value.domain
   app_name = each.value.app_name
-  manifest = each.value.manifest
   container_port = each.value.container_port
 }

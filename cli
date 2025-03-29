@@ -175,34 +175,26 @@ cmd_create() {
     export TF_VAR_duckdns_domain1="$DUCKDNS_DOMAIN1"
     export TF_VAR_duckdns_domain2="$DUCKDNS_DOMAIN2"
 
-    # check pre-requisites
+    # 1. Pre-flight checks
     check_dependencies
     check_ssh_key
     check_cloud_credentials
 
-    # create vm
+    # 2. Infrastructure provisioning
     terraform_apply 00-vm
-
-    # load instance details
     load_instance_details
 
-    # wait for host to be ready
+    # 3. Cluster bootstrap
     wait_for_host
-
-    # accept ssh key
     accept_ssh_key
-
-    # install k3s
     terraform_apply 01-k3s
-
-    # create ssh tunnel
     create_cluster_ssh_tunnel
 
-    # apply platform
+    # 4. Platform setup
     terraform_apply 02-platform
 
-    # apply applications
-    terraform_apply 03-applications
+    # 5. Workload deployment
+    terraform_apply 03-workloads
 }
 
 load_instance_details() {

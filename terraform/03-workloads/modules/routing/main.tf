@@ -13,34 +13,7 @@ variable "container_port" {
   description = "Container port"
 }
 
-variable "manifest" {
-  description = "The parsed manifest configuration"
-  type = object({
-    metadata = object({
-      name      = string
-      namespace = string
-    })
-    spec = object({
-      repo            = string
-      chart           = string
-      version         = string
-      targetNamespace = string
-      createNamespace = bool
-      valuesContent   = string
-    })
-  })
-}
-
-module "app" {
-  source = "../helm-release"
-  manifest = var.manifest
-}
-
 resource "kubernetes_manifest" "app_http_route" {
-  depends_on = [
-    module.app,
-  ]
-
   manifest = yamldecode(
     templatefile(
       "${path.module}/manifests/http-route.yaml",
@@ -53,10 +26,6 @@ resource "kubernetes_manifest" "app_http_route" {
 }
 
 resource "kubernetes_manifest" "app_https_route" {  
-  depends_on = [
-    module.app,
-  ]
-
   manifest = yamldecode(
     templatefile(
       "${path.module}/manifests/https-route.yaml",
