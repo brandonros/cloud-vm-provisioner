@@ -233,16 +233,13 @@ cmd_cleanup() {
     # terraform destroy
     terraform_destroy 00-vm
 
-    # Cleanup server-files
-    rm -rf $SCRIPT_PATH/terraform/01-k3s/kubeconfig
-
     # cleanup temp files
-    rm -rf /tmp/hosts.ini
     rm -rf /tmp/vm_info.txt
+    rm -rf $SCRIPT_PATH/terraform/01-k3s/kubeconfig
 
     # cleanup all tfstate files
     pushd terraform
-    find ./00-vm ./01-k3s ./02-platform ./03-applications \
+    find ./00-vm ./01-k3s ./02-platform ./03-workloads \
         -type d -name ".terraform" -exec rm -rf {} \; -prune \
         -o -type f -name ".terraform.lock.hcl" -delete \
         -o -type f -name "*.tfstate" -delete \
