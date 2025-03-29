@@ -12,7 +12,7 @@ locals {
 }
 
 data "external" "kubeconfig" {
-  program = ["bash", "${path.module}/get-kubeconfig.sh"]
+  program = ["bash", "${path.module}/kubeconfig.sh"]
   
   query = {
     instance_ipv4 = local.instance_ipv4
