@@ -35,23 +35,26 @@ provider "helm" {
   }
 }
 
-module "metrics_server" {
-  source = "./modules/00-metrics-server"
-}
-
 module "gateway_api" {
-  depends_on = [module.metrics_server]
-  source = "./modules/01-gateway-api"
+  source = "./modules/gateway-api"
   instance_username = data.terraform_remote_state.vm.outputs.instance_username
   instance_ip = data.terraform_remote_state.vm.outputs.instance_ipv4
 }
 
-module "cert_manager" {
-  source = "./modules/02-cert-manager"
+module "metrics_server" {
   depends_on = [module.gateway_api]
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/metrics-server.yaml"))
+}
+
+module "cert_manager" {
+  depends_on = [module.metrics_server]
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/cert-manager.yaml"))
 }
 
 module "traefik" {
-  source = "./modules/03-traefik"
   depends_on = [module.cert_manager]
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/traefik.yaml"))
 }
