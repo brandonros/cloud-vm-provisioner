@@ -51,24 +51,14 @@ module "duckdns_updater" {
   duckdns_domain = var.duckdns_domain
 }
 
-module "issuer" {
-  source = "./modules/01-issuer"
+module "certificates" {
+  source = "./modules/01-certificates"
   depends_on = [module.duckdns_updater]
-}
-
-module "gateway" {
-  source = "./modules/02-gateway"
-  depends_on = [module.issuer]
   duckdns_domain = var.duckdns_domain
 }
 
 module "pdf_generator" {
-  source = "./modules/03-pdf-generator"
-  depends_on = [module.gateway]
-}
-
-module "traefik_routes" {
-  source = "./modules/04-traefik-routes"
-  depends_on = [module.pdf_generator]
+  source = "./modules/02-pdf-generator"
+  depends_on = [module.certificates]
   duckdns_domain = var.duckdns_domain
 }

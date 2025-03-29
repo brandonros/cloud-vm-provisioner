@@ -175,7 +175,7 @@ cmd_create() {
     check_cloud_credentials
 
     # create vm
-    terraform_apply 00-infrastructure
+    terraform_apply 00-vm
 
     # load instance details
     load_instance_details
@@ -186,21 +186,21 @@ cmd_create() {
     # accept ssh key
     accept_ssh_key
 
-    # install kubernetes
-    terraform_apply 01-kubernetes
+    # install k3s
+    terraform_apply 01-k3s
 
-    # create ssh tunne
+    # create ssh tunnel
     create_cluster_ssh_tunnel
 
-    # apply base
-    terraform_apply 02-base
+    # apply platform
+    terraform_apply 02-platform
 
     # apply applications
     terraform_apply 03-applications
 }
 
 load_instance_details() {
-    pushd terraform/00-infrastructure/
+    pushd terraform/00-vm/
 
     # Check if terraform outputs exist and are not empty
     if [ "$(terraform output -json 2>/dev/null)" = "{}" ]; then
@@ -227,10 +227,10 @@ cmd_connect() {
 
 cmd_cleanup() {
     # terraform destroy
-    terraform_destroy 00-infrastructure
+    terraform_destroy 00-vm
 
     # Cleanup server-files
-    rm -rf $SCRIPT_PATH/terraform/01-kubernetes/kubeconfig
+    rm -rf $SCRIPT_PATH/terraform/01-k3s/kubeconfig
 
     # cleanup temp files
     rm -rf /tmp/hosts.ini
@@ -238,7 +238,7 @@ cmd_cleanup() {
 
     # cleanup all tfstate files
     pushd terraform
-    find ./00-infrastructure ./01-kubernetes ./02-base ./03-applications \
+    find ./00-vm ./01-k3s ./02-platform ./03-applications \
         -type d -name ".terraform" -exec rm -rf {} \; -prune \
         -o -type f -name ".terraform.lock.hcl" -delete \
         -o -type f -name "*.tfstate" -delete \
