@@ -46,12 +46,12 @@ locals {
     pdf_generator1 = {
       domain = var.duckdns_domain1
       app_name = "pdf-generator1"
-      helm_values = yamldecode(file("${path.module}/pdf-generator1.yaml"))
+      manifest = yamldecode(file("${path.module}/manifests/pdf-generator1.yaml"))
     }
     pdf_generator2 = {
       domain = var.duckdns_domain2
       app_name = "pdf-generator2"
-      helm_values = yamldecode(file("${path.module}/pdf-generator2.yaml"))
+      manifest = yamldecode(file("${path.module}/manifests/pdf-generator2.yaml"))
     }
   }
 }

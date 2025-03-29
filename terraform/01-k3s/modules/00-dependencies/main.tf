@@ -13,7 +13,7 @@ locals {
 
 resource "null_resource" "dependencies" {
   provisioner "remote-exec" {
-    inline = [file("${path.module}/dependencies.sh")]
+    inline = [file("${path.module}/setup.sh")]
 
     connection {
       type        = "ssh"

@@ -13,25 +13,14 @@ variable "helm_values" {
   description = "Full Helm values configuration"
 }
 
-resource "kubernetes_namespace" "app" {
-  metadata {
-    name = var.app_name
-  }
-}
-
 resource "helm_release" "app" {  
-  depends_on = [
-    kubernetes_namespace.app,
-  ]
-
-  name       = var.app_name
-  repository = "https://raw.githubusercontent.com/brandonros/hull-wrapper/master/"
-  chart      = "hull-wrapper"
-  namespace  = var.app_name
-  version    = "0.2.0"
-
+  name       = var.manifest.metadata.name
+  repository = var.manifest.spec.repo
+  chart      = var.manifest.spec.chart
+  namespace  = var.manifest.metadata.namespace
+  version    = var.manifest.spec.version
   values = [
-    yamlencode(var.helm_values)
+    var.manifest.spec.valuesContent
   ]
 }
 
