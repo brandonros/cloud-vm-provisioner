@@ -8,25 +8,9 @@ variable "app_name" {
   description = "Application name"
 } 
 
-variable "image_repository" {
-  type = string
-  description = "Image repository"
-}
-
-variable "image_tag" {
-  type = string
-  description = "Image tag"
-}
-
-variable "environment_variables" {
-  type = map(string)
-  description = "Environment variables to pass to the container"
-  default = {}
-}
-
-variable "container_port" {
-  type = number
-  description = "Container port"
+variable "helm_values" {
+  type = any
+  description = "Full Helm values configuration"
 }
 
 resource "kubernetes_namespace" "app" {
@@ -47,46 +31,7 @@ resource "helm_release" "app" {
   version    = "0.2.0"
 
   values = [
-    <<-EOT
-    hull:
-      config:
-        general:
-          nameOverride: ${var.app_name}
-          rbac: false
-          noObjectNamePrefixes: true
-      objects:
-        serviceaccount:
-          default:
-            enabled: false
-        deployment:
-          ${var.app_name}:
-            replicas: 4
-            pod:
-              containers:
-                main:
-                  resources:
-                    requests:
-                      memory: 256Mi
-                      cpu: 250m
-                    limits:
-                      memory: 2048Mi
-                      cpu: 2000m
-                  image:
-                    repository: ${var.image_repository}
-                    tag: ${var.image_tag}
-                  env:
-                    ${yamlencode(var.environment_variables)}
-                  ports:
-                    http:
-                      containerPort: ${var.container_port}
-        service:
-          ${var.app_name}:
-            type: ClusterIP
-            ports:
-              http:
-                port: ${var.container_port}
-                targetPort: ${var.container_port}
-    EOT
+    yamlencode(var.helm_values)
   ]
 }
 
@@ -145,7 +90,7 @@ spec:
     backendRefs:
     - name: ${var.app_name}
       namespace: ${var.app_name}
-      port: ${var.container_port}
+      port: ${var.helm_values.hull.objects.deployment[var.app_name].pod.containers.main.ports.http.containerPort}
       kind: Service
       weight: 100
 YAML

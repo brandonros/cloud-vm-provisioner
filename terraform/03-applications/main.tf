@@ -44,50 +44,109 @@ variable "applications" {
   type = map(object({
     domain = string
     app_name = string
-    image_repository = string
-    image_tag = string
-    container_port = number
-    environment_variables = map(object({
-      value = string
-    }))
+    helm_values = any
   }))
   description = "Map of application configurations"
   default = {
     pdf_generator1 = {
       domain = var.duckdns_domain1
       app_name = "pdf-generator1"
-      image_repository = "ghcr.io/avdeev99/puppeteer-pdf-generator"
-      image_tag = "93420ed874e6937871ce6a40449a960aa8738e86"
-      container_port = 3000
-      environment_variables = {
-        CHROMIUM_PATH = {
-          value = "/usr/bin/chromium"
-        }
-        PUPPETEER_MAX_CONCURRENT_PAGES = {
-          value = "15"
-        }
-        ASPNETCORE_URLS = {
-          value = "http://0.0.0.0:3000"
-        }
-      }
+      helm_values = yamldecode(<<YAML
+hull:
+  config:
+    general:
+      nameOverride: pdf-generator1
+      rbac: false
+      noObjectNamePrefixes: true
+  objects:
+    serviceaccount:
+      default:
+        enabled: false
+    deployment:
+      pdf-generator1:
+        replicas: 4
+        pod:
+          containers:
+            main:
+              resources:
+                requests:
+                  memory: 256Mi
+                  cpu: 250m
+                limits:
+                  memory: 2048Mi
+                  cpu: 2000m
+              image:
+                repository: ghcr.io/avdeev99/puppeteer-pdf-generator
+                tag: 93420ed874e6937871ce6a40449a960aa8738e86
+              env:
+                CHROMIUM_PATH:
+                  value: /usr/bin/chromium
+                PUPPETEER_MAX_CONCURRENT_PAGES:
+                  value: "15"
+                ASPNETCORE_URLS:
+                  value: http://0.0.0.0:3000
+              ports:
+                http:
+                  containerPort: 3000
+    service:
+      pdf-generator1:
+        type: ClusterIP
+        ports:
+          http:
+            port: 3000
+            targetPort: 3000
+YAML
+      )
     }
     pdf_generator2 = {
       domain = var.duckdns_domain2
       app_name = "pdf-generator2"
-      image_repository = "ghcr.io/avdeev99/puppeteer-pdf-generator"
-      image_tag = "93420ed874e6937871ce6a40449a960aa8738e86"
-      container_port = 3000
-      environment_variables = {
-        CHROMIUM_PATH = {
-          value = "/usr/bin/chromium"
-        }
-        PUPPETEER_MAX_CONCURRENT_PAGES = {
-          value = "15"
-        }
-        ASPNETCORE_URLS = {
-          value = "http://0.0.0.0:3000"
-        }
-      }
+      helm_values = yamldecode(<<YAML
+hull:
+  config:
+    general:
+      nameOverride: pdf-generator2
+      rbac: false
+      noObjectNamePrefixes: true
+  objects:
+    serviceaccount:
+      default:
+        enabled: false
+    deployment:
+      pdf-generator2:
+        replicas: 4
+        pod:
+          containers:
+            main:
+              resources:
+                requests:
+                  memory: 256Mi
+                  cpu: 250m
+                limits:
+                  memory: 2048Mi
+                  cpu: 2000m
+              image:
+                repository: ghcr.io/avdeev99/puppeteer-pdf-generator
+                tag: 93420ed874e6937871ce6a40449a960aa8738e86
+              env:
+                CHROMIUM_PATH:
+                  value: /usr/bin/chromium
+                PUPPETEER_MAX_CONCURRENT_PAGES:
+                  value: "15"
+                ASPNETCORE_URLS:
+                  value: http://0.0.0.0:3000
+              ports:
+                http:
+                  containerPort: 3000
+    service:
+      pdf-generator2:
+        type: ClusterIP
+        ports:
+          http:
+            port: 3000
+            targetPort: 3000
+YAML
+      )
     }
   }
 }
@@ -124,8 +183,5 @@ module "application" {
   depends_on = [module.certificates]
   domain = each.value.domain
   app_name = each.value.app_name
-  image_repository = each.value.image_repository
-  image_tag = each.value.image_tag
-  container_port = each.value.container_port
-  environment_variables = each.value.environment_variables
+  helm_values = each.value.helm_values
 }
