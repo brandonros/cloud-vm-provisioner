@@ -233,7 +233,10 @@ cmd_connect() {
 
 cmd_cleanup() {
     # kill tunnels
-    pkill -f "ssh.*-L 6443:localhost:6443.*"
+    if pgrep -f "ssh.*-L 6443:localhost:6443.*" > /dev/null
+    then
+        pkill -f "ssh.*-L 6443:localhost:6443.*"
+    fi
 
     # terraform destroy
     terraform_destroy 00-vm
