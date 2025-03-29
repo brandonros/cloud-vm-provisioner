@@ -1,19 +1,19 @@
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
-  name: dispatcher
+  name: consumer
   namespace: kube-system
 spec:
   repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
   chart: hull-wrapper
-  targetNamespace: dispatcher
+  targetNamespace: consumer
   createNamespace: true
   version: 0.2.0
   valuesContent: |-
     hull:
       config:
         general:
-          nameOverride: dispatcher
+          nameOverride: consumer
           rbac: false
           noObjectNamePrefixes: true
       objects:
@@ -21,7 +21,7 @@ spec:
           default:
             enabled: false
         deployment:
-          dispatcher:
+          consumer:
             replicas: 2
             pod:
               containers:
@@ -34,22 +34,24 @@ spec:
                       memory: 2048Mi
                       cpu: 2000m
                   image:
-                    repository: ghcr.io/brandonros/dotnet-dispatcher
-                    tag: 2640b9fc10f61ed9e5ff85f7231f82cef99d4f7b
+                    repository: ghcr.io/avdeev99/rmq-masstransit/consumer
+                    tag: 5b5b618d4addbdd6a5c25bd258262eeb1ac57136
                   env:
+                    ASPNETCORE_ENVIRONMENT:
+                      value: Development
                     ASPNETCORE_URLS:
                       value: http://*:3000
-                    RABBITMQ_URI:
-                      value: amqp://rabbitmq.rabbitmq.svc.cluster.local:5672
-                    RABBITMQ_USER:
+                    RabbitMqSettings__Host:
+                      value: rabbitmq.rabbitmq.svc.cluster.local
+                    RabbitMqSettings__Username:
                       value: user
-                    RABBITMQ_PASSWORD:
+                    RabbitMqSettings__Password:
                       value: password
                   ports:
                     http:
                       containerPort: 3000
         service:
-          dispatcher:
+          consumer:
             type: ClusterIP
             ports:
               http:
