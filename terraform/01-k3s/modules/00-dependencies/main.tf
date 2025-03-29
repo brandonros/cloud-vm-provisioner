@@ -1,14 +1,14 @@
-data "terraform_remote_state" "infrastructure" {
+data "terraform_remote_state" "vm" {
   backend = "local"
   config = {
-    path = "${path.module}/../../../00-infrastructure/terraform.tfstate"
+    path = "${path.module}/../../../00-vm/terraform.tfstate"
   }
 }
 
 locals {
-  instance_ipv4 = data.terraform_remote_state.infrastructure.outputs.instance_ipv4
-  instance_username = data.terraform_remote_state.infrastructure.outputs.instance_username
-  instance_ssh_port = data.terraform_remote_state.infrastructure.outputs.instance_ssh_port
+  instance_ipv4 = data.terraform_remote_state.vm.outputs.instance_ipv4
+  instance_username = data.terraform_remote_state.vm.outputs.instance_username
+  instance_ssh_port = data.terraform_remote_state.vm.outputs.instance_ssh_port
 }
 
 resource "null_resource" "dependencies" {
@@ -18,11 +18,18 @@ resource "null_resource" "dependencies" {
       # Update package list
       sudo apt-get update
 
+      # Install needrestart
+      sudo apt-get install -y needrestart
+
+      # Configure for automatic restarts in non-interactive environments
+      sudo sed -i 's/#$nrconf{restart} = '"'"'i'"'"';/$nrconf{restart} = '"'"'a'"'"';/g' /etc/needrestart/needrestart.conf
+
       # Upgrade all installed packages to their latest versions
       sudo apt-get -y upgrade
+      sudo needrestart -r a
 
       # Dist-upgrade all installed packages to their latest versions
-      sudo apt-get -y dist-upgrade
+      # sudo apt-get -y dist-upgrade
       # TODO: i think this is bad practice because we don't reboot into the new kernel after
 
       # Install required packages

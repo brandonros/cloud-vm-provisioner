@@ -11,17 +11,17 @@ terraform {
   }
 }
 
-data "terraform_remote_state" "infrastructure" {
+data "terraform_remote_state" "vm" {
   backend = "local"
   config = {
-    path = "../00-infrastructure/terraform.tfstate"
+    path = "../00-vm/terraform.tfstate"
   }
 }
 
-data "terraform_remote_state" "kubernetes" {
+data "terraform_remote_state" "k3s" {
   backend = "local"
   config = {
-    path = "../01-kubernetes/terraform.tfstate"
+    path = "../01-k3s/terraform.tfstate"
   }
 }
 
@@ -36,12 +36,12 @@ variable "duckdns_domain" {
 }
 
 provider "kubernetes" {
-  config_path = data.terraform_remote_state.kubernetes.outputs.kubeconfig_path
+  config_path = data.terraform_remote_state.k3s.outputs.kubeconfig_path
 }
 
 provider "helm" {
   kubernetes {
-    config_path = data.terraform_remote_state.kubernetes.outputs.kubeconfig_path
+    config_path = data.terraform_remote_state.k3s.outputs.kubeconfig_path
   }
 }
 

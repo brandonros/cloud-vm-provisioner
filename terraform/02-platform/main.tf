@@ -11,27 +11,27 @@ terraform {
   }
 }
 
-data "terraform_remote_state" "infrastructure" {
+data "terraform_remote_state" "vm" {
   backend = "local"
   config = {
-    path = "../00-infrastructure/terraform.tfstate"
+    path = "../00-vm/terraform.tfstate"
   }
 }
 
-data "terraform_remote_state" "kubernetes" {
+data "terraform_remote_state" "k3s" {
   backend = "local"
   config = {
-    path = "../01-kubernetes/terraform.tfstate"
+    path = "../01-k3s/terraform.tfstate"
   }
 }
 
 provider "kubernetes" {
-  config_path = data.terraform_remote_state.kubernetes.outputs.kubeconfig_path
+  config_path = data.terraform_remote_state.k3s.outputs.kubeconfig_path
 }
 
 provider "helm" {
   kubernetes {
-    config_path = data.terraform_remote_state.kubernetes.outputs.kubeconfig_path
+    config_path = data.terraform_remote_state.k3s.outputs.kubeconfig_path
   }
 }
 
@@ -42,8 +42,8 @@ module "metrics_server" {
 module "gateway_api" {
   depends_on = [module.metrics_server]
   source = "./modules/01-gateway-api"
-  instance_username = data.terraform_remote_state.infrastructure.outputs.instance_username
-  instance_ip = data.terraform_remote_state.infrastructure.outputs.instance_ipv4
+  instance_username = data.terraform_remote_state.vm.outputs.instance_username
+  instance_ip = data.terraform_remote_state.vm.outputs.instance_ipv4
 }
 
 module "cert_manager" {

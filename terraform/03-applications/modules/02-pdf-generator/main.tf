@@ -10,6 +10,10 @@ resource "kubernetes_namespace" "pdf_generator" {
 }
 
 resource "helm_release" "pdf_generator" {  
+  depends_on = [
+    kubernetes_namespace.pdf_generator,
+  ]
+
   name       = "pdf-generator"
   repository = "https://raw.githubusercontent.com/brandonros/hull-wrapper/master/"
   chart      = "hull-wrapper"
@@ -70,8 +74,7 @@ resource "helm_release" "pdf_generator" {
 
 resource "kubernetes_manifest" "pdf_generator_http_route" {
   depends_on = [
-    kubernetes_manifest.http_gateway,
-    kubernetes_manifest.https_gateway,
+    helm_release.pdf_generator,
   ]
 
   manifest = yamldecode(<<YAML
@@ -99,7 +102,7 @@ YAML
 
 resource "kubernetes_manifest" "pdf_generator_https_route" {  
   depends_on = [
-    kubernetes_manifest.pdf_generator_reference_grant,
+    helm_release.pdf_generator,
   ]
 
   manifest = yamldecode(<<YAML
@@ -133,7 +136,6 @@ YAML
 
 resource "kubernetes_manifest" "pdf_generator_reference_grant" {  
   depends_on = [
-    helm_release.pdf_generator,
     kubernetes_manifest.pdf_generator_https_route,
   ]
 
