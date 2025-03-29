@@ -32,7 +32,7 @@ resource "null_resource" "dependencies" {
       # sudo apt-get -y dist-upgrade
       # TODO: i think this is bad practice because we don't reboot into the new kernel after
 
-      # Install required packages
+      # Install required packages to help debug issues
       sudo apt-get -y install acl htop psmisc netcat-traditional
 
       # Remove unused packages
