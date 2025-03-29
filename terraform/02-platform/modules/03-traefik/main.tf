@@ -1,53 +1,15 @@
-resource "kubernetes_namespace" "traefik" {
-  metadata {
-    name = "traefik"
-  }
+locals {
+  manifest = yamldecode(file("${path.module}/manifest.yaml"))
 }
 
-resource "helm_release" "traefik" {
-  depends_on = [
-    kubernetes_namespace.traefik
-  ]
-  
-  name       = "traefik"
-  repository = "https://traefik.github.io/charts"
-  chart      = "traefik"
-  namespace  = "traefik"
-  version    = "34.4.0"
-
+resource "helm_release" "cert_manager" {  
+  name       = local.manifest.metadata.name
+  repository = local.manifest.spec.repo
+  chart      = local.manifest.spec.chart
+  namespace  = local.manifest.metadata.namespace
+  version    = local.manifest.spec.version
   values = [
-    <<-EOT
-    ports:
-      web:
-        port: 8000
-        expose:
-          default: true
-        exposedPort: 80
-        protocol: TCP
-      websecure:
-        port: 8443
-        expose:
-          default: true
-        exposedPort: 443
-        protocol: TCP
-        tls:
-          enabled: true
-    
-    gateway:
-      enabled: false
-
-    logs:
-      general:
-        level: TRACE
-      access:
-        enabled: true
-
-    providers:
-      kubernetesIngress:
-        enabled: false
-      kubernetesGateway:
-        enabled: true
-    EOT
+    local.manifest.spec.valuesContent
   ]
-} 
+}
 

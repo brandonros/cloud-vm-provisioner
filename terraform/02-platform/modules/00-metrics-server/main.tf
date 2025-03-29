@@ -1,6 +1,14 @@
+locals {
+  manifest = yamldecode(file("${path.module}/manifest.yaml"))
+}
+
 resource "helm_release" "metrics_server" {  
-  name       = "metrics-server"
-  repository = "https://kubernetes-sigs.github.io/metrics-server/"
-  chart      = "metrics-server"
-  namespace  = "kube-system"
+  name       = local.manifest.metadata.name
+  repository = local.manifest.spec.repo
+  chart      = local.manifest.spec.chart
+  namespace  = local.manifest.metadata.namespace
+  version    = local.manifest.spec.version
+  values = [
+    local.manifest.spec.valuesContent
+  ]
 }

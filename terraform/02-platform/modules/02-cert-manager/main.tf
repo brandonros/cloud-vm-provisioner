@@ -1,28 +1,14 @@
-resource "kubernetes_namespace" "cert_manager" {
-  metadata {
-    name = "cert-manager"
-  }
+locals {
+  manifest = yamldecode(file("${path.module}/manifest.yaml"))
 }
 
-resource "helm_release" "cert_manager" {
-  depends_on = [
-    kubernetes_namespace.cert_manager,
-  ]
-  
-  name       = "cert-manager"
-  repository = "https://charts.jetstack.io"
-  chart      = "cert-manager"
-  namespace  = "cert-manager"
-  version    = "v1.15.3"
-
+resource "helm_release" "cert_manager" {  
+  name       = local.manifest.metadata.name
+  repository = local.manifest.spec.repo
+  chart      = local.manifest.spec.chart
+  namespace  = local.manifest.metadata.namespace
+  version    = local.manifest.spec.version
   values = [
-    <<-EOT
-    crds:
-        enabled: true
-    config:
-      apiVersion: controller.config.cert-manager.io/v1alpha1
-      kind: ControllerConfiguration
-      enableGatewayAPI: true
-    EOT
+    local.manifest.spec.valuesContent
   ]
-} 
+}
