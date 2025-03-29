@@ -41,16 +41,6 @@ check_cloud_credentials() {
         echo "DUCKDNS_TOKEN is not set"
         exit 1
     fi
-    if [ -z "${DUCKDNS_DOMAIN1}" ]
-    then
-        echo "DUCKDNS_DOMAIN1 is not set"
-        exit 1
-    fi
-    if [ -z "${DUCKDNS_DOMAIN2}" ]
-    then
-        echo "DUCKDNS_DOMAIN2 is not set"
-        exit 1
-    fi
 
     # cloud provider credentials
     if [ "$CLOUD_PROVIDER" == "google_cloud" ]
@@ -172,8 +162,6 @@ create_cluster_ssh_tunnel() {
 
 cmd_create() {
     export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
-    export TF_VAR_duckdns_domain1="$DUCKDNS_DOMAIN1"
-    export TF_VAR_duckdns_domain2="$DUCKDNS_DOMAIN2"
 
     # 1. Pre-flight checks
     check_dependencies

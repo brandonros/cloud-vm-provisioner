@@ -11,6 +11,16 @@ terraform {
   }
 }
 
+provider "kubernetes" {
+  config_path = data.terraform_remote_state.k3s.outputs.kubeconfig_path
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = data.terraform_remote_state.k3s.outputs.kubeconfig_path
+  }
+}
+
 data "terraform_remote_state" "vm" {
   backend = "local"
   config = {
@@ -30,41 +40,20 @@ variable "duckdns_token" {
   description = "DuckDNS token"
 } 
 
-variable "duckdns_domain1" {
-  type = string
-  description = "DuckDNS domain #1"
-}
-
-variable "duckdns_domain2" {
-  type = string
-  description = "DuckDNS domain #2"
-}
-
-# Define a locals block to compute the values that depend on variables
 locals {
   applications = {
     pdf_generator1 = {
-      domain = var.duckdns_domain1
+      domain = "pdf-generator5555.duckdns.org"
       app_name = "pdf-generator1"
       manifest = yamldecode(file("${path.module}/manifests/pdf-generator1.yaml"))
       container_port = 3000
     }
     pdf_generator2 = {
-      domain = var.duckdns_domain2
+      domain = "pdf-generator5556.duckdns.org"
       app_name = "pdf-generator2"
       manifest = yamldecode(file("${path.module}/manifests/pdf-generator2.yaml"))
       container_port = 3000
     }
-  }
-}
-
-provider "kubernetes" {
-  config_path = data.terraform_remote_state.k3s.outputs.kubeconfig_path
-}
-
-provider "helm" {
-  kubernetes {
-    config_path = data.terraform_remote_state.k3s.outputs.kubeconfig_path
   }
 }
 

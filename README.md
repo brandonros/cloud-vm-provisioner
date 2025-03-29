@@ -65,5 +65,3 @@ Commands:
 
 ### DuckDNS
 * `DUCKDNS_TOKEN`
-* `DUCKDNS_DOMAIN1`
-* `DUCKDNS_DOMAIN2`
