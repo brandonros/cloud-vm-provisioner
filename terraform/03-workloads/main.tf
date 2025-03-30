@@ -42,16 +42,16 @@ variable "duckdns_token" {
 
 locals {
   applications = {
-    producer = {
-      domain = "producer5555.duckdns.org"
-      app_name = "producer"
-      manifest = yamldecode(file("${path.module}/manifests/producer.yaml"))
-      container_port = 3000
-    }
     consumer = {
       domain = "consumer5555.duckdns.org"
       app_name = "consumer"
       manifest = yamldecode(file("${path.module}/manifests/consumer.yaml"))
+      container_port = 3000
+    }
+    dispatcher = {
+      domain = "dispatcher5555.duckdns.org"
+      app_name = "dispatcher"
+      manifest = yamldecode(file("${path.module}/manifests/dispatcher.yaml"))
       container_port = 3000
     }
   }

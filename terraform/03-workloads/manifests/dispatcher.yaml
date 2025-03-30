@@ -1,19 +1,19 @@
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
-  name: producer
+  name: dispatcher
   namespace: kube-system
 spec:
   repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
   chart: hull-wrapper
-  targetNamespace: producer
+  targetNamespace: dispatcher
   createNamespace: true
   version: 0.2.0
   valuesContent: |-
     hull:
       config:
         general:
-          nameOverride: producer
+          nameOverride: dispatcher
           rbac: false
           noObjectNamePrefixes: true
       objects:
@@ -21,7 +21,7 @@ spec:
           default:
             enabled: false
         deployment:
-          producer:
+          dispatcher:
             replicas: 2
             pod:
               containers:
@@ -34,18 +34,18 @@ spec:
                       memory: 2048Mi
                       cpu: 2000m
                   image:
-                    repository: ghcr.io/avdeev99/rmq-masstransit/producer
-                    tag: 5b5b618d4addbdd6a5c25bd258262eeb1ac57136
+                    repository: ghcr.io/brandonros/dotnet-message-hub/consumer
+                    tag: 306c79eda7411adcc9ba206690c736546dbb39cc
                   env:
                     ASPNETCORE_ENVIRONMENT:
                       value: Development
                     ASPNETCORE_URLS:
                       value: http://*:3000
-                    RabbitMqSettings__Host:
-                      value: rabbitmq.rabbitmq.svc.cluster.local
-                    RabbitMqSettings__Username:
+                    RABBITMQ_URI:
+                      value: amqp://rabbitmq.rabbitmq.svc.cluster.local:5672
+                    RABBITMQ_USER:
                       value: user
-                    RabbitMqSettings__Password:
+                    RABBITMQ_PASSWORD:
                       value: password
                   ports:
                     http:
