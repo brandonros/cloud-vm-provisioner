@@ -34,7 +34,7 @@ spec:
                       memory: 2048Mi
                       cpu: 2000m
                   image:
-                    repository: ghcr.io/brandonros/dotnet-message-hub/consumer
+                    repository: ghcr.io/brandonros/dotnet-message-hub/dispatcher
                     tag: 306c79eda7411adcc9ba206690c736546dbb39cc
                   env:
                     ASPNETCORE_ENVIRONMENT:
@@ -51,7 +51,7 @@ spec:
                     http:
                       containerPort: 3000
         service:
-          producer:
+          dispatcher:
             type: ClusterIP
             ports:
               http:
