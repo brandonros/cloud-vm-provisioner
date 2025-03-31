@@ -35,7 +35,7 @@ spec:
                       cpu: 2000m
                   image:
                     repository: ghcr.io/brandonros/dotnet-message-hub/consumer
-                    tag: 306c79eda7411adcc9ba206690c736546dbb39cc
+                    tag: 40cfebd8df949352ad0b0c3d40955b06eab5e534
                   env:
                     ASPNETCORE_ENVIRONMENT:
                       value: Development
