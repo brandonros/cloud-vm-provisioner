@@ -43,15 +43,3 @@ data "local_file" "vm_info" {
 locals {
   split_vm_info = split(":", trimspace(data.local_file.vm_info.content))
 }
-
-output "instance_username" {
-  value = "debian"
-}
-
-output "instance_ipv4" {
-  value = local.split_vm_info[0]
-}
-
-output "ssh_port" {
-  value = local.split_vm_info[1]
-}

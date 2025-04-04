@@ -20,7 +20,7 @@ images:
   digest: "sha256:42911131556b610895360e3d28a2c3ec41c0bad85e8df9fc9374996509d1f256" # Wed, 15 Jan 2025 23:04:40 GMT
 
 # memory
-memory: "10GiB"
+memory: "8GiB"
 
 # cpus
 cpus: 8
@@ -30,30 +30,6 @@ disk: "100GiB"
 
 # port forwards
 portForwards:
-# kafka-external
-- guestPort: 9095
-  hostPort: 9095
-  guestIP: "127.0.0.1"
-  hostIP: "127.0.0.1"
-  proto: tcp
-# redis
-- guestPort: 6379
-  hostPort: 6379
-  guestIP: "127.0.0.1"
-  hostIP: "127.0.0.1"
-  proto: tcp
-# rabbitmq
-- guestPort: 5672
-  hostPort: 5672
-  guestIP: "127.0.0.1"
-  hostIP: "127.0.0.1"
-  proto: tcp
-# postgresql
-- guestPort: 5432
-  hostPort: 5432
-  guestIP: "127.0.0.1"
-  hostIP: "127.0.0.1"
-  proto: tcp
 # kubernetes api
 - guestPort: 6443
   hostPort: 6443
