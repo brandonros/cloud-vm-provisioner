@@ -16,7 +16,7 @@ resource "null_resource" "lima_vm" {
     command = <<-EOT
       if ! limactl list | grep -q "debian-k3s"; then
         # TODO: envsubst because we have a variable for an ssh key in the yaml file?
-        limactl start ./debian-k3s.yaml
+        limactl start ${path.module}/debian-k3s.yaml
         limactl shell debian-k3s bash -c '
           mkdir -p /home/debian/.ssh
           echo "${local.ssh_public_key}" > /home/debian/.ssh/authorized_keys
@@ -31,7 +31,11 @@ resource "null_resource" "lima_vm" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "limactl stop -f debian-k3s && limactl delete debian-k3s && rm -f /tmp/vm_info.txt"
+    command = <<-EOT
+      limactl stop -f debian-k3s
+      limactl delete debian-k3s
+      rm -f /tmp/vm_info.txt
+    EOT
   }
 }
 
