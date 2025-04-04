@@ -39,6 +39,7 @@ module "gateway_api" {
   source = "./modules/gateway-api"
   instance_username = data.terraform_remote_state.vm.outputs.instance_username
   instance_ip = data.terraform_remote_state.vm.outputs.instance_ipv4
+  instance_ssh_port = data.terraform_remote_state.vm.outputs.instance_ssh_port
 }
 
 module "metrics_server" {

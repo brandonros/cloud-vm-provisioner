@@ -8,6 +8,11 @@ variable "instance_ip" {
   description = "IP address of the Vultr instance"
 }
 
+variable "instance_ssh_port" {
+  type = number
+  description = "SSH port of the Vultr instance"
+}
+
 resource "null_resource" "install_gateway_api" {
   provisioner "remote-exec" {
     script = "${path.module}/install-gateway-api.sh"
@@ -17,6 +22,7 @@ resource "null_resource" "install_gateway_api" {
       user        = var.instance_username
       private_key = file("~/.ssh/id_rsa")
       host        = var.instance_ip
+      port        = var.instance_ssh_port
     }
   }
 }

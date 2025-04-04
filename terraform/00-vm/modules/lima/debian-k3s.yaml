@@ -30,6 +30,12 @@ disk: "100GiB"
 
 # port forwards
 portForwards:
+# rabbitmq
+- guestPort: 15672
+  hostPort: 15672
+  guestIP: "127.0.0.1"
+  hostIP: "127.0.0.1"
+  proto: tcp
 # kubernetes api
 - guestPort: 6443
   hostPort: 6443
