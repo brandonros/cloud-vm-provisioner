@@ -20,6 +20,7 @@ resource "null_resource" "dependencies" {
       user        = local.instance_username
       private_key = file("~/.ssh/id_rsa")
       host        = local.instance_ipv4
+      port        = local.instance_ssh_port
     }
   }
 }
