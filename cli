@@ -151,7 +151,7 @@ create_cluster_ssh_tunnel() {
         if ! pgrep -f "ssh.*-L 6443:localhost:6443.*${instance_ipv4}" > /dev/null
         then
             echo "Starting SSH tunnel..."
-            ssh -fN -L 6443:localhost:6443 -L 15672:localhost:15672 ${instance_username}@${instance_ipv4}
+            ssh -fN -L 6443:localhost:6443 -L 15672:localhost:15672 -p ${instance_ssh_port} ${instance_username}@${instance_ipv4}
         else
             echo "SSH tunnel already running"
         fi
