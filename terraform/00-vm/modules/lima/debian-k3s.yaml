@@ -17,7 +17,7 @@ containerd:
 images:
 - location: "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-arm64.qcow2"
   arch: "aarch64"
-  digest: "sha256:42911131556b610895360e3d28a2c3ec41c0bad85e8df9fc9374996509d1f256" # Wed, 15 Jan 2025 23:04:40 GMT
+  digest: "sha256:8694e5f09eef0ee1ea528df534571e6efbfa93285cbd17ab9cdba87c33707f8d"
 
 # memory
 memory: "8GiB"
