@@ -1,0 +1,14 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: loki
+  namespace: monitoring
+spec:
+  repo: https://grafana.github.io/helm-charts
+  chart: loki-stack
+  targetNamespace: monitoring
+  createNamespace: true
+  version: 2.10.2
+  valuesContent: |-
+    loki:
+      enabled: true

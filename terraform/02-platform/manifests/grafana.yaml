@@ -1,0 +1,196 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  repo: https://grafana.github.io/helm-charts
+  chart: grafana
+  targetNamespace: monitoring
+  createNamespace: true
+  version: 8.11.3
+  valuesContent: |-
+    # Simple Grafana values for local development with LGTM stack
+
+    # Basic deployment configuration
+    replicas: 1
+    deploymentStrategy:
+      type: RollingUpdate
+
+    # Basic security configuration
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 472
+      runAsGroup: 472
+      fsGroup: 472
+
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: RuntimeDefault
+
+    # Grafana image configuration
+    image:
+      repository: grafana/grafana
+      pullPolicy: IfNotPresent
+
+    # Service configuration
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 80
+      targetPort: 3000
+
+    # Persistence for dashboards and settings
+    persistence:
+      enabled: true
+      size: 5Gi
+      accessModes:
+        - ReadWriteOnce
+
+    # Admin user setup
+    adminUser: admin
+    adminPassword: admin
+
+    # Create RBAC resources
+    rbac:
+      create: true
+
+    serviceAccount:
+      create: true
+      automountServiceAccountToken: true
+
+    # Disable test framework for local development
+    testFramework:
+      enabled: false
+
+    # Probe configuration
+    readinessProbe:
+      httpGet:
+        path: /api/health
+        port: 3000
+      initialDelaySeconds: 10
+      timeoutSeconds: 30
+      failureThreshold: 10
+
+    livenessProbe:
+      httpGet:
+        path: /api/health
+        port: 3000
+      initialDelaySeconds: 60
+      timeoutSeconds: 30
+      failureThreshold: 10
+
+    # Resources for local development
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
+
+    # Grafana configuration
+    grafana.ini:
+      paths:
+        data: /var/lib/grafana/
+        logs: /var/log/grafana
+        plugins: /var/lib/grafana/plugins
+        provisioning: /etc/grafana/provisioning
+      
+      server:
+        root_url: "%(protocol)s://%(domain)s:%(http_port)s/"
+        serve_from_sub_path: false
+      
+      auth:
+        disable_login_form: false
+      
+      auth.anonymous:
+        enabled: true
+        org_role: Viewer
+      
+      analytics:
+        check_for_updates: false
+        reporting_enabled: false
+      
+      log:
+        mode: console
+        level: info
+
+    # Configure datasources for the LGTM stack
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://mimir-gateway
+          access: proxy
+          isDefault: true
+        - name: Loki
+          type: loki
+          url: http://loki-gateway
+          access: proxy
+        - name: Tempo
+          type: tempo
+          url: http://tempo-gateway
+          access: proxy
+          jsonData:
+            httpMethod: GET
+            tracesToLogs:
+              datasourceUid: loki
+              tags: ['instance', 'pod', 'container']
+              mappedTags: [{ key: 'service.name', value: 'service' }]
+              spanStartTimeShift: '-1m'
+              spanEndTimeShift: '1m'
+              filterByTraceID: true
+              filterBySpanID: false
+            serviceMap:
+              datasourceUid: prometheus
+            search:
+              hide: false
+            nodeGraph:
+              enabled: true
+            lokiSearch:
+              datasourceUid: loki
+
+    # Configure dashboards providers
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+
+    # Enable sidecar for loading dashboards
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        searchNamespace: null
+        provider:
+          name: 'sidecarProvider'
+          orgid: 1
+          folder: ''
+          type: file
+          disableDelete: false
+          allowUiUpdates: true
+      datasources:
+        enabled: true
+        label: grafana_datasource
+        searchNamespace: null
+
+    # Plugins to install
+    plugins:
+      - grafana-piechart-panel
+      - natel-plotly-panel
+      - grafana-clock-panel
+      - grafana-worldmap-panel

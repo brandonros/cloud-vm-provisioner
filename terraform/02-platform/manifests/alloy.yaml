@@ -1,0 +1,151 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: alloy
+  namespace: monitoring
+spec:
+  repo: https://grafana.github.io/helm-charts
+  chart: alloy
+  targetNamespace: monitoring
+  createNamespace: true
+  version: 0.12.6
+  valuesContent: |-
+    # Simple Grafana Alloy values for local development with LGTM stack
+
+    # Set up a simple deployment for local development
+    controller:
+      type: deployment
+      replicas: 1
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "12345"
+
+    # Basic Alloy configuration
+    alloy:
+      # Use HTTP scheme for local development
+      listenAddr: 0.0.0.0
+      listenPort: 12345
+      
+      # OpenTelemetry collector config for receiving metrics, traces, and logs
+      configMap:
+        create: true
+        content: |
+          // Grafana Alloy Configuration for LGTM Stack
+          // This configuration demonstrates how to collect and ship metrics, logs, and traces
+
+          // Local file discovery for logs
+          local.file_match "system_logs" {
+            path_targets = [{"__path__" = "/var/log/**/*.log"}]
+          }
+
+          // Logs processing pipeline
+          loki.source.file "local_logs" {
+              targets    = local.file_match.system_logs.targets
+              forward_to = [loki.write.local.receiver]
+          }
+
+          // Loki write endpoint configuration
+          loki.write "local" {
+              endpoint {
+                  url = "http://loki:3100/loki/api/v1/push"
+              }
+          }
+
+          // Prometheus node exporter metrics scraping
+          prometheus.scrape "node_exporter" {
+              targets = [
+                  {
+                      "__address__" = "localhost:9100",
+                  },
+              ]
+              forward_to = [prometheus.remote_write.mimir.receiver]
+          }
+
+          // Mimir remote write configuration
+          prometheus.remote_write "mimir" {
+              endpoint {
+                  url = "http://mimir:9009/api/v1/push"
+              }
+          }
+
+          // OpenTelemetry collector for traces
+          otelcol.receiver.otlp "default" {
+              grpc {
+                  endpoint = "0.0.0.0:4317"
+              }
+              
+              output {
+                  traces = [otelcol.exporter.otlp.tempo.input]
+              }
+          }
+
+          // Tempo trace exporter
+          otelcol.exporter.otlp "tempo" {
+              client {
+                  endpoint = "tempo:4317"
+                  tls {
+                      insecure = true
+                  }
+              }
+          }
+
+          // Optional: Application metrics from a sample service
+          prometheus.scrape "example_app" {
+              targets = [
+                  {
+                      "__address__" = "example-app:8080",
+                      "job" = "example-service",
+                  },
+              ]
+              forward_to = [prometheus.remote_write.mimir.receiver]
+          }
+
+          // Health check and debugging components
+          logging {
+              level  = "info"
+              format = "logfmt"
+          }
+
+      # Add extra ports for OTLP receivers
+      extraPorts:
+        - name: "otlp-grpc"
+          port: 4317
+          targetPort: 4317
+          protocol: "TCP"
+        - name: "otlp-http"
+          port: 4318
+          targetPort: 4318
+          protocol: "TCP"
+
+    # Enable service for accessing Alloy from your applications
+    service:
+      enabled: true
+      type: ClusterIP
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "12345"
+
+    # Simple resource requests for local development
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+    # Default image settings
+    image:
+      repository: grafana/alloy
+      pullPolicy: IfNotPresent
+
+    # Create RBAC resources
+    rbac:
+      create: true
+
+    # Create ServiceAccount
+    serviceAccount:
+      create: true
+
+    # Configure auto-reload for configuration changes
+    configReloader:
+      enabled: true
