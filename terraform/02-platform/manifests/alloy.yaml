@@ -68,10 +68,21 @@ spec:
               }
           }
 
-          // OpenTelemetry collector for traces
+          // OpenTelemetry collector for traces - gRPC receiver
           otelcol.receiver.otlp "default" {
               grpc {
                   endpoint = "0.0.0.0:4317"
+              }
+              
+              output {
+                  traces = [otelcol.exporter.otlp.tempo.input]
+              }
+          }
+
+          // OpenTelemetry collector for traces - HTTP receiver
+          otelcol.receiver.otlp "http" {
+              http {
+                  endpoint = "0.0.0.0:4318"
               }
               
               output {

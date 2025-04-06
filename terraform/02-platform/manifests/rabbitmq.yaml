@@ -38,10 +38,7 @@ spec:
 
     ## Expose service ports for local access
     service:
-      type: NodePort
-      nodePorts:
-        amqp: 30672
-        manager: 30673
+      type: ClusterIP
 
     ## Disable metrics for simplicity
     metrics:
