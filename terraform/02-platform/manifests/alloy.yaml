@@ -64,7 +64,7 @@ spec:
           // Mimir remote write configuration
           prometheus.remote_write "mimir" {
               endpoint {
-                  url = "http://mimir:9009/api/v1/push"
+                  url = "http://mimir-gateway/api/v1/push"
               }
           }
 

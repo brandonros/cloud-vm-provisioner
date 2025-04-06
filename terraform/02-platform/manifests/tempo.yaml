@@ -32,7 +32,7 @@ spec:
       # Enable metrics generator for service graphs
       metricsGenerator:
         enabled: true
-        remoteWriteUrl: "http://mimir-gateway:80/api/v1/push"
+        remoteWriteUrl: "http://mimir-gateway/api/v1/push"
       
       # Set short retention for local development
       retention: 24h

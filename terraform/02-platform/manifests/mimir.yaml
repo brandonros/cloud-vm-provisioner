@@ -64,4 +64,10 @@ spec:
     rollout_operator:
       resources:
         requests:
-          cpu: 20m
+          cpu: 20m 
+    nginx:
+      enabled: false
+    gateway:
+      enabledNonEnterprise: true
+      replicas: 1
+          

@@ -131,11 +131,11 @@ spec:
           isDefault: true
         - name: Loki
           type: loki
-          url: http://loki-gateway
+          url: http://loki
           access: proxy
         - name: Tempo
           type: tempo
-          url: http://tempo-gateway
+          url: http://tempo
           access: proxy
           jsonData:
             httpMethod: GET
