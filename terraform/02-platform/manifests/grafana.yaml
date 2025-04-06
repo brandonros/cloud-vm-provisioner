@@ -126,12 +126,11 @@ spec:
         datasources:
         - name: Prometheus
           type: prometheus
-          url: http://mimir-gateway
+          url: http://mimir-gateway/prometheus
           access: proxy
-          isDefault: true
         - name: Loki
           type: loki
-          url: http://loki
+          url: http://loki:3100
           access: proxy
         - name: Tempo
           type: tempo
@@ -155,42 +154,3 @@ spec:
               enabled: true
             lokiSearch:
               datasourceUid: loki
-
-    # Configure dashboards providers
-    dashboardProviders:
-      dashboardproviders.yaml:
-        apiVersion: 1
-        providers:
-        - name: 'default'
-          orgId: 1
-          folder: ''
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/default
-
-    # Enable sidecar for loading dashboards
-    sidecar:
-      dashboards:
-        enabled: true
-        label: grafana_dashboard
-        searchNamespace: null
-        provider:
-          name: 'sidecarProvider'
-          orgid: 1
-          folder: ''
-          type: file
-          disableDelete: false
-          allowUiUpdates: true
-      datasources:
-        enabled: true
-        label: grafana_datasource
-        searchNamespace: null
-
-    # Plugins to install
-    plugins:
-      - grafana-piechart-panel
-      - natel-plotly-panel
-      - grafana-clock-panel
-      - grafana-worldmap-panel
