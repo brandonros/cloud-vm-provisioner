@@ -23,7 +23,8 @@ spec:
         requests:
           cpu: 20m
     ingester:
-      replicas: 1
+      # TODO: config ingester.ring.replication_factor to 1?
+      replicas: 3
       zoneAwareReplication:
         enabled: false
       resources:
