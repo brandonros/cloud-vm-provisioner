@@ -74,20 +74,34 @@ spec:
                   endpoint = "0.0.0.0:4317"
               }
               
-              output {
-                  traces = [otelcol.exporter.otlp.tempo.input]
-              }
-          }
-
-          // OpenTelemetry collector for traces - HTTP receiver
-          otelcol.receiver.otlp "http" {
               http {
                   endpoint = "0.0.0.0:4318"
               }
               
               output {
-                  traces = [otelcol.exporter.otlp.tempo.input]
+                  metrics = [otelcol.processor.batch.default.input]
+                  logs    = [otelcol.processor.batch.default.input]
+                  traces  = [otelcol.processor.batch.default.input]
               }
+          }
+
+          // Batch processor to optimize throughput
+          otelcol.processor.batch "default" {
+              output {
+                  metrics = [otelcol.exporter.prometheus.mimir.input]
+                  logs    = [otelcol.exporter.loki.local.input]
+                  traces  = [otelcol.exporter.otlp.tempo.input]
+              }
+          }
+
+          // Prometheus exporter to convert OTLP metrics to Prometheus format
+          otelcol.exporter.prometheus "mimir" {
+              forward_to = [prometheus.remote_write.mimir.receiver]
+          }
+
+          // Loki exporter for logs
+          otelcol.exporter.loki "local" {
+              forward_to = [loki.write.local.receiver]
           }
 
           // Tempo trace exporter
