@@ -11,4 +11,7 @@ spec:
   version: 2.10.2
   valuesContent: |-
     loki:
+      extraLabels:
+        app.kubernetes.io/name: loki
+      isDefault: false
       enabled: true
