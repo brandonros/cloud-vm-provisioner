@@ -68,7 +68,7 @@ spec:
               }
           }
 
-          // OpenTelemetry collector for traces - gRPC receiver
+          // OpenTelemetry collector for traces
           otelcol.receiver.otlp "default" {
               grpc {
                   endpoint = "0.0.0.0:4317"
@@ -90,7 +90,7 @@ spec:
               output {
                   metrics = [otelcol.exporter.prometheus.mimir.input]
                   logs    = [otelcol.exporter.loki.local.input]
-                  traces  = [otelcol.exporter.otlp.tempo.input]
+                  traces  = [otelcol.exporter.otlphttp.tempo.input]
               }
           }
 
@@ -105,12 +105,9 @@ spec:
           }
 
           // Tempo trace exporter
-          otelcol.exporter.otlp "tempo" {
+          otelcol.exporter.otlphttp "tempo" {
               client {
-                  endpoint = "tempo.tempo:4317"
-                  tls {
-                      insecure = true
-                  }
+                  endpoint = "http://tempo.tempo:4318"
               }
           }
 

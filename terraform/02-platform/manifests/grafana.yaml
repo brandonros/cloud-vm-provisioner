@@ -173,4 +173,4 @@ spec:
               type: 'Tag'
               tag: 'http.path'
             streamingEnabled:
-              search: true
+              search: false
