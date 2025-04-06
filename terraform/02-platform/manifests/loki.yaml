@@ -44,19 +44,24 @@ spec:
       replicas: 1
       resources:
         limits:
-          cpu: 3
-          memory: 4Gi
+          cpu: 2
+          memory: 2Gi
         requests:
           cpu: 1
           memory: 1Gi
       extraEnv:
         # Keep a little bit lower than memory limits
         - name: GOMEMLIMIT
-          value: 3750MiB
+          value: 750MiB
 
     chunksCache:
       # default is 500MB, with limited memory keep this smaller
       writebackSizeLimit: 10MB
+      allocatedMemory: 256
+
+    resultsCache:
+      enabled: true
+      allocatedMemory: 256
 
     # Enable minio for storage
     minio:
