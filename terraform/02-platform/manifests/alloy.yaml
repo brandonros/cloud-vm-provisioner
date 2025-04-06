@@ -2,11 +2,11 @@ apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: alloy
-  namespace: monitoring
+  namespace: alloy
 spec:
   repo: https://grafana.github.io/helm-charts
   chart: alloy
-  targetNamespace: monitoring
+  targetNamespace: alloy
   createNamespace: true
   version: 0.12.6
   valuesContent: |-
@@ -47,7 +47,7 @@ spec:
           // Loki write endpoint configuration
           loki.write "local" {
               endpoint {
-                  url = "http://loki:3100/loki/api/v1/push"
+                  url = "http://loki.loki:3100/loki/api/v1/push"
               }
           }
 
@@ -64,7 +64,7 @@ spec:
           // Mimir remote write configuration
           prometheus.remote_write "mimir" {
               endpoint {
-                  url = "http://mimir-gateway/api/v1/push"
+                  url = "http://mimir-gateway.mimir/api/v1/push"
               }
           }
 
@@ -93,7 +93,7 @@ spec:
           // Tempo trace exporter
           otelcol.exporter.otlp "tempo" {
               client {
-                  endpoint = "tempo:4317"
+                  endpoint = "tempo.tempo:4317"
                   tls {
                       insecure = true
                   }

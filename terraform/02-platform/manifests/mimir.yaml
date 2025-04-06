@@ -2,11 +2,11 @@ apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: mimir
-  namespace: monitoring
+  namespace: mimir
 spec:
   repo: https://grafana.github.io/helm-charts
   chart: mimir-distributed
-  targetNamespace: monitoring
+  targetNamespace: mimir
   createNamespace: true
   version: 5.6.0
   valuesContent: |-

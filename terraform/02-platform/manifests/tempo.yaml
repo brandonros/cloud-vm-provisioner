@@ -2,11 +2,11 @@ apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: tempo
-  namespace: monitoring
+  namespace: tempo
 spec:
   repo: https://grafana.github.io/helm-charts
   chart: tempo
-  targetNamespace: monitoring
+  targetNamespace: tempo
   createNamespace: true
   version: 1.20.0
   valuesContent: |-
