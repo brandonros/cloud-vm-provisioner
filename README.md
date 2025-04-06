@@ -21,6 +21,14 @@ Commands:
   help        Show this help message
 ```
 
+## Example
+
+```shell
+./cli create
+cp terraform/01-k3s/modules/02-kubeconfig/kubeconfig ~/.kube/config
+sudo kubefwd svc -n grafana -n rabbitmq  -n alloy
+```
+
 ## Supported cloud providers
 
 * AWS
