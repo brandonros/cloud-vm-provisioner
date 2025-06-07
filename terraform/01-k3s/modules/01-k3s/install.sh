@@ -5,7 +5,7 @@ if ! command -v kubectl &> /dev/null; then
     echo "kubectl not found, installing k3s..."
     
     # install k3s
-    curl -sfL https://get.k3s.io | sudo INSTALL_K3S_VERSION="v1.32.3+k3s1" INSTALL_K3S_EXEC="server --disable=traefik --disable=metrics-server" sh -
+    curl -sfL https://get.k3s.io | sudo INSTALL_K3S_VERSION="v1.33.1+k3s1" INSTALL_K3S_EXEC="server --disable=traefik --disable=metrics-server" sh -
     
     # trust cluster ssl
     echo "trusting cluster ssl"
