@@ -13,11 +13,8 @@ if ! command -v kubectl &> /dev/null; then
     sudo update-ca-certificates
     
     # add coredns in the cluster to node dns resolution chain
-    if ! sudo grep -q "nameserver 10.43.0.10" /etc/resolvconf/resolv.conf.d/tail; then
-        echo "adding coredns to dns resolution chain"
-        echo "nameserver 10.43.0.10" | sudo tee -a /etc/resolvconf/resolv.conf.d/tail > /dev/null
-        sudo resolvconf -u
-    fi
+    # TODO: edit /etc/systemd/resolved.conf
+    # TODO: sudo systemctl restart systemd-resolved
     
     echo "k3s installation complete"
 else
