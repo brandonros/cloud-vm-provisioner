@@ -5,9 +5,13 @@ set -e
 SCRIPT=$(readlink -f "$0")
 SCRIPT_PATH=$(dirname "$SCRIPT")
 
+export TF_SKIP_PROVIDER_VERIFY=true
+export CLOUD_PROVIDER="azure"
+export ARM_SUBSCRIPTION_ID="16c3f0f7-3a06-449e-8ac6-ec2d63078996"
+
 check_dependencies() {
     # Define required dependencies
-    dependencies=("terraform" "ssh" "nc" "jq")
+    dependencies=("terraform" "ssh" "telnet" "jq")
 
     # Check each dependency
     for cmd in "${dependencies[@]}"; do
@@ -19,6 +23,8 @@ check_dependencies() {
 }
 
 check_ssh_key() {
+    # azure does not support id_ed25519
+
     # check for ssh key
     if [ ! -e "$HOME/.ssh/id_rsa.pub" ]
     then
@@ -32,13 +38,6 @@ check_cloud_credentials() {
     if [ -z "${CLOUD_PROVIDER}" ]
     then
         echo "CLOUD_PROVIDER is not set"
-        exit 1
-    fi
-
-    # duckdns
-    if [ -z "${DUCKDNS_TOKEN}" ]
-    then
-        echo "DUCKDNS_TOKEN is not set"
         exit 1
     fi
 
@@ -121,7 +120,7 @@ accept_ssh_key() {
 
 wait_for_host() {
     echo "Waiting for ${instance_ipv4} to become available on port ${instance_ssh_port}..."
-    while ! nc -z ${instance_ipv4} ${instance_ssh_port}
+    while ! (echo > /dev/tcp/${instance_ipv4}/${instance_ssh_port}) 2>/dev/null
     do
         sleep 1
     done
@@ -146,30 +145,33 @@ terraform_apply() {
 }
 
 create_cluster_ssh_tunnel() {
-    if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux"* ]]
-    then
-        if ! pgrep -f "ssh.*-L 6443:localhost:6443.*${instance_ipv4}" > /dev/null
-        then
-            echo "Starting SSH tunnel..."
-            ssh -fN -L 6443:localhost:6443 -p ${instance_ssh_port} ${instance_username}@${instance_ipv4}
+    # Function to check if the tunnel is already running
+    is_tunnel_running() {
+        if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+            tasklist | grep -q "[s]sh.exe.*6443:localhost:6443.*${instance_ipv4}"
         else
-            echo "SSH tunnel already running"
+            pgrep -f "ssh.*-L 6443:localhost:6443.*${instance_ipv4}" > /dev/null
         fi
+    }
+
+    echo "Checking for existing SSH tunnel..."
+
+    if is_tunnel_running; then
+        echo "SSH tunnel already running"
     else
-        echo "Windows SSH tunnel setup not implemented"
+        echo "Starting SSH tunnel..."
+        ssh -fN -L 6443:localhost:6443 -p ${instance_ssh_port} ${instance_username}@${instance_ipv4}
     fi
 }
 
 cmd_create() {
-    export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
-
     # 1. Pre-flight checks
     check_dependencies
     check_ssh_key
     check_cloud_credentials
 
     # 2. Infrastructure provisioning
-    terraform_apply 00-vm
+    #terraform_apply 00-vm
     load_instance_details
 
     # 3. Cluster bootstrap
@@ -179,7 +181,7 @@ cmd_create() {
     create_cluster_ssh_tunnel
 
     # 4. Platform setup
-    terraform_apply 02-platform
+    #terraform_apply 02-platform
 
     # 5. Workload deployment
     #terraform_apply 03-workloads
