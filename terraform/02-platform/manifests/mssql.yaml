@@ -1,0 +1,139 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: mssql
+  namespace: kube-system
+spec:
+  repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
+  chart: hull-wrapper
+  targetNamespace: mssql
+  createNamespace: true
+  version: 0.2.0
+  valuesContent: |-
+    hull-wrapper:
+      hull:
+        config:
+          general:
+            nameOverride: mssql
+            rbac: false
+            noObjectNamePrefixes: true
+
+        objects:
+          serviceaccount:
+            default:
+              enabled: false
+          
+          service:
+            mssql:
+              type: ClusterIP
+              ports:
+                sql:
+                  port: 1433
+                  targetPort: 1433
+          
+          statefulset:
+            mssql:
+              replicas: 1
+              volumeClaimTemplates:
+                - metadata:
+                    name: data
+                  spec:
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 1Gi
+                - metadata:
+                    name: secrets
+                  spec:
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 1Gi
+                - metadata:
+                    name: log
+                  spec:
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 1Gi
+                - metadata:
+                    name: system
+                  spec:
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 1Gi
+              pod:
+                initContainers:
+                  permission-fix:
+                    image:
+                      repository: busybox
+                      tag: latest
+                    command:
+                      - sh
+                      - -c
+                      - |
+                        chown -R 10001:0 /.system
+                        chown -R 10001:0 /var/opt/mssql/data
+                        chown -R 10001:0 /var/opt/mssql/log
+                        chown -R 10001:0 /var/opt/mssql/secrets
+                        chmod -R 755 /.system
+                        chmod -R 755 /var/opt/mssql/data
+                        chmod -R 755 /var/opt/mssql/log
+                        chmod -R 755 /var/opt/mssql/secrets
+                    securityContext:
+                      runAsUser: 0
+                      runAsGroup: 0
+                    volumeMounts:
+                      data:
+                        name: data
+                        mountPath: /var/opt/mssql/data
+                      log:
+                        name: log
+                        mountPath: /var/opt/mssql/log
+                      secrets:
+                        name: secrets
+                        mountPath: /var/opt/mssql/secrets
+                      system:
+                        name: system
+                        mountPath: /.system
+                containers:
+                  main:
+                    resources:
+                      requests:
+                        memory: 1Gi
+                        cpu: 500m
+                      limits:
+                        memory: 4Gi
+                        cpu: 2000m
+                    image:
+                      repository: mcr.microsoft.com/mssql/server
+                      tag: 2022-latest
+                    env:
+                      ACCEPT_EULA:
+                        value: 'Y'
+                      SA_PASSWORD:
+                        value: 'Test_Password123!'
+                    securityContext:
+                      runAsUser: 10001
+                      runAsGroup: 10001
+                    ports:
+                      sql:
+                        containerPort: 1433
+                    volumeMounts:
+                      system:
+                        name: system
+                        mountPath: /.system
+                      log:
+                        name: log
+                        mountPath: /log
+                      secrets:
+                        name: secrets
+                        mountPath: /var/opt/mssql/secrets
+                      data:
+                        name: data
+                        mountPath: /var/opt/mssql/data
