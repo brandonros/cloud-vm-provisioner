@@ -147,8 +147,8 @@ terraform_apply() {
 create_cluster_ssh_tunnel() {
     # Function to check if the tunnel is already running
     is_tunnel_running() {
-        if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-            tasklist | grep -q "[s]sh.exe.*6443:localhost:6443.*${instance_ipv4}"
+        if [[ "$OSTYPE" == "msys" ]]; then
+            netstat -a -n -o | grep "127.0.0.1:6443.*LISTENING" > /dev/null
         else
             pgrep -f "ssh.*-L 6443:localhost:6443.*${instance_ipv4}" > /dev/null
         fi
@@ -171,7 +171,7 @@ cmd_create() {
     check_cloud_credentials
 
     # 2. Infrastructure provisioning
-    #terraform_apply 00-vm
+    terraform_apply 00-vm
     load_instance_details
 
     # 3. Cluster bootstrap
