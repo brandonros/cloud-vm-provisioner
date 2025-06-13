@@ -147,11 +147,7 @@ terraform_apply() {
 create_cluster_ssh_tunnel() {
     # Function to check if the tunnel is already running
     is_tunnel_running() {
-        if [[ "$OSTYPE" == "msys" ]]; then
-            netstat -a -n -o | grep "127.0.0.1:6443.*LISTENING" > /dev/null
-        else
-            pgrep -f "ssh.*-L 6443:localhost:6443.*${instance_ipv4}" > /dev/null
-        fi
+        ps -ef | grep -E "ssh.*-L 6443:localhost:6443.*${instance_ipv4}" | grep -v grep > /dev/null
     }
 
     echo "Checking for existing SSH tunnel..."
@@ -171,7 +167,7 @@ cmd_create() {
     check_cloud_credentials
 
     # 2. Infrastructure provisioning
-    terraform_apply 00-vm
+    #terraform_apply 00-vm
     load_instance_details
 
     # 3. Cluster bootstrap
@@ -181,7 +177,7 @@ cmd_create() {
     create_cluster_ssh_tunnel
 
     # 4. Platform setup
-    #terraform_apply 02-platform
+    terraform_apply 02-platform
 
     # 5. Workload deployment
     #terraform_apply 03-workloads
@@ -215,10 +211,7 @@ cmd_connect() {
 
 cmd_cleanup() {
     # kill tunnels
-    if pgrep -f "ssh.*-L 6443:localhost:6443.*" > /dev/null
-    then
-        pkill -f "ssh.*-L 6443:localhost:6443.*"
-    fi
+    ps -W | grep "ssh.*-L 6443:localhost:6443" | awk '{print $1}' | xargs -r kill -9
 
     # terraform destroy
     terraform_destroy 00-vm
