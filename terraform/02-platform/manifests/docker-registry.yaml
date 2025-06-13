@@ -9,3 +9,5 @@ spec:
   targetNamespace: docker-registry
   createNamespace: true
   version: 2.3.0
+  valuesContent: |-
+    {}

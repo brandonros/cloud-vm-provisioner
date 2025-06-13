@@ -64,3 +64,9 @@ module "docker_registry" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/docker-registry.yaml"))
 }
+
+module "mssql" {
+  depends_on = [module.docker_registry]
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/mssql.yaml"))
+}
