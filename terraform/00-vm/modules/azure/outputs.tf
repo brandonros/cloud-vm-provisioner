@@ -3,9 +3,9 @@ output "instance_username" {
 }
 
 output "instance_ipv4" {
-  value = local.split_vm_info[0]
+  value = azurerm_public_ip.public_ip1.ip_address
 }
 
 output "instance_ssh_port" {
-  value = local.split_vm_info[1]
+  value = 22
 }

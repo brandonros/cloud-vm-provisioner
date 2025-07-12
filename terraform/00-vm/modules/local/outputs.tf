@@ -1,11 +1,11 @@
 output "instance_username" {
-  value = "debian"
+  value = "brandon"
 }
 
 output "instance_ipv4" {
-  value = local.split_vm_info[0]
+  value = "192.168.0.18"
 }
 
 output "instance_ssh_port" {
-  value = local.split_vm_info[1]
+  value = 22
 }

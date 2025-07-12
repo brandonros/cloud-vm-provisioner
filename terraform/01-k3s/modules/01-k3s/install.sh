@@ -22,8 +22,7 @@ else
 fi
 
 # Configure kubeconfig for user
-USER_HOME="/home/debian"
-KUBE_CONFIG="$USER_HOME/.kube/config"
+KUBE_CONFIG="$HOME/.kube/config"
 
 # Check if kubeconfig exists
 if [ ! -f "$KUBE_CONFIG" ]; then
@@ -33,15 +32,15 @@ if [ ! -f "$KUBE_CONFIG" ]; then
     KUBECONFIG=$(sudo k3s kubectl config view --raw)
     
     # Create .kube directory if it doesn't exist
-    mkdir -p "$USER_HOME/.kube" 2> /dev/null
+    mkdir -p "$HOME/.kube" 2> /dev/null
     
     # Write kubeconfig
     echo "$KUBECONFIG" > "$KUBE_CONFIG"
     chmod 600 "$KUBE_CONFIG"
     
     # Add to .bashrc if not already there
-    if ! grep -q "export KUBECONFIG=$KUBE_CONFIG" "$USER_HOME/.bashrc"; then
-        echo "export KUBECONFIG=$KUBE_CONFIG" >> "$USER_HOME/.bashrc"
+    if ! grep -q "export KUBECONFIG=$KUBE_CONFIG" "$HOME/.bashrc"; then
+        echo "export KUBECONFIG=$KUBE_CONFIG" >> "$HOME/.bashrc"
     fi
     
     echo "Kubeconfig configured for user"

@@ -24,15 +24,3 @@ resource "digitalocean_droplet" "droplet1" {
   size     = "s-4vcpu-16gb-amd" # 4 vCPU, 16 GB, $0.125/hr
   ssh_keys = [digitalocean_ssh_key.ssh_key.fingerprint]
 }
-
-output "instance_username" {
-  value = "debian"
-}
-
-output "instance_ipv4" {
-  value = digitalocean_droplet.droplet1.ipv4_address
-}
-
-output "ssh_port" {
-  value = 22
-}

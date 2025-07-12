@@ -6,7 +6,7 @@ SCRIPT=$(readlink -f "$0")
 SCRIPT_PATH=$(dirname "$SCRIPT")
 
 export TF_SKIP_PROVIDER_VERIFY=true
-export CLOUD_PROVIDER="azure"
+export CLOUD_PROVIDER="local"
 export ARM_SUBSCRIPTION_ID="16c3f0f7-3a06-449e-8ac6-ec2d63078996"
 
 check_dependencies() {
@@ -96,6 +96,9 @@ check_cloud_credentials() {
             echo "limactl is not installed"
             exit 1
         fi
+    elif [ "$CLOUD_PROVIDER" == "local" ]
+    then
+        echo "TODO: check something for local"
     elif [ "$CLOUD_PROVIDER" == "oracle" ]
     then
         echo "TODO: check for private key file"
@@ -171,7 +174,7 @@ cmd_create() {
     check_cloud_credentials
 
     # 2. Infrastructure provisioning
-    #terraform_apply 00-vm
+    terraform_apply 00-vm
     load_instance_details
 
     # 3. Cluster bootstrap
