@@ -32,13 +32,14 @@ spec:
         
         deployment:
           postgrest:
-            replicas: 4
+            replicas: 10
             pod:
               containers:
                 main:
                   image:
                     repository: postgrest/postgrest
                     tag: v13.0.4
+
                   env:
                     PGRST_DB_URI:
                       value: 'postgres://postgres:Test_Password123!@pgbouncer.pgbouncer.svc.cluster.local:5433/ledgerr'
@@ -49,9 +50,19 @@ spec:
                     PGRST_SERVER_PORT:
                       value: '3000'
                     PGRST_DB_POOL:
-                      value: '100'
+                      value: '200'
                     PGRST_LOG_LEVEL:
                       value: 'warn'
+                    PGRST_DB_POOL_ACQUISITION_TIMEOUT:
+                      value: '10'
                   ports:
                     http:
                       containerPort: 3000
+                  
+                  resources:
+                    requests:
+                      cpu: "500m"
+                      memory: "512Mi"
+                    limits:
+                      cpu: "1000m"
+                      memory: "1024Mi"

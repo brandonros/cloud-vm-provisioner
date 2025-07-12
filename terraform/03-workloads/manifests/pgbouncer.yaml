@@ -16,7 +16,6 @@ spec:
           nameOverride: pgbouncer
           rbac: false
           noObjectNamePrefixes: true
-
       objects:
         serviceaccount:
           default:
@@ -32,7 +31,7 @@ spec:
         
         deployment:
           pgbouncer:
-            replicas: 2
+            replicas: 1
             pod:
               containers:
                 main:
@@ -47,43 +46,43 @@ spec:
                     DATABASE_URL:
                       value: 'postgres://postgres:Test_Password123!@postgresql.postgresql.svc.cluster.local:5432/ledgerr'
                     
-                    # Connection Pool Settings - Critical for your load test
+                    # MASSIVE CONNECTION POOL SCALING
                     MAX_CLIENT_CONN:
-                      value: "1000"        # Increased from default 100
+                      value: "5000"        # Was 1000, now 5000
                     DEFAULT_POOL_SIZE:
-                      value: "50"          # Connections per database
+                      value: "500"         # Was 250, now 500 per database
                     MAX_DB_CONNECTIONS:
-                      value: "200"         # Total backend connections
+                      value: "1500"        # Was 500, now 1500 total backend
                     POOL_MODE:
-                      value: "transaction" # Most efficient for your use case
+                      value: "transaction" # Keep transaction mode
                     
                     # Performance Tuning
                     RESERVE_POOL_SIZE:
-                      value: "10"          # Emergency connections
+                      value: "50"          # Was 10, now 50
                     RESERVE_POOL_TIMEOUT:
-                      value: "5"           # Seconds
+                      value: "3"           # Faster failover
                     
-                    # Timeout Settings
+                    # Aggressive Timeout Settings for Load Testing
                     SERVER_IDLE_TIMEOUT:
-                      value: "600"         # 10 minutes
+                      value: "300"         # Was 600, now 5 minutes
                     CLIENT_IDLE_TIMEOUT:
-                      value: "0"           # Disabled for load testing
+                      value: "0"           # Keep disabled
                     SERVER_CONNECT_TIMEOUT:
-                      value: "15"          # Seconds
+                      value: "10"          # Was 15, now 10 seconds
                     QUERY_TIMEOUT:
-                      value: "30"          # Seconds
+                      value: "60"          # Was 30, now 60 seconds
                     
-                    # Logging for troubleshooting
+                    # Minimal logging for performance
                     LOG_CONNECTIONS:
-                      value: "0"           # Disable for performance
+                      value: "0"
                     LOG_DISCONNECTIONS:
-                      value: "0"           # Disable for performance  
+                      value: "0"
                     LOG_POOLER_ERRORS:
-                      value: "1"           # Keep enabled for debugging
+                      value: "1"
                     LOG_STATS:
-                      value: "1"           # Enable stats logging
+                      value: "1"
                     STATS_PERIOD:
-                      value: "60"          # Stats every 60 seconds
+                      value: "30"          # More frequent stats
                     
                     # Network optimization
                     TCP_KEEPALIVE:
@@ -91,11 +90,10 @@ spec:
                     TCP_KEEPCNT:
                       value: "3"
                     TCP_KEEPIDLE:
-                      value: "600"
+                      value: "300"         # More aggressive
                     TCP_KEEPINTVL:
-                      value: "30"
+                      value: "15"          # More frequent
                     
-                    # Admin access for monitoring
                     ADMIN_USERS:
                       value: "postgres"
                     STATS_USERS:
@@ -105,10 +103,11 @@ spec:
                     pgbouncer:
                       containerPort: 5433
                   
+                  # Increased resources for pgbouncer
                   resources:
                     requests:
-                      cpu: "100m"
-                      memory: "128Mi"
+                      cpu: "1000m"         # Was 500m
+                      memory: "1Gi"        # Was 512Mi
                     limits:
-                      cpu: "500m"
-                      memory: "512Mi"
+                      cpu: "2000m"         # Was 1000m
+                      memory: "2Gi"        # Was 1Gi
