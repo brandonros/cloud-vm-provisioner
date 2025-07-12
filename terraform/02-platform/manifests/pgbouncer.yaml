@@ -1,0 +1,49 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: pgbouncer
+  namespace: kube-system
+spec:
+  repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
+  chart: hull-wrapper
+  targetNamespace: pgbouncer
+  createNamespace: true
+  version: 0.2.0
+  valuesContent: |-
+    hull:
+      config:
+        general:
+          nameOverride: pgbouncer
+          rbac: false
+          noObjectNamePrefixes: true
+
+      objects:
+        serviceaccount:
+          default:
+            enabled: false
+        
+        service:
+          pgbouncer:
+            type: ClusterIP
+            ports:
+              postgres:
+                port: 5432
+                targetPort: 5432
+        
+        deployment:
+          pgbouncer:
+            replicas: 1
+            pod:
+              containers:
+                main:
+                  image:
+                    repository: edoburu/pgbouncer
+                    tag: v1.24.1-p1
+                  env:
+                    AUTH_TYPE:
+                      value: scram-sha-256
+                    DATABASE_URL:
+                      value: 'postgres://postgres:Test_Password123!@postgresql.postgresql.svc.cluster.local:5432/postgres'
+                  ports:
+                    pgbouncer:
+                      containerPort: 5432

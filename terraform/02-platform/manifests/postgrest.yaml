@@ -1,0 +1,47 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: postgrest
+  namespace: kube-system
+spec:
+  repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
+  chart: hull-wrapper
+  targetNamespace: postgrest
+  createNamespace: true
+  version: 0.2.0
+  valuesContent: |-
+    hull:
+      config:
+        general:
+          nameOverride: postgrest
+          rbac: false
+          noObjectNamePrefixes: true
+
+      objects:
+        serviceaccount:
+          default:
+            enabled: false
+        
+        service:
+          postgrest:
+            type: ClusterIP
+            ports:
+              http:
+                port: 3000
+                targetPort: 3000
+        
+        deployment:
+          postgrest:
+            replicas: 1
+            pod:
+              containers:
+                main:
+                  image:
+                    repository: postgrest/postgrest
+                    tag: v13.0.4
+                  env:
+                    PGRST_DB_URI:
+                      value: 'postgres://postgres:Test_Password123!@pgbouncer.pgbouncer.svc.cluster.local:5432/postgres'
+                  ports:
+                    http:
+                      containerPort: 3000

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export KUBECONFIG="/home/debian/.kube/config"
+export KUBECONFIG="$HOME/.kube/config"
 
 # Check if the CRD exists and capture the return code without showing errors
 if ! kubectl get crd gatewayclasses.gateway.networking.k8s.io &>/dev/null; then

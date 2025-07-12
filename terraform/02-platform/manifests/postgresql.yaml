@@ -1,0 +1,67 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: postgresql
+  namespace: kube-system
+spec:
+  repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
+  chart: hull-wrapper
+  targetNamespace: postgresql
+  createNamespace: true
+  version: 0.2.0
+  valuesContent: |-
+    hull:
+      config:
+        general:
+          nameOverride: postgresql
+          rbac: false
+          noObjectNamePrefixes: true
+
+      objects:
+        serviceaccount:
+          default:
+            enabled: false
+
+        service:
+          postgresql:
+            ports:
+              postgresql:
+                port: 5432
+                targetPort: 5432
+
+        statefulset:
+          postgresql:
+            serviceName: postgresql
+            replicas: 1
+            
+            pod:
+              containers:
+                main:
+                  image:
+                    repository: postgres
+                    tag: 17.5-bookworm
+                  
+                  ports:
+                    postgresql:
+                      containerPort: 5432
+                  
+                  env:
+                    POSTGRES_PASSWORD:
+                      value: "Test_Password123!"
+                    PGDATA:
+                      value: "/var/lib/postgresql/data/pgdata"
+                  
+                  volumeMounts:
+                    data:
+                      name: postgres-data
+                      mountPath: /var/lib/postgresql/data
+            
+            volumeClaimTemplates:
+              - metadata:
+                  name: postgres-data
+                spec:
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: 8Gi

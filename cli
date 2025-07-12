@@ -184,7 +184,7 @@ cmd_create() {
     create_cluster_ssh_tunnel
 
     # 4. Platform setup
-    #terraform_apply 02-platform
+    terraform_apply 02-platform
 
     # 5. Workload deployment
     #terraform_apply 03-workloads

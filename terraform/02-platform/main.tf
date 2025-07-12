@@ -59,32 +59,49 @@ module "traefik" {
   manifest = yamldecode(file("${path.module}/manifests/traefik.yaml"))
 }
 
-module "rabbitmq" {
+module "postgresql" {
   source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/rabbitmq.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/postgresql.yaml"))
 }
 
-module "loki" {
+module "pgbouncer" {
+  depends_on = [module.postgresql]
   source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/loki.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/pgbouncer.yaml"))
 }
 
-module "grafana" {
+module "postgrest" {
+  depends_on = [module.pgbouncer]
   source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/grafana.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
 }
 
-module "tempo" {
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/tempo.yaml"))
-}
+# module "rabbitmq" {
+#   source   = "./modules/helm-release"
+#   manifest = yamldecode(file("${path.module}/manifests/rabbitmq.yaml"))
+# }
 
-module "mimir" {
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/mimir.yaml"))
-}
+# module "loki" {
+#   source   = "./modules/helm-release"
+#   manifest = yamldecode(file("${path.module}/manifests/loki.yaml"))
+# }
 
-module "alloy" {
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
-}
+# module "grafana" {
+#   source   = "./modules/helm-release"
+#   manifest = yamldecode(file("${path.module}/manifests/grafana.yaml"))
+# }
+
+# module "tempo" {
+#   source   = "./modules/helm-release"
+#   manifest = yamldecode(file("${path.module}/manifests/tempo.yaml"))
+# }
+
+# module "mimir" {
+#   source   = "./modules/helm-release"
+#   manifest = yamldecode(file("${path.module}/manifests/mimir.yaml"))
+# }
+
+# module "alloy" {
+#   source   = "./modules/helm-release"
+#   manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
+# }
