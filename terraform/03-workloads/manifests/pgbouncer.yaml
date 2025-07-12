@@ -46,6 +46,69 @@ spec:
                       value: 5433
                     DATABASE_URL:
                       value: 'postgres://postgres:Test_Password123!@postgresql.postgresql.svc.cluster.local:5432/ledgerr'
+                    
+                    # Connection Pool Settings - Critical for your load test
+                    MAX_CLIENT_CONN:
+                      value: "1000"        # Increased from default 100
+                    DEFAULT_POOL_SIZE:
+                      value: "50"          # Connections per database
+                    MAX_DB_CONNECTIONS:
+                      value: "200"         # Total backend connections
+                    POOL_MODE:
+                      value: "transaction" # Most efficient for your use case
+                    
+                    # Performance Tuning
+                    RESERVE_POOL_SIZE:
+                      value: "10"          # Emergency connections
+                    RESERVE_POOL_TIMEOUT:
+                      value: "5"           # Seconds
+                    
+                    # Timeout Settings
+                    SERVER_IDLE_TIMEOUT:
+                      value: "600"         # 10 minutes
+                    CLIENT_IDLE_TIMEOUT:
+                      value: "0"           # Disabled for load testing
+                    SERVER_CONNECT_TIMEOUT:
+                      value: "15"          # Seconds
+                    QUERY_TIMEOUT:
+                      value: "30"          # Seconds
+                    
+                    # Logging for troubleshooting
+                    LOG_CONNECTIONS:
+                      value: "0"           # Disable for performance
+                    LOG_DISCONNECTIONS:
+                      value: "0"           # Disable for performance  
+                    LOG_POOLER_ERRORS:
+                      value: "1"           # Keep enabled for debugging
+                    LOG_STATS:
+                      value: "1"           # Enable stats logging
+                    STATS_PERIOD:
+                      value: "60"          # Stats every 60 seconds
+                    
+                    # Network optimization
+                    TCP_KEEPALIVE:
+                      value: "1"
+                    TCP_KEEPCNT:
+                      value: "3"
+                    TCP_KEEPIDLE:
+                      value: "600"
+                    TCP_KEEPINTVL:
+                      value: "30"
+                    
+                    # Admin access for monitoring
+                    ADMIN_USERS:
+                      value: "postgres"
+                    STATS_USERS:
+                      value: "postgres"
+                  
                   ports:
                     pgbouncer:
                       containerPort: 5433
+                  
+                  resources:
+                    requests:
+                      cpu: "100m"
+                      memory: "128Mi"
+                    limits:
+                      cpu: "500m"
+                      memory: "512Mi"

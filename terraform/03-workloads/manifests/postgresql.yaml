@@ -22,6 +22,70 @@ spec:
           default:
             enabled: false
 
+        configmap:
+          postgresql-config:
+            data:
+              postgresql.conf:
+                inline: |
+                  # Connection Settings - Optimized for your load test
+                  listen_addresses = '*'
+                  max_connections = 500
+                  superuser_reserved_connections = 3
+                  
+                  # Memory Settings (adjust based on your node's available RAM)
+                  shared_buffers = 256MB
+                  work_mem = 4MB
+                  maintenance_work_mem = 64MB
+                  effective_cache_size = 512MB
+                  
+                  # Performance Settings
+                  random_page_cost = 1.1
+                  effective_io_concurrency = 200
+                  
+                  # WAL (Write-Ahead Log) Settings
+                  wal_buffers = 16MB
+                  checkpoint_completion_target = 0.9
+                  checkpoint_timeout = 15min
+                  max_wal_size = 1GB
+                  min_wal_size = 80MB
+                  
+                  # Connection and Statement Timeouts
+                  statement_timeout = 30s
+                  idle_in_transaction_session_timeout = 60s
+                  lock_timeout = 10s
+                  
+                  # Logging (useful for debugging performance issues)
+                  log_min_duration_statement = 1000
+                  log_connections = off
+                  log_disconnections = off
+                  log_lock_waits = on
+                  log_temp_files = 10MB
+                  
+                  # Statistics and Monitoring
+                  track_activities = on
+                  track_counts = on
+                  track_io_timing = on
+                  track_functions = pl
+                  
+                  # Background Writer (tune for write-heavy workloads)
+                  bgwriter_delay = 200ms
+                  bgwriter_lru_maxpages = 100
+                  bgwriter_lru_multiplier = 2.0
+                  
+                  # Auto-vacuum settings (important for transaction-heavy loads)
+                  autovacuum = on
+                  autovacuum_max_workers = 3
+                  autovacuum_naptime = 1min
+                  autovacuum_vacuum_threshold = 50
+                  autovacuum_analyze_threshold = 50
+                  autovacuum_vacuum_scale_factor = 0.2
+                  autovacuum_analyze_scale_factor = 0.1
+                  
+                  # Network settings
+                  tcp_keepalives_idle = 600
+                  tcp_keepalives_interval = 30
+                  tcp_keepalives_count = 3
+
         service:
           postgresql:
             ports:
@@ -51,10 +115,28 @@ spec:
                     PGDATA:
                       value: "/var/lib/postgresql/data/pgdata"
                   
+                  # Resource limits to ensure PostgreSQL has enough memory
+                  resources:
+                    requests:
+                      cpu: "4000m"
+                      memory: "8Gi"
+                    limits:
+                      cpu: "16000m"
+                      memory: "16Gi"
+                  
                   volumeMounts:
                     data:
                       name: postgres-data
                       mountPath: /var/lib/postgresql/data
+                    config:
+                      name: config
+                      mountPath: /var/lib/postgresql/data/postgresql.conf
+                      subPath: postgresql.conf
+              
+              volumes:
+                config:
+                  configMap:
+                    name: postgresql-config
             
             volumeClaimTemplates:
               - metadata:
