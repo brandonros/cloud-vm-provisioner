@@ -59,32 +59,14 @@ module "traefik" {
   manifest = yamldecode(file("${path.module}/manifests/traefik.yaml"))
 }
 
-module "rabbitmq" {
+module "docker_registry" {
+  depends_on = [module.traefik]
   source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/rabbitmq.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/docker-registry.yaml"))
 }
 
-module "loki" {
+module "mssql" {
+  depends_on = [module.docker_registry]
   source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/loki.yaml"))
-}
-
-module "grafana" {
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/grafana.yaml"))
-}
-
-module "tempo" {
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/tempo.yaml"))
-}
-
-module "mimir" {
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/mimir.yaml"))
-}
-
-module "alloy" {
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/mssql.yaml"))
 }
