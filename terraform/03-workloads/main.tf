@@ -42,35 +42,58 @@ variable "duckdns_token" {
 
 locals {
   applications = {
-    consumer = {
-      domain = "consumer5555.duckdns.org"
-      app_name = "consumer"
-      manifest = yamldecode(file("${path.module}/manifests/consumer.yaml"))
-      container_port = 3000
+    # consumer = {
+    #   domain = "consumer5555.duckdns.org"
+    #   app_name = "consumer"
+    #   manifest = yamldecode(file("${path.module}/manifests/consumer.yaml"))
+    #   container_port = 3000
+    # }
+    # dispatcher = {
+    #   domain = "producer5555.duckdns.org"
+    #   app_name = "dispatcher"
+    #   manifest = yamldecode(file("${path.module}/manifests/dispatcher.yaml"))
+    #   container_port = 3000
+    # }
+    postgresql = {
+      domain = "postgresql5555.duckdns.org"
+      app_name = "postgresql"
+      manifest = yamldecode(file("${path.module}/manifests/postgresql.yaml"))
+      container_port = 5432
+      protocol_type = "tcp"
     }
-    dispatcher = {
-      domain = "producer5555.duckdns.org"
-      app_name = "dispatcher"
-      manifest = yamldecode(file("${path.module}/manifests/dispatcher.yaml"))
+    pgbouncer = {
+      domain = "pgbouncer5555.duckdns.org"
+      app_name = "pgbouncer"
+      manifest = yamldecode(file("${path.module}/manifests/pgbouncer.yaml"))
+      container_port = 5433
+      protocol_type = "tcp"
+    }
+    postgrest = {
+      domain = "postgrest5555.duckdns.org"
+      app_name = "postgrest"
+      manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
       container_port = 3000
+      protocol_type = "http"
     }
   }
 }
 
-module "dns" {
-  for_each = local.applications
-  source = "./modules/dns"
-  duckdns_token = var.duckdns_token
-  duckdns_domain = each.value.domain
-  app_name = each.value.app_name
-}
+# module "dns" {
+#   for_each = local.applications
+#   source = "./modules/dns"
+#   duckdns_token = var.duckdns_token
+#   duckdns_domain = each.value.domain
+#   app_name = each.value.app_name
+# }
 
 module "tls" {
   for_each = local.applications
   source = "./modules/tls"
-  depends_on = [module.dns]
+  #depends_on = [module.dns]
   domain = each.value.domain
   app_name = each.value.app_name
+  protocol_type = each.value.protocol_type
+  container_port = each.value.container_port
 }
 
 module "app" {
@@ -87,4 +110,5 @@ module "routing" {
   domain = each.value.domain
   app_name = each.value.app_name
   container_port = each.value.container_port
+  protocol_type = each.value.protocol_type
 }

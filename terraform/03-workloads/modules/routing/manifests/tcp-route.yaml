@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: ${app_name}-tcp-route
+  namespace: traefik
+spec:
+  parentRefs:
+  - name: ${app_name}-tcp-gateway
+    namespace: traefik
+    kind: Gateway
+    sectionName: ${app_name}-tcp
+  rules:
+  - backendRefs:
+    - name: ${app_name}
+      namespace: ${app_name}
+      port: ${container_port}
+      kind: Service
+      weight: 100

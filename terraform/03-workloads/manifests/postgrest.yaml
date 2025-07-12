@@ -32,7 +32,7 @@ spec:
         
         deployment:
           postgrest:
-            replicas: 1
+            replicas: 4
             pod:
               containers:
                 main:
@@ -41,7 +41,17 @@ spec:
                     tag: v13.0.4
                   env:
                     PGRST_DB_URI:
-                      value: 'postgres://postgres:Test_Password123!@pgbouncer.pgbouncer.svc.cluster.local:5432/postgres'
+                      value: 'postgres://postgres:Test_Password123!@pgbouncer.pgbouncer.svc.cluster.local:5432/ledgerr'
+                    PGRST_DB_SCHEMAS:
+                      value: 'ledgerr_api'
+                    PGRST_DB_ANON_ROLE:
+                      value: 'postgres'
+                    PGRST_SERVER_PORT:
+                      value: '3000'
+                    PGRST_DB_POOL:
+                      value: '100'
+                    PGRST_LOG_LEVEL:
+                      value: 'warn'
                   ports:
                     http:
                       containerPort: 3000

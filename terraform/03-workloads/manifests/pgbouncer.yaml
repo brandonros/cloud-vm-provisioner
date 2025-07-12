@@ -27,12 +27,12 @@ spec:
             type: ClusterIP
             ports:
               postgres:
-                port: 5432
-                targetPort: 5432
+                port: 5433
+                targetPort: 5433
         
         deployment:
           pgbouncer:
-            replicas: 1
+            replicas: 2
             pod:
               containers:
                 main:
@@ -42,8 +42,10 @@ spec:
                   env:
                     AUTH_TYPE:
                       value: scram-sha-256
+                    LISTEN_PORT:
+                      value: 5433
                     DATABASE_URL:
-                      value: 'postgres://postgres:Test_Password123!@postgresql.postgresql.svc.cluster.local:5432/postgres'
+                      value: 'postgres://postgres:Test_Password123!@postgresql.postgresql.svc.cluster.local:5432/ledgerr'
                   ports:
                     pgbouncer:
-                      containerPort: 5432
+                      containerPort: 5433

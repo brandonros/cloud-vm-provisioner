@@ -59,23 +59,6 @@ module "traefik" {
   manifest = yamldecode(file("${path.module}/manifests/traefik.yaml"))
 }
 
-module "postgresql" {
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/postgresql.yaml"))
-}
-
-module "pgbouncer" {
-  depends_on = [module.postgresql]
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/pgbouncer.yaml"))
-}
-
-module "postgrest" {
-  depends_on = [module.pgbouncer]
-  source   = "./modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
-}
-
 # module "rabbitmq" {
 #   source   = "./modules/helm-release"
 #   manifest = yamldecode(file("${path.module}/manifests/rabbitmq.yaml"))

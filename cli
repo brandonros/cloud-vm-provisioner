@@ -187,7 +187,8 @@ cmd_create() {
     terraform_apply 02-platform
 
     # 5. Workload deployment
-    #terraform_apply 03-workloads
+    export TF_VAR_duckdns_token="$DUCKDNS_TOKEN"
+    terraform_apply 03-workloads
 }
 
 load_instance_details() {

@@ -26,6 +26,20 @@ spec:
         protocol: TCP
         tls:
           enabled: true
+
+      postgresql:
+        port: 5432
+        expose:
+          default: true
+        exposedPort: 5432
+        protocol: TCP
+
+      pgbouncer:
+        port: 5433
+        expose:
+          default: true
+        exposedPort: 5433
+        protocol: TCP
         
     gateway:
       enabled: false
@@ -42,3 +56,4 @@ spec:
 
       kubernetesGateway:
         enabled: true
+        experimentalChannel: true
