@@ -21,6 +21,10 @@ resource "random_string" "id" {
 resource "azurerm_resource_group" "resource_group1" {
   name     = "resource_group1_${random_string.id.result}" # random string seems to help with DNS caching at Azure level during reapplies?
   location = "East US 2"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_virtual_network" "virtual_network1" {
@@ -28,6 +32,10 @@ resource "azurerm_virtual_network" "virtual_network1" {
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.resource_group1.location
   resource_group_name = azurerm_resource_group.resource_group1.name
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_subnet" "subnet1" {
@@ -52,6 +60,10 @@ resource "azurerm_network_security_group" "network_security_group1" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_public_ip" "public_ip1" {
@@ -64,6 +76,10 @@ resource "azurerm_public_ip" "public_ip1" {
   sku_tier = "Regional"
   ddos_protection_mode = "VirtualNetworkInherited"
   idle_timeout_in_minutes = 4
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_network_interface" "network_interface1" {
@@ -78,6 +94,10 @@ resource "azurerm_network_interface" "network_interface1" {
     private_ip_address_allocation = "Dynamic"
     private_ip_address_version    = "IPv4"
     public_ip_address_id          = azurerm_public_ip.public_ip1.id
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
   }
 }
 
@@ -112,6 +132,10 @@ resource "azurerm_linux_virtual_machine" "virtual_machine1" {
   os_disk {
     storage_account_type = "Standard_LRS"
     caching              = "ReadWrite"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
   }
 }
 
