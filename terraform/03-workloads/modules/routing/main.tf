@@ -15,11 +15,11 @@ variable "container_port" {
 
 variable "protocol_type" {
   type        = string
-  description = "Protocol type: 'http' or 'tcp'"
+  description = "Protocol type: 'http', 'https' or 'tcp'"
   default     = "http"
   validation {
-    condition     = contains(["http", "tcp"], var.protocol_type)
-    error_message = "Protocol type must be either 'http' or 'tcp'."
+    condition     = contains(["http", "https", "tcp"], var.protocol_type)
+    error_message = "Protocol type must be either 'http', 'https' or 'tcp'."
   }
 }
 
@@ -32,6 +32,22 @@ resource "kubernetes_manifest" "app_http_route" {
       "${path.module}/manifests/http-route.yaml",
       {
         app_name = var.app_name,
+        domain   = var.domain,
+        container_port = var.container_port
+      }
+    )
+  )
+}
+
+# HTTP Redirect Route - only created when protocol_type is "http"
+resource "kubernetes_manifest" "app_http_redirect_route" {
+  count = var.protocol_type == "https" ? 1 : 0
+  
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/manifests/http-redirect-route.yaml",
+      {
+        app_name = var.app_name,
         domain   = var.domain
       }
     )
@@ -40,7 +56,7 @@ resource "kubernetes_manifest" "app_http_route" {
 
 # HTTPS Route - only created when protocol_type is "http"  
 resource "kubernetes_manifest" "app_https_route" {
-  count = var.protocol_type == "http" ? 1 : 0
+  count = var.protocol_type == "https" ? 1 : 0
   
   manifest = yamldecode(
     templatefile(
@@ -71,7 +87,7 @@ resource "kubernetes_manifest" "app_tcp_route" {
 
 # Reference Grant for HTTP/HTTPS - only created when protocol_type is "http"
 resource "kubernetes_manifest" "app_http_reference_grant" {
-  count = var.protocol_type == "http" ? 1 : 0
+  count = var.protocol_type == "http" || var.protocol_type == "https" ? 1 : 0
   
   depends_on = [
     kubernetes_manifest.app_https_route,

@@ -69,7 +69,7 @@ locals {
       protocol_type = "tcp"
     }
     postgrest = {
-      domain = "postgrest5555.duckdns.org"
+      domain = "postgrest.asusrogstrix.local"
       app_name = "postgrest"
       manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
       container_port = 3000
