@@ -99,6 +99,26 @@ spec:
               job_name = "kube-state-metrics"
           }
 
+          // cAdvisor
+          prometheus.scrape "cadvisor_static" {
+              targets = [
+                  {
+                      "__address__" = "asusrogstrix:10250",
+                      "job" = "cadvisor",
+                      "node" = "asusrogstrix",
+                  },
+              ]
+              forward_to = [prometheus.remote_write.mimir.receiver]
+              scrape_interval = "15s"
+              job_name = "cadvisor"
+              metrics_path = "/metrics/cadvisor"
+              scheme = "https"
+              bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+              tls_config {
+                  insecure_skip_verify = true
+              }
+          }
+
           // Mimir remote write configuration
           prometheus.remote_write "mimir" {
               endpoint {
