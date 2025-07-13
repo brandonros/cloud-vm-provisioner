@@ -25,7 +25,7 @@ spec:
             replicas: 2
             pod:
               containers:
-                main:
+                consumer:
                   resources:
                     requests:
                       memory: 256Mi

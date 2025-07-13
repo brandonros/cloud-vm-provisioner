@@ -34,7 +34,7 @@ spec:
             replicas: 1
             pod:
               containers:
-                main:
+                pgbouncer:
                   image:
                     repository: edoburu/pgbouncer
                     tag: v1.24.1-p1

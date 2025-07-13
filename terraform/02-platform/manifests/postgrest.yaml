@@ -35,7 +35,7 @@ spec:
             replicas: 4
             pod:
               containers:
-                main:
+                postgrest:
                   image:
                     repository: postgrest/postgrest
                     tag: v13.0.4
