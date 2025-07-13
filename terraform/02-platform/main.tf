@@ -93,3 +93,21 @@ module "alloy" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
 }
+
+# postgresql
+module "postgresql" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/postgresql.yaml"))
+}
+
+# pgbouncer
+module "pgbouncer" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/pgbouncer.yaml"))
+}
+
+# postgrest
+module "postgrest" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
+}

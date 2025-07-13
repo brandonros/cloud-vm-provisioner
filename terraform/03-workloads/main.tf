@@ -68,18 +68,14 @@ variable "enable_dns" {
 # Application definitions - purely for deployment
 locals {
   applications = {
-    postgresql = {
-      app_name = "postgresql"
-      manifest = yamldecode(file("${path.module}/manifests/postgresql.yaml"))
-    }
-    pgbouncer = {
-      app_name = "pgbouncer"
-      manifest = yamldecode(file("${path.module}/manifests/pgbouncer.yaml"))
-    }
-    postgrest = {
-      app_name = "postgrest"
-      manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
-    }
+    # rpc-dispatcher = {
+    #   app_name = "rpc-dispatcher"
+    #   manifest = yamldecode(file("${path.module}/manifests/rpc-dispatcher.yaml"))
+    # }
+    # rpc-consumer = {
+    #   app_name = "rpc-consumer"
+    #   manifest = yamldecode(file("${path.module}/manifests/rpc-consumer.yaml"))
+    # }
   }
 
   # Routing configuration - separate from deployment
@@ -102,6 +98,18 @@ locals {
       container_port = 3000
       protocol_type = "http"
     }
+    # rpc-dispatcher = {
+    #   domain = "rpc-dispatcher.asusrogstrix.local"
+    #   app_name = "rpc-dispatcher"
+    #   container_port = 3000
+    #   protocol_type = "https"
+    # }
+    # rpc-consumer = {
+    #   domain = "rpc-consumer.asusrogstrix.local"
+    #   app_name = "rpc-consumer"
+    #   container_port = 3000
+    #   protocol_type = "https"
+    # }
   }
 }
 
