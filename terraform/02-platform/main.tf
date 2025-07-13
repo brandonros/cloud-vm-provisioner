@@ -94,10 +94,16 @@ module "alloy" {
   manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
 }
 
-# node exporter
+# node-exporter
 module "node-exporter" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/node-exporter.yaml"))
+}
+
+# kube-state-metrics
+module "kube-state-metrics" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/kube-state-metrics.yaml"))
 }
 
 # postgresql

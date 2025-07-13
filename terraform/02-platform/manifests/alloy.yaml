@@ -86,6 +86,19 @@ spec:
               job_name = "external-node-exporter"
           }
 
+          // kube-state-metrics
+          prometheus.scrape "kube_state_metrics" {
+              targets = [
+                  {
+                      "__address__" = "kube-state-metrics.kube-state-metrics:8080",
+                      "job" = "kube-state-metrics",
+                  },
+              ]
+              forward_to = [prometheus.remote_write.mimir.receiver]
+              scrape_interval = "15s"
+              job_name = "kube-state-metrics"
+          }
+
           // Mimir remote write configuration
           prometheus.remote_write "mimir" {
               endpoint {
