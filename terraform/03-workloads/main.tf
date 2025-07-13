@@ -38,75 +38,115 @@ data "terraform_remote_state" "k3s" {
 variable "duckdns_token" {
   type = string
   description = "DuckDNS token"
-} 
+  default = ""
+}
 
+variable "deploy_apps" {
+  type = bool
+  description = "Whether to deploy applications"
+  default = true
+}
+
+variable "enable_routing" {
+  type = bool
+  description = "Whether to enable routing/ingress"
+  default = true
+}
+
+variable "enable_tls" {
+  type = bool
+  description = "Whether to enable TLS certificates"
+  default = false
+}
+
+variable "enable_dns" {
+  type = bool
+  description = "Whether to manage DNS records"
+  default = false
+}
+
+# Application definitions - purely for deployment
 locals {
   applications = {
-    # consumer = {
-    #   domain = "consumer5555.duckdns.org"
-    #   app_name = "consumer"
-    #   manifest = yamldecode(file("${path.module}/manifests/consumer.yaml"))
-    #   container_port = 3000
-    # }
-    # dispatcher = {
-    #   domain = "producer5555.duckdns.org"
-    #   app_name = "dispatcher"
-    #   manifest = yamldecode(file("${path.module}/manifests/dispatcher.yaml"))
-    #   container_port = 3000
-    # }
+    postgresql = {
+      app_name = "postgresql"
+      manifest = yamldecode(file("${path.module}/manifests/postgresql.yaml"))
+    }
+    pgbouncer = {
+      app_name = "pgbouncer"
+      manifest = yamldecode(file("${path.module}/manifests/pgbouncer.yaml"))
+    }
+    postgrest = {
+      app_name = "postgrest"
+      manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
+    }
+  }
+
+  # Routing configuration - separate from deployment
+  routing_config = {
     postgresql = {
       domain = "postgresql5555.duckdns.org"
       app_name = "postgresql"
-      manifest = yamldecode(file("${path.module}/manifests/postgresql.yaml"))
       container_port = 5432
       protocol_type = "tcp"
     }
     pgbouncer = {
       domain = "pgbouncer5555.duckdns.org"
       app_name = "pgbouncer"
-      manifest = yamldecode(file("${path.module}/manifests/pgbouncer.yaml"))
       container_port = 5433
       protocol_type = "tcp"
     }
     postgrest = {
       domain = "postgrest.asusrogstrix.local"
       app_name = "postgrest"
-      manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
       container_port = 3000
       protocol_type = "http"
     }
   }
 }
 
-# module "dns" {
-#   for_each = local.applications
-#   source = "./modules/dns"
-#   duckdns_token = var.duckdns_token
-#   duckdns_domain = each.value.domain
-#   app_name = each.value.app_name
-# }
-
-module "tls" {
-  for_each = local.applications
-  source = "./modules/tls"
-  #depends_on = [module.dns]
-  domain = each.value.domain
-  app_name = each.value.app_name
-  protocol_type = each.value.protocol_type
-  container_port = each.value.container_port
-}
-
+# Deploy applications (always available, controlled by var.deploy_apps)
 module "app" {
-  for_each = local.applications
+  for_each = var.deploy_apps ? local.applications : {}
   source = "./modules/helm-release"
-  depends_on = [module.tls]
   manifest = each.value.manifest
 }
 
+# DNS management (optional)
+module "dns" {
+  for_each = var.enable_dns ? local.routing_config : {}
+  source = "./modules/dns"
+  
+  duckdns_token = var.duckdns_token
+  duckdns_domain = each.value.domain
+  app_name = each.value.app_name
+}
+
+# TLS certificates (optional, can depend on DNS or work independently)
+module "tls" {
+  for_each = var.enable_tls ? local.routing_config : {}
+  source = "./modules/tls"
+  
+  #depends_on = [module.dns]
+  domain = each.value.domain
+  app_name = each.value.app_name
+  container_port = each.value.container_port
+}
+
+# Routing/Ingress (optional, depends on apps being deployed)
 module "routing" {
-  for_each = local.applications
+  for_each = var.enable_routing ? local.routing_config : {}
   source = "./modules/routing"
-  depends_on = [module.app]
+  #depends_on = [module.app]
+  domain = each.value.domain
+  app_name = each.value.app_name
+  container_port = each.value.container_port
+  protocol_type = each.value.protocol_type
+}
+
+module "gateway" {
+  for_each = var.enable_routing ? local.routing_config : {}
+  source = "./modules/gateway"
   domain = each.value.domain
   app_name = each.value.app_name
   container_port = each.value.container_port
