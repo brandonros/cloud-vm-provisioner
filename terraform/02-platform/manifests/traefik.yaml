@@ -10,6 +10,17 @@ spec:
   createNamespace: true
   version: 34.4.0
   valuesContent: |-
+    deployment:
+      replicas: 5
+
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "1000m"
+        memory: "1024Mi"
+
     ports:
       web:
         port: 8000
@@ -46,9 +57,9 @@ spec:
 
     logs:
       general:
-        level: TRACE
+        level: INFO
       access:
-        enabled: true
+        enabled: false
 
     providers:
       kubernetesIngress:
