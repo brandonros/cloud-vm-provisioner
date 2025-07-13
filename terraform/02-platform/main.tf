@@ -94,6 +94,12 @@ module "alloy" {
   manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
 }
 
+# node exporter
+module "node-exporter" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/node-exporter.yaml"))
+}
+
 # postgresql
 module "postgresql" {
   source   = "./modules/helm-release"

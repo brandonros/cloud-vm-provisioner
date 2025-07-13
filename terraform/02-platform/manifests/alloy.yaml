@@ -52,25 +52,38 @@ spec:
           }
 
           // Built-in Unix (Node) Exporter - replaces standalone node_exporter
-          prometheus.exporter.unix "local_system" {
-              include_exporter_metrics = true
-              
-              // Optional: Configure specific collectors
-              set_collectors = ["cpu", "meminfo", "diskstats", "filesystem", "netdev", "loadavg"]
-              
-              // Optional: Enable additional collectors
-              enable_collectors = ["systemd", "processes"]
-              
-              // Optional: Disable expensive collectors
-              disable_collectors = ["arp", "bcache"]
-          }
+          // prometheus.exporter.unix "local_system" {
+          //     include_exporter_metrics = true
+          //     
+          //     // Optional: Configure specific collectors
+          //     set_collectors = ["cpu", "meminfo", "diskstats", "filesystem", "netdev", "loadavg"]
+          //     
+          //     // Optional: Enable additional collectors
+          //     enable_collectors = ["processes"]
+          //     
+          //     // Optional: Disable expensive collectors
+          //     disable_collectors = ["arp", "bcache", "systemd"]
+          // }
 
           // Scrape the built-in unix exporter
-          prometheus.scrape "node_metrics" {
-              targets = prometheus.exporter.unix.local_system.targets
+          // prometheus.scrape "node_metrics" {
+          //     targets = prometheus.exporter.unix.local_system.targets
+          //     forward_to = [prometheus.remote_write.mimir.receiver]
+          //     scrape_interval = "15s"
+          //     job_name = "node-exporter"
+          // }
+
+          // Scrape external node exporter - replace with your actual service name and namespace
+          prometheus.scrape "external_node_exporter" {
+              targets = [
+                  {
+                      "__address__" = "node-exporter-prometheus-node-exporter.node-exporter:9100",
+                      "job" = "external-node-exporter",
+                  },
+              ]
               forward_to = [prometheus.remote_write.mimir.receiver]
               scrape_interval = "15s"
-              job_name = "node-exporter"
+              job_name = "external-node-exporter"
           }
 
           // Mimir remote write configuration

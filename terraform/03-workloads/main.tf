@@ -98,6 +98,12 @@ locals {
       container_port = 3000
       protocol_type = "http"
     }
+    grafana = {
+      domain = "grafana.asusrogstrix.local"
+      app_name = "grafana"
+      container_port = 80
+      protocol_type = "http"
+    }
     # rpc-dispatcher = {
     #   domain = "rpc-dispatcher.asusrogstrix.local"
     #   app_name = "rpc-dispatcher"
