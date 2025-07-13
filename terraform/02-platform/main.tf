@@ -64,27 +64,32 @@ module "traefik" {
 #   manifest = yamldecode(file("${path.module}/manifests/rabbitmq.yaml"))
 # }
 
-# module "loki" {
-#   source   = "./modules/helm-release"
-#   manifest = yamldecode(file("${path.module}/manifests/loki.yaml"))
-# }
+# logs
+module "loki" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/loki.yaml"))
+}
 
-# module "grafana" {
-#   source   = "./modules/helm-release"
-#   manifest = yamldecode(file("${path.module}/manifests/grafana.yaml"))
-# }
+# tracing
+module "tempo" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/tempo.yaml"))
+}
 
-# module "tempo" {
-#   source   = "./modules/helm-release"
-#   manifest = yamldecode(file("${path.module}/manifests/tempo.yaml"))
-# }
+# monitoring
+module "grafana" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/grafana.yaml"))
+}
 
-# module "mimir" {
-#   source   = "./modules/helm-release"
-#   manifest = yamldecode(file("${path.module}/manifests/mimir.yaml"))
-# }
+# storage
+module "mimir" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/mimir.yaml"))
+}
 
-# module "alloy" {
-#   source   = "./modules/helm-release"
-#   manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
-# }
+# collector
+module "alloy" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
+}

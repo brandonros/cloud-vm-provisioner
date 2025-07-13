@@ -174,11 +174,11 @@ spec:
                   # MASSIVE RESOURCE INCREASE - USE YOUR HARDWARE!
                   resources:
                     requests:
-                      cpu: "12000m"      # 12 CPUs (was 4)
-                      memory: "48Gi"     # 48GB RAM (was 8GB) 
+                      cpu: "2"      # Instead of 12
+                      memory: "8Gi" # Instead of 48Gi
                     limits:
-                      cpu: "18000m"      # 18 CPUs (was 16)
-                      memory: "56Gi"     # 56GB RAM (was 16GB)
+                      cpu: "8"      # Instead of 18
+                      memory: "16Gi" # Instead of 56Gi
                   
                   volumeMounts:
                     data:

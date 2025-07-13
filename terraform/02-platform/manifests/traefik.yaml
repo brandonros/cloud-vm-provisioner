@@ -11,7 +11,7 @@ spec:
   version: 34.4.0
   valuesContent: |-
     deployment:
-      replicas: 5
+      replicas: 4
 
     resources:
       requests:

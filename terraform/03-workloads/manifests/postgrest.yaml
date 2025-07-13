@@ -32,7 +32,7 @@ spec:
         
         deployment:
           postgrest:
-            replicas: 10
+            replicas: 4
             pod:
               containers:
                 main:
