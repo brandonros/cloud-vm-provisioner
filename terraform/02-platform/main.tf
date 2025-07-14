@@ -123,3 +123,9 @@ module "postgrest" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
 }
+
+# postgres-exporter
+module "postgres-exporter" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/postgres-exporter.yaml"))
+}

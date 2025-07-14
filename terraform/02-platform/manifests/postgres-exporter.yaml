@@ -1,0 +1,20 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: postgres-exporter
+  namespace: kube-system
+spec:
+  repo: https://prometheus-community.github.io/helm-charts
+  chart: prometheus-postgres-exporter
+  targetNamespace: postgres-exporter
+  createNamespace: true
+  version: 7.0.0
+  valuesContent: |-
+    config:
+      datasource:
+        host: 'postgresql.postgresql.svc.cluster.local'
+        user: 'postgres'
+        password: 'Test_Password123!'
+        port: "5432"
+        database: 'ledgerr'
+        sslmode: disable

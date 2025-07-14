@@ -119,6 +119,19 @@ spec:
               }
           }
 
+          // postgres-exporter
+          prometheus.scrape "postgres_exporter" {
+              targets = [
+                  {
+                      "__address__" = "postgres-exporter-prometheus-postgres-exporter.postgres-exporter:80",
+                      "job" = "postgres-exporter",
+                  },
+              ]
+              forward_to = [prometheus.remote_write.mimir.receiver]
+              scrape_interval = "15s"
+              job_name = "postgres-exporter"
+          }
+
           // Mimir remote write configuration
           prometheus.remote_write "mimir" {
               endpoint {
