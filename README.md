@@ -24,9 +24,31 @@ Commands:
 ## Example
 
 ```shell
-./cli create
-cp terraform/01-k3s/modules/02-kubeconfig/kubeconfig ~/.kube/config
-sudo kubefwd svc -n grafana -n rabbitmq  -n alloy
+$ cargo install just
+$ just
+Available recipes:
+    all                   # Run all stages: vm, k3s, platform, workloads
+    apps                  # Deploy applications only (platform + workloads)
+    check-cloud-creds     # Check cloud provider credentials
+    check-deps            # Check required dependencies
+    check-instance-state  # Check that instance state is loaded
+    check-ssh-key         # Check SSH key exists
+    check-tunnel          # Check that tunnel is running
+    cleanup               # Clean up all resources and local state
+    connect               # Connect to the provisioned instance via SSH
+    create-tunnel         # Create SSH tunnel for K3s API access
+    default               # Default recipe - shows available commands
+    destroy stage         # Destroy specific stage
+    from stage            # Run from a specific stage onwards
+    info                  # Show current instance details
+    infra                 # Deploy infrastructure only (VM + K3s)
+    k3s                   # Stage 2: Install K3s on the VM
+    load-instance-details # Load instance details from terraform output
+    plan-all              # Plan all terraform changes without applying
+    platform              # Stage 3: Deploy platform services
+    vm                    # Stage 1: Provision VM infrastructure
+    wait-and-accept       # Wait for host and accept SSH key
+    workloads             # Stage 4: Deploy workloads
 ```
 
 ## Supported cloud providers

@@ -7,11 +7,6 @@ terraform {
   }
 }
 
-provider "azurerm" {
-  features {}
-  # make sure ARM_SUBSCRIPTION_ID is set, then `az login --scope https://graph.microsoft.com/.default`
-}
-
 resource "random_string" "id" {
   length  = 4
   upper   = false

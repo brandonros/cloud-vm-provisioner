@@ -7,10 +7,6 @@ terraform {
   }
 }
 
-provider "vultr" {
-  # uses VULTR_API_KEY env var
-}
-
 resource "vultr_ssh_key" "my_ssh_key" {
   name = "my_ssh_key"
   ssh_key = "${file("~/.ssh/id_rsa.pub")}"

@@ -37,14 +37,6 @@ variable "availability_domain" {
   default = "xYGb:US-ASHBURN-AD-3"
 }
 
-provider "oci" {
-  tenancy_ocid     = var.tenancy_ocid
-  user_ocid        = var.user_ocid
-  private_key_path = var.private_key_path
-  fingerprint      = var.fingerprint
-  region           = var.region
-}
-
 # Get a list of Availability Domains
 data "oci_identity_availability_domains" "ads" {
   compartment_id = var.tenancy_ocid

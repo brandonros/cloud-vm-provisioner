@@ -7,11 +7,6 @@ terraform {
   }
 }
 
-provider "aws" {
-  // depends on AWS_ACCESS_KEY_ID
-  // depends on AWS_SECRET_ACCESS_KEY
-  region = "us-east-1"
-}
 
 resource "aws_vpc" "vpc1" {
   cidr_block = "10.0.0.0/16"

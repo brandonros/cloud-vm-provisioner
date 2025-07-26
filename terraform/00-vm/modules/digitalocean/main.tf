@@ -7,10 +7,6 @@ terraform {
   }
 }
 
-provider "digitalocean" {
-    // depends on DIGITALOCEAN_TOKEN
-}
-
 resource "digitalocean_ssh_key" "ssh_key" {
   name       = "ssh_key"
   public_key = file("~/.ssh/id_rsa.pub")

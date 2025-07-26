@@ -7,12 +7,6 @@ terraform {
   }
 }
 
-provider "google" {
-  credentials = file("~/gcp/service-account-key.json")
-  project = "kubevirt-poc" # create this manually
-  region  = "us-east1" # Set your desired region
-}
-
 variable "os_login_user_id" {
   type        = string
   default     = "109486927228315081685" # from gcloud compute os-login describe-profile

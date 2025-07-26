@@ -8,11 +8,6 @@ terraform {
   }
 }
 
-# make sure HCLOUD_TOKEN it set
-provider "hcloud" {
-
-}
-
 resource "hcloud_ssh_key" "ssh_key" {
   name       = "ssh_key"
   public_key = file("~/.ssh/id_rsa.pub")
