@@ -1,7 +1,9 @@
 #!/bin/bash
 
 set -e
+
 export DEBIAN_FRONTEND=noninteractive
+export DEBIAN_PRIORITY=critical
 
 echo "Starting k3s installation process..."
 
@@ -18,7 +20,7 @@ sudo apt-get install -y needrestart
 sudo sed -i 's/#$nrconf{restart} = '"'"'i'"'"';/$nrconf{restart} = '"'"'a'"'"';/g' /etc/needrestart/needrestart.conf
 
 # Upgrade all installed packages to their latest versions
-sudo apt-get -y upgrade
+sudo -E apt-get -y -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" upgrade
 sudo needrestart -r a
 
 # Install required packages to help debug issues
