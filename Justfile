@@ -38,14 +38,6 @@ k3s: check-instance-state
     terraform init
     terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
-# Stage 3: Deploy platform services (legacy - deploys all)
-platform-legacy: check-tunnel
-    #!/usr/bin/env bash
-    set -e
-    echo "🚀 Deploying platform services (legacy)..."
-    cd {{ script_path }}/terraform/02-platform
-    terraform init
-    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
 # === Individual Platform Services ===
 
@@ -277,15 +269,6 @@ routing-rpc-dispatcher: check-tunnel
 routing: routing-postgresql routing-grafana routing-postgrest routing-rpc-consumer routing-rpc-dispatcher
     @echo "✅ All routing configurations deployed"
 
-# Stage 4: Deploy workloads (legacy - for compatibility)
-workloads-legacy:
-    #!/usr/bin/env bash
-    set -e
-    echo "🚀 Deploying workloads (legacy)..."
-    export TF_VAR_duckdns_token="${DUCKDNS_TOKEN:-}"
-    cd {{ script_path }}/terraform/03-workloads
-    terraform init
-    terraform apply -auto-approve
 
 # Connect to the provisioned instance via SSH
 connect: load-instance-details
@@ -316,7 +299,7 @@ cleanup:
     
     # Clean up all tfstate files  
     cd {{ script_path }}/terraform
-    find ./00-vm-* ./01-k3s-install ./02-platform-* ./03-workload-* ./03-workloads ./04-routing-* \
+    find ./00-vm-* ./01-k3s-install ./02-platform-* ./03-workload-* ./04-routing-* \
         -type d -name ".terraform" -exec rm -rf {} \; -prune \
         -o -type f -name ".terraform.lock.hcl" -delete \
         -o -type f -name "*.tfstate" -delete \
@@ -508,22 +491,6 @@ info: load-instance-details
     echo "  SSH Port: ${instance_ssh_port}"
     echo "  Cloud Provider: ${CLOUD_PROVIDER}"
 
-# Plan all terraform changes without applying
-plan-all: check-deps check-ssh-key check-cloud-creds
-    #!/usr/bin/env bash
-    set -e
-    stages=("00-vm-${CLOUD_PROVIDER}" "01-k3s-install" "02-platform" "03-workloads")
-    for stage in "${stages[@]}"; do
-        echo "📋 Planning ${stage}..."
-        cd {{ script_path }}/terraform/${stage}
-        terraform init
-        if [ "${stage}" = "01-k3s-install" ] || [ "${stage}" = "02-platform" ]; then
-            terraform plan -var="cloud_provider=${CLOUD_PROVIDER}" || true
-        else
-            terraform plan || true
-        fi
-        echo ""
-    done
 
 # Destroy specific stage
 destroy stage: 
@@ -532,10 +499,7 @@ destroy stage:
     case "{{ stage }}" in
         vm)       dir="00-vm-${CLOUD_PROVIDER}" ;;
         k3s)      dir="01-k3s-install" ;;
-        platform) dir="02-platform" ;;
-        workloads) dir="03-workloads" ;;
-        workloads-legacy) dir="03-workloads" ;;
-        *) echo "❌ Unknown stage: {{ stage }}"; exit 1 ;;
+        *) echo "❌ Unknown stage: {{ stage }}"; echo "Available stages: vm, k3s"; exit 1 ;;
     esac
     
     echo "💥 Destroying {{ stage }}..."

@@ -27,28 +27,55 @@ Commands:
 $ cargo install just
 $ just
 Available recipes:
-    all                   # Run all stages: vm, k3s, platform, workloads
-    apps                  # Deploy applications only (platform + workloads)
-    check-cloud-creds     # Check cloud provider credentials
-    check-deps            # Check required dependencies
-    check-instance-state  # Check that instance state is loaded
-    check-ssh-key         # Check SSH key exists
-    check-tunnel          # Check that tunnel is running
-    cleanup               # Clean up all resources and local state
-    connect               # Connect to the provisioned instance via SSH
-    create-tunnel         # Create SSH tunnel for K3s API access
-    default               # Default recipe - shows available commands
-    destroy stage         # Destroy specific stage
-    from stage            # Run from a specific stage onwards
-    info                  # Show current instance details
-    infra                 # Deploy infrastructure only (VM + K3s)
-    k3s                   # Stage 2: Install K3s on the VM
-    load-instance-details # Load instance details from terraform output
-    plan-all              # Plan all terraform changes without applying
-    platform              # Stage 3: Deploy platform services
-    vm                    # Stage 1: Provision VM infrastructure
-    wait-and-accept       # Wait for host and accept SSH key
-    workloads             # Stage 4: Deploy workloads
+    all                         # Run all stages: vm, k3s, platform, workloads, routing
+    apps                        # Deploy applications only (platform + workloads + routing)
+    check-cloud-creds           # Check cloud provider credentials
+    check-deps                  # Check required dependencies
+    check-instance-state        # Check that instance state is loaded
+    check-ssh-key               # Check SSH key exists
+    check-tunnel                # Check that tunnel is running
+    cleanup                     # Clean up all resources and local state
+    connect                     # Connect to the provisioned instance via SSH
+    create-tunnel               # Create SSH tunnel for K3s API access
+    default                     # Default recipe - shows available commands
+    destroy stage               # Destroy specific stage
+    from stage                  # Run from a specific stage onwards
+    info                        # Show current instance details
+    infra                       # Deploy infrastructure only (VM + K3s)
+    k3s                         # Stage 2: Install K3s on the VM
+    load-instance-details       # Load instance details from terraform output
+    platform                    # Deploy all platform services in logical order
+    platform-alloy
+    platform-cert-manager
+    platform-core               # Deploy core infrastructure (essential networking & security)
+    platform-database           # Deploy database stack
+    platform-gateway-api        # Core infrastructure services
+    platform-grafana            # Monitoring services
+    platform-kube-state-metrics
+    platform-loki               # Observability services
+    platform-metrics-server
+    platform-mimir
+    platform-monitoring         # Deploy monitoring stack
+    platform-node-exporter
+    platform-observability      # Deploy observability stack
+    platform-pgbouncer
+    platform-postgres-exporter
+    platform-postgresql         # Database services
+    platform-postgrest
+    platform-rabbitmq           # Messaging services
+    platform-tempo
+    platform-traefik
+    routing                     # Deploy all routing configurations
+    routing-grafana
+    routing-postgresql
+    routing-postgrest
+    routing-rpc-consumer
+    routing-rpc-dispatcher
+    vm                          # Stage 1: Provision VM infrastructure
+    wait-and-accept             # Wait for host and accept SSH key
+    workload-rpc-consumer
+    workload-rpc-dispatcher
+    workloads                   # Deploy all workloads
 ```
 
 ### Create and connect to a new VM
