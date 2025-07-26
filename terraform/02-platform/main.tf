@@ -59,10 +59,10 @@ module "traefik" {
   manifest = yamldecode(file("${path.module}/manifests/traefik.yaml"))
 }
 
-# module "rabbitmq" {
-#   source   = "./modules/helm-release"
-#   manifest = yamldecode(file("${path.module}/manifests/rabbitmq.yaml"))
-# }
+module "rabbitmq" {
+  source   = "./modules/helm-release"
+  manifest = yamldecode(file("${path.module}/manifests/rabbitmq.yaml"))
+}
 
 # logs
 module "loki" {
@@ -94,37 +94,31 @@ module "alloy" {
   manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
 }
 
-# node-exporter
 module "node-exporter" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/node-exporter.yaml"))
 }
 
-# kube-state-metrics
 module "kube-state-metrics" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/kube-state-metrics.yaml"))
 }
 
-# postgresql
 module "postgresql" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/postgresql.yaml"))
 }
 
-# pgbouncer
 module "pgbouncer" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/pgbouncer.yaml"))
 }
 
-# postgrest
 module "postgrest" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/postgrest.yaml"))
 }
 
-# postgres-exporter
 module "postgres-exporter" {
   source   = "./modules/helm-release"
   manifest = yamldecode(file("${path.module}/manifests/postgres-exporter.yaml"))
