@@ -6,7 +6,7 @@ variable "cloud_provider" {
   validation {
     condition = contains([
       "aws",
-      "azure", 
+      "azure",
       "digitalocean",
       "google_cloud",
       "hetzner",

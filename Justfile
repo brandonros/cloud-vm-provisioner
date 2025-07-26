@@ -38,14 +38,171 @@ k3s: check-instance-state
     terraform init
     terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
-# Stage 3: Deploy platform services
-platform: check-tunnel
+# Stage 3: Deploy platform services (legacy - deploys all)
+platform-legacy: check-tunnel
     #!/usr/bin/env bash
     set -e
-    echo "🚀 Deploying platform services..."
+    echo "🚀 Deploying platform services (legacy)..."
     cd {{ script_path }}/terraform/02-platform
     terraform init
     terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+# === Individual Platform Services ===
+
+# Core infrastructure services
+platform-gateway-api: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Gateway API..."
+    cd {{ script_path }}/terraform/02-platform-gateway-api
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-cert-manager: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying cert-manager..."
+    cd {{ script_path }}/terraform/02-platform-cert-manager
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-traefik: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Traefik..."
+    cd {{ script_path }}/terraform/02-platform-traefik
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-metrics-server: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Metrics Server..."
+    cd {{ script_path }}/terraform/02-platform-metrics-server
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+# Database services
+platform-postgresql: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying PostgreSQL..."
+    cd {{ script_path }}/terraform/02-platform-postgresql
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-pgbouncer: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying PgBouncer..."
+    cd {{ script_path }}/terraform/02-platform-pgbouncer
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-postgrest: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying PostgREST..."
+    cd {{ script_path }}/terraform/02-platform-postgrest
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-postgres-exporter: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Postgres Exporter..."
+    cd {{ script_path }}/terraform/02-platform-postgres-exporter
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+# Monitoring services
+platform-grafana: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Grafana..."
+    cd {{ script_path }}/terraform/02-platform-grafana
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-mimir: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Mimir..."
+    cd {{ script_path }}/terraform/02-platform-mimir
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-alloy: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Alloy..."
+    cd {{ script_path }}/terraform/02-platform-alloy
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-node-exporter: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Node Exporter..."
+    cd {{ script_path }}/terraform/02-platform-node-exporter
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-kube-state-metrics: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Kube State Metrics..."
+    cd {{ script_path }}/terraform/02-platform-kube-state-metrics
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+# Observability services
+platform-loki: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Loki..."
+    cd {{ script_path }}/terraform/02-platform-loki
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+platform-tempo: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Tempo..."
+    cd {{ script_path }}/terraform/02-platform-tempo
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+# Messaging services
+platform-rabbitmq: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying RabbitMQ..."
+    cd {{ script_path }}/terraform/02-platform-rabbitmq
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+# === Service Groups ===
+
+# Deploy core infrastructure (essential networking & security)
+platform-core: platform-gateway-api platform-cert-manager platform-traefik platform-metrics-server
+    @echo "✅ Core platform services deployed"
+
+# Deploy database stack
+platform-database: platform-postgresql platform-pgbouncer platform-postgrest platform-postgres-exporter
+    @echo "✅ Database services deployed"
+
+# Deploy monitoring stack
+platform-monitoring: platform-grafana platform-mimir platform-alloy platform-node-exporter platform-kube-state-metrics
+    @echo "✅ Monitoring services deployed"
+
+# Deploy observability stack
+platform-observability: platform-loki platform-tempo
+    @echo "✅ Observability services deployed"
+
+# Deploy all platform services in logical order
+platform: platform-core platform-database platform-monitoring platform-observability platform-rabbitmq
+    @echo "✅ All platform services deployed"
 
 # Stage 4: Deploy workloads
 workloads:
