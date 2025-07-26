@@ -21,7 +21,7 @@ Commands:
   help        Show this help message
 ```
 
-## Example
+## Examples
 
 ```shell
 $ cargo install just
@@ -49,6 +49,12 @@ Available recipes:
     vm                    # Stage 1: Provision VM infrastructure
     wait-and-accept       # Wait for host and accept SSH key
     workloads             # Stage 4: Deploy workloads
+```
+
+### Create and connect to a new VM
+
+```
+$ just vm wait-and-accept connect
 ```
 
 ## Supported cloud providers
