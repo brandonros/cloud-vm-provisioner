@@ -25,9 +25,9 @@ vm: check-deps check-ssh-key check-cloud-creds
     #!/usr/bin/env bash
     set -e
     echo "🚀 Provisioning VM infrastructure..."
-    cd {{ script_path }}/terraform/00-vm
+    cd {{ script_path }}/terraform/00-vm-${CLOUD_PROVIDER}
     terraform init
-    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+    terraform apply -auto-approve
 
 # Stage 2: Install K3s on the VM
 k3s: check-instance-state
@@ -76,17 +76,17 @@ cleanup:
     fi
     
     # Destroy VM infrastructure
-    cd {{ script_path }}/terraform/00-vm
+    cd {{ script_path }}/terraform/00-vm-${CLOUD_PROVIDER}
     terraform init
-    terraform destroy -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" || true
+    terraform destroy -auto-approve || true
     
     # Clean up temp files
     rm -f /tmp/vm_info.txt
     rm -rf {{ script_path }}/terraform/01-k3s/kubeconfig
     
-    # Clean up all tfstate files
+    # Clean up all tfstate files  
     cd {{ script_path }}/terraform
-    find ./00-vm ./01-k3s ./02-platform ./03-workloads \
+    find ./00-vm-* ./01-k3s ./02-platform ./03-workloads \
         -type d -name ".terraform" -exec rm -rf {} \; -prune \
         -o -type f -name ".terraform.lock.hcl" -delete \
         -o -type f -name "*.tfstate" -delete \
@@ -182,7 +182,7 @@ check-cloud-creds:
 load-instance-details:
     #!/usr/bin/env bash
     set -e
-    cd {{ script_path }}/terraform/00-vm
+    cd {{ script_path }}/terraform/00-vm-${CLOUD_PROVIDER}
     
     # Check if terraform outputs exist
     if [ "$(terraform output -json 2>/dev/null)" = "{}" ]; then
@@ -282,15 +282,12 @@ info: load-instance-details
 plan-all: check-deps check-ssh-key check-cloud-creds
     #!/usr/bin/env bash
     set -e
-    for stage in 00-vm 01-k3s 02-platform 03-workloads; do
+    stages=("00-vm-${CLOUD_PROVIDER}" "01-k3s" "02-platform" "03-workloads")
+    for stage in "${stages[@]}"; do
         echo "📋 Planning ${stage}..."
         cd {{ script_path }}/terraform/${stage}
         terraform init
-        if [ "${stage}" = "00-vm" ]; then
-            terraform plan -var="cloud_provider=${CLOUD_PROVIDER}" || true
-        else
-            terraform plan || true
-        fi
+        terraform plan || true
         echo ""
     done
 
@@ -299,7 +296,7 @@ destroy stage:
     #!/usr/bin/env bash
     set -e
     case "{{ stage }}" in
-        vm)       dir="00-vm" ;;
+        vm)       dir="00-vm-${CLOUD_PROVIDER}" ;;
         k3s)      dir="01-k3s" ;;
         platform) dir="02-platform" ;;
         workloads) dir="03-workloads" ;;
@@ -309,11 +306,7 @@ destroy stage:
     echo "💥 Destroying {{ stage }}..."
     cd {{ script_path }}/terraform/${dir}
     terraform init
-    if [ "${dir}" = "00-vm" ]; then
-        terraform destroy -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
-    else
-        terraform destroy -auto-approve
-    fi
+    terraform destroy -auto-approve
 
 # Run from a specific stage onwards
 from stage:

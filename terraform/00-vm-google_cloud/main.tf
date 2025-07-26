@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "5.42.0"
-    }
-  }
-}
-
 variable "os_login_user_id" {
   type        = string
   default     = "109486927228315081685" # from gcloud compute os-login describe-profile

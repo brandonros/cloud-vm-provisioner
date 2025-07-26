@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    oci = {
-      source  = "oracle/oci"
-      version = "6.18.0"
-    }
-  }
-}
-
 variable "tenancy_ocid" {
   type = string
   default = "ocid1.tenancy.oc1..aaaaaaaaamup363q6nms526umcphqshjk6iy3jlqkwt26foyu2nf7lrcfvxa"

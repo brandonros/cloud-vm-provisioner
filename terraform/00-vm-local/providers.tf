@@ -7,8 +7,5 @@ terraform {
   }
 }
 
-resource "null_resource" "local_stub" {
-  provisioner "local-exec" {
-    command = "echo 'stub'"
-  }
-}
+# Local uses null provider for local development
+# No explicit provider configuration needed

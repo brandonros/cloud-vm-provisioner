@@ -1,13 +1,4 @@
 # Tell terraform to use the provider and select a version.
-terraform {
-  required_providers {
-    hcloud = {
-      source  = "hetznercloud/hcloud"
-      version = "~> 1.45"
-    }
-  }
-}
-
 resource "hcloud_ssh_key" "ssh_key" {
   name       = "ssh_key"
   public_key = file("~/.ssh/id_rsa.pub")

@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    vultr = {
-      source = "vultr/vultr"
-      version = "2.21.0"
-    }
-  }
-}
 
 resource "vultr_ssh_key" "my_ssh_key" {
   name = "my_ssh_key"
