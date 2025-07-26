@@ -36,7 +36,7 @@ k3s: check-instance-state
     echo "🚀 Installing K3s cluster..."
     cd {{ script_path }}/terraform/01-k3s
     terraform init
-    terraform apply -auto-approve
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
 # Stage 3: Deploy platform services
 platform: check-tunnel
@@ -45,7 +45,7 @@ platform: check-tunnel
     echo "🚀 Deploying platform services..."
     cd {{ script_path }}/terraform/02-platform
     terraform init
-    terraform apply -auto-approve
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
 # Stage 4: Deploy workloads
 workloads:
@@ -287,7 +287,11 @@ plan-all: check-deps check-ssh-key check-cloud-creds
         echo "📋 Planning ${stage}..."
         cd {{ script_path }}/terraform/${stage}
         terraform init
-        terraform plan || true
+        if [ "${stage}" = "01-k3s" ] || [ "${stage}" = "02-platform" ]; then
+            terraform plan -var="cloud_provider=${CLOUD_PROVIDER}" || true
+        else
+            terraform plan || true
+        fi
         echo ""
     done
 
@@ -306,7 +310,11 @@ destroy stage:
     echo "💥 Destroying {{ stage }}..."
     cd {{ script_path }}/terraform/${dir}
     terraform init
-    terraform destroy -auto-approve
+    if [ "${dir}" = "01-k3s" ] || [ "${dir}" = "02-platform" ]; then
+        terraform destroy -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+    else
+        terraform destroy -auto-approve
+    fi
 
 # Run from a specific stage onwards
 from stage:

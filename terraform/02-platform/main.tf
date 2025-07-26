@@ -14,7 +14,7 @@ terraform {
 data "terraform_remote_state" "vm" {
   backend = "local"
   config = {
-    path = "../00-vm/terraform.tfstate"
+    path = "../00-vm-${var.cloud_provider}/terraform.tfstate"
   }
 }
 
