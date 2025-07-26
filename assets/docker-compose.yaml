@@ -19,7 +19,6 @@ services:
       - MODSEC_AUDIT_ENGINE=RelevantOnly
       - MODSEC_RULE_ENGINE=On
       - NGINX_ALWAYS_TLS_REDIRECT=on
-      - SERVER_NAME=155.138.163.152
       - SSL_ENGINE=on
       - SSL_PORT=8443
     depends_on:
