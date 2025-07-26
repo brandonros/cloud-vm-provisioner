@@ -21,7 +21,7 @@ data "terraform_remote_state" "vm" {
 data "terraform_remote_state" "k3s" {
   backend = "local"
   config = {
-    path = "../01-k3s/terraform.tfstate"
+    path = "../01-k3s-install/terraform.tfstate"
   }
 }
 

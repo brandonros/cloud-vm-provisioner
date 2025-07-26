@@ -34,7 +34,7 @@ k3s: check-instance-state
     #!/usr/bin/env bash
     set -e
     echo "🚀 Installing K3s cluster..."
-    cd {{ script_path }}/terraform/01-k3s
+    cd {{ script_path }}/terraform/01-k3s-install
     terraform init
     terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
@@ -82,11 +82,11 @@ cleanup:
     
     # Clean up temp files
     rm -f /tmp/vm_info.txt
-    rm -rf {{ script_path }}/terraform/01-k3s/kubeconfig
+    rm -rf {{ script_path }}/terraform/01-k3s-install/kubeconfig
     
     # Clean up all tfstate files  
     cd {{ script_path }}/terraform
-    find ./00-vm-* ./01-k3s ./02-platform ./03-workloads \
+    find ./00-vm-* ./01-k3s-install ./02-platform ./03-workloads \
         -type d -name ".terraform" -exec rm -rf {} \; -prune \
         -o -type f -name ".terraform.lock.hcl" -delete \
         -o -type f -name "*.tfstate" -delete \
@@ -282,12 +282,12 @@ info: load-instance-details
 plan-all: check-deps check-ssh-key check-cloud-creds
     #!/usr/bin/env bash
     set -e
-    stages=("00-vm-${CLOUD_PROVIDER}" "01-k3s" "02-platform" "03-workloads")
+    stages=("00-vm-${CLOUD_PROVIDER}" "01-k3s-install" "02-platform" "03-workloads")
     for stage in "${stages[@]}"; do
         echo "📋 Planning ${stage}..."
         cd {{ script_path }}/terraform/${stage}
         terraform init
-        if [ "${stage}" = "01-k3s" ] || [ "${stage}" = "02-platform" ]; then
+        if [ "${stage}" = "01-k3s-install" ] || [ "${stage}" = "02-platform" ]; then
             terraform plan -var="cloud_provider=${CLOUD_PROVIDER}" || true
         else
             terraform plan || true
@@ -301,7 +301,7 @@ destroy stage:
     set -e
     case "{{ stage }}" in
         vm)       dir="00-vm-${CLOUD_PROVIDER}" ;;
-        k3s)      dir="01-k3s" ;;
+        k3s)      dir="01-k3s-install" ;;
         platform) dir="02-platform" ;;
         workloads) dir="03-workloads" ;;
         *) echo "❌ Unknown stage: {{ stage }}"; exit 1 ;;
@@ -310,7 +310,7 @@ destroy stage:
     echo "💥 Destroying {{ stage }}..."
     cd {{ script_path }}/terraform/${dir}
     terraform init
-    if [ "${dir}" = "01-k3s" ] || [ "${dir}" = "02-platform" ]; then
+    if [ "${dir}" = "01-k3s-install" ] || [ "${dir}" = "02-platform" ]; then
         terraform destroy -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
     else
         terraform destroy -auto-approve

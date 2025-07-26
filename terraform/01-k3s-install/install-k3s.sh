@@ -1,5 +1,36 @@
 #!/bin/bash
 
+set -e
+export DEBIAN_FRONTEND=noninteractive
+
+echo "Starting k3s installation process..."
+
+# ====================================
+# Step 1: Install system dependencies
+# ====================================
+echo "Installing system dependencies..."
+
+# Update package list
+sudo apt-get update
+
+# Install + configure needrestart to restart daemons after library updates.
+sudo apt-get install -y needrestart
+sudo sed -i 's/#$nrconf{restart} = '"'"'i'"'"';/$nrconf{restart} = '"'"'a'"'"';/g' /etc/needrestart/needrestart.conf
+
+# Upgrade all installed packages to their latest versions
+sudo apt-get -y upgrade
+sudo needrestart -r a
+
+# Install required packages to help debug issues
+sudo apt-get -y install acl htop psmisc netcat-traditional
+
+echo "System dependencies installed successfully"
+
+# ====================================
+# Step 2: Install k3s
+# ====================================
+echo "Installing k3s..."
+
 # Check if kubectl is installed
 if ! command -v kubectl &> /dev/null; then
     echo "kubectl not found, installing k3s..."
@@ -12,16 +43,16 @@ if ! command -v kubectl &> /dev/null; then
     sudo cp /var/lib/rancher/k3s/server/tls/server-ca.crt /usr/local/share/ca-certificates/
     sudo update-ca-certificates
     
-    # add coredns in the cluster to node dns resolution chain
-    # TODO: edit /etc/systemd/resolved.conf
-    # TODO: sudo systemctl restart systemd-resolved
-    
     echo "k3s installation complete"
 else
     echo "kubectl already installed, skipping installation"
 fi
 
-# Configure kubeconfig for user
+# ====================================
+# Step 3: Configure kubeconfig
+# ====================================
+echo "Configuring kubeconfig..."
+
 KUBE_CONFIG="$HOME/.kube/config"
 
 # Check if kubeconfig exists
@@ -48,7 +79,9 @@ else
     echo "Kubeconfig already exists, skipping configuration"
 fi
 
-# Wait for k3s to be rolled out
+# ====================================
+# Step 4: Wait for k3s to be ready
+# ====================================
 export KUBECONFIG="$KUBE_CONFIG"
 echo "Waiting for k3s components to be rolled out..."
 
@@ -60,4 +93,5 @@ kubectl wait deployment -n kube-system local-path-provisioner --for create --tim
 kubectl wait deployment -n kube-system coredns --for condition=Available=True --timeout=300s
 kubectl wait deployment -n kube-system local-path-provisioner --for condition=Available=True --timeout=300s
 
+echo "✅ k3s installation and configuration complete!"
 echo "k3s components are ready"
