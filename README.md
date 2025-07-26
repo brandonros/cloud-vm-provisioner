@@ -84,6 +84,12 @@ Available recipes:
 $ just vm wait-and-accept connect
 ```
 
+### Create a VM with k3s provisioned
+
+```
+just vm create-tunnel k3s platform-core
+```
+
 ## Supported cloud providers
 
 * AWS

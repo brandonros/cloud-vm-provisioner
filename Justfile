@@ -30,7 +30,7 @@ vm: check-deps check-ssh-key check-cloud-creds
     terraform apply -auto-approve
 
 # Stage 2: Install K3s on the VM
-k3s: check-instance-state
+k3s: check-instance-state check-tunnel
     #!/usr/bin/env bash
     set -e
     echo "🚀 Installing K3s cluster..."
@@ -174,6 +174,15 @@ platform-rabbitmq: check-tunnel
     terraform init
     terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
+# Web services
+platform-nginx: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Nginx..."
+    cd {{ script_path }}/terraform/02-platform-nginx
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
 # === Service Groups ===
 
 # Deploy core infrastructure (essential networking & security)
@@ -193,7 +202,7 @@ platform-observability: platform-loki platform-tempo
     @echo "✅ Observability services deployed"
 
 # Deploy all platform services in logical order
-platform: platform-core platform-database platform-monitoring platform-observability platform-rabbitmq
+platform: platform-core platform-database platform-monitoring platform-observability platform-rabbitmq platform-nginx
     @echo "✅ All platform services deployed"
 
 # === Individual Workload Services ===
