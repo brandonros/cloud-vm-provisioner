@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy Node Exporter
 module "node_exporter" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/node-exporter.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/node-exporter.yaml"))
 }

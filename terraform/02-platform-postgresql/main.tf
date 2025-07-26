@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy PostgreSQL
 module "postgresql" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/postgresql.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/postgresql.yaml"))
 }

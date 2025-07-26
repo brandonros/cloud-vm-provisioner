@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy Grafana
 module "grafana" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/grafana.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/grafana.yaml"))
 }

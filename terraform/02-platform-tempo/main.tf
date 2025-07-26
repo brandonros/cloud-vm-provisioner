@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy Tempo
 module "tempo" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/tempo.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/tempo.yaml"))
 }

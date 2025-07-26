@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy PgBouncer
 module "pgbouncer" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/pgbouncer.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/pgbouncer.yaml"))
 }

@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy RabbitMQ
 module "rabbitmq" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/rabbitmq.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/rabbitmq.yaml"))
 }

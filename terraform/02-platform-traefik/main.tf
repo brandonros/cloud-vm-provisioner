@@ -28,7 +28,7 @@ provider "helm" {
 # Deploy Traefik (depends on Cert Manager)
 module "traefik" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/traefik.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/traefik.yaml"))
   
   # Ensure Cert Manager is deployed first
   depends_on = [data.terraform_remote_state.cert_manager]

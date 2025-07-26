@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy Loki
 module "loki" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/loki.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/loki.yaml"))
 }

@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy Kube State Metrics
 module "kube_state_metrics" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/kube-state-metrics.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/kube-state-metrics.yaml"))
 }

@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy Metrics Server (independent service)
 module "metrics_server" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/metrics-server.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/metrics-server.yaml"))
 }

@@ -17,8 +17,8 @@ script_path := justfile_directory()
 default:
     @just --list
 
-# Run all stages: vm, k3s, platform, workloads
-all: check-deps check-ssh-key check-cloud-creds vm wait-and-accept k3s create-tunnel platform workloads
+# Run all stages: vm, k3s, platform, workloads, routing
+all: check-deps check-ssh-key check-cloud-creds vm wait-and-accept k3s create-tunnel platform workloads routing
 
 # Stage 1: Provision VM infrastructure
 vm: check-deps check-ssh-key check-cloud-creds
@@ -204,11 +204,84 @@ platform-observability: platform-loki platform-tempo
 platform: platform-core platform-database platform-monitoring platform-observability platform-rabbitmq
     @echo "✅ All platform services deployed"
 
-# Stage 4: Deploy workloads
-workloads:
+# === Individual Workload Services ===
+
+workload-rpc-consumer: check-tunnel
     #!/usr/bin/env bash
     set -e
-    echo "🚀 Deploying workloads..."
+    echo "🚀 Deploying RPC Consumer..."
+    cd {{ script_path }}/terraform/03-workload-rpc-consumer
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+workload-rpc-dispatcher: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying RPC Dispatcher..."
+    cd {{ script_path }}/terraform/03-workload-rpc-dispatcher
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
+# Deploy all workloads
+workloads: workload-rpc-consumer workload-rpc-dispatcher
+    @echo "✅ All workloads deployed"
+
+# === Layer 4: Routing/DNS/TLS Services ===
+
+routing-postgresql: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Configuring PostgreSQL routing..."
+    export TF_VAR_duckdns_token="${DUCKDNS_TOKEN:-}"
+    cd {{ script_path }}/terraform/04-routing-postgresql
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" -var="duckdns_token=${DUCKDNS_TOKEN:-}" -var="enable_dns=${ENABLE_DNS:-false}" -var="enable_tls=${ENABLE_TLS:-false}"
+
+routing-grafana: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Configuring Grafana routing..."
+    export TF_VAR_duckdns_token="${DUCKDNS_TOKEN:-}"
+    cd {{ script_path }}/terraform/04-routing-grafana
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" -var="duckdns_token=${DUCKDNS_TOKEN:-}" -var="enable_dns=${ENABLE_DNS:-false}" -var="enable_tls=${ENABLE_TLS:-false}"
+
+routing-postgrest: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Configuring PostgREST routing..."
+    export TF_VAR_duckdns_token="${DUCKDNS_TOKEN:-}"
+    cd {{ script_path }}/terraform/04-routing-postgrest
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" -var="duckdns_token=${DUCKDNS_TOKEN:-}" -var="enable_dns=${ENABLE_DNS:-false}" -var="enable_tls=${ENABLE_TLS:-false}"
+
+routing-rpc-consumer: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Configuring RPC Consumer routing..."
+    export TF_VAR_duckdns_token="${DUCKDNS_TOKEN:-}"
+    cd {{ script_path }}/terraform/04-routing-rpc-consumer
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" -var="duckdns_token=${DUCKDNS_TOKEN:-}" -var="enable_dns=${ENABLE_DNS:-false}" -var="enable_tls=${ENABLE_TLS:-false}"
+
+routing-rpc-dispatcher: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Configuring RPC Dispatcher routing..."
+    export TF_VAR_duckdns_token="${DUCKDNS_TOKEN:-}"
+    cd {{ script_path }}/terraform/04-routing-rpc-dispatcher
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" -var="duckdns_token=${DUCKDNS_TOKEN:-}" -var="enable_dns=${ENABLE_DNS:-false}" -var="enable_tls=${ENABLE_TLS:-false}"
+
+# Deploy all routing configurations
+routing: routing-postgresql routing-grafana routing-postgrest routing-rpc-consumer routing-rpc-dispatcher
+    @echo "✅ All routing configurations deployed"
+
+# Stage 4: Deploy workloads (legacy - for compatibility)
+workloads-legacy:
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying workloads (legacy)..."
     export TF_VAR_duckdns_token="${DUCKDNS_TOKEN:-}"
     cd {{ script_path }}/terraform/03-workloads
     terraform init
@@ -243,7 +316,7 @@ cleanup:
     
     # Clean up all tfstate files  
     cd {{ script_path }}/terraform
-    find ./00-vm-* ./01-k3s-install ./02-platform ./03-workloads \
+    find ./00-vm-* ./01-k3s-install ./02-platform-* ./03-workload-* ./03-workloads ./04-routing-* \
         -type d -name ".terraform" -exec rm -rf {} \; -prune \
         -o -type f -name ".terraform.lock.hcl" -delete \
         -o -type f -name "*.tfstate" -delete \
@@ -419,8 +492,8 @@ check-tunnel: load-instance-details
 infra: vm wait-and-accept k3s create-tunnel
     @echo "✅ Infrastructure deployed"
 
-# Deploy applications only (platform + workloads)  
-apps: platform workloads
+# Deploy applications only (platform + workloads + routing)  
+apps: platform workloads routing
     @echo "✅ Applications deployed"
 
 # --- Utility Commands ---
@@ -461,6 +534,7 @@ destroy stage:
         k3s)      dir="01-k3s-install" ;;
         platform) dir="02-platform" ;;
         workloads) dir="03-workloads" ;;
+        workloads-legacy) dir="03-workloads" ;;
         *) echo "❌ Unknown stage: {{ stage }}"; exit 1 ;;
     esac
     
@@ -480,7 +554,7 @@ from stage:
     stages=()
     found=false
     
-    for s in vm k3s platform workloads; do
+    for s in vm k3s platform workloads routing; do
         if [ "$s" = "{{ stage }}" ] || [ "$found" = true ]; then
             found=true
             stages+=($s)

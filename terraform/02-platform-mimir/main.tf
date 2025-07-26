@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy Mimir
 module "mimir" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/mimir.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/mimir.yaml"))
 }

@@ -6,14 +6,6 @@ data "terraform_remote_state" "k3s" {
   }
 }
 
-# Wait for Gateway API to be deployed
-data "terraform_remote_state" "gateway_api" {
-  backend = "local"
-  config = {
-    path = "../02-platform-gateway-api/terraform.tfstate"
-  }
-}
-
 # Configure providers
 provider "kubernetes" {
   config_path = data.terraform_remote_state.k3s.outputs.kubeconfig_path
@@ -25,11 +17,8 @@ provider "helm" {
   }
 }
 
-# Deploy cert-manager (depends on Gateway API)
-module "cert_manager" {
+# Deploy rpc-consumer application
+module "rpc_consumer" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("${path.module}/manifests/cert-manager.yaml"))
-  
-  # Ensure Gateway API is deployed first
-  depends_on = [data.terraform_remote_state.gateway_api]
+  manifest = yamldecode(file("${path.module}/manifests/rpc-consumer.yaml"))
 }

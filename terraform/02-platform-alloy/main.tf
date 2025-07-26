@@ -20,5 +20,5 @@ provider "helm" {
 # Deploy Alloy
 module "alloy" {
   source   = "../modules/helm-release"
-  manifest = yamldecode(file("../manifests/alloy.yaml"))
+  manifest = yamldecode(file("${path.module}/manifests/alloy.yaml"))
 }
