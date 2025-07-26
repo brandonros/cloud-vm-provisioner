@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  waf:
+    image: owasp/modsecurity-crs:nginx
+    container_name: waf
+    hostname: waf
+    restart: always
+    ports:
+      - "80:8080"   # Public HTTP traffic hits WAF
+      - "443:8443"  # Public HTTPS traffic hits WAF
+    volumes:
+      - /tmp/certs/fullchain.cer:/etc/nginx/conf/server.crt:ro
+      - /tmp/certs/155.138.163.152.key:/etc/nginx/conf/server.key:ro
+    environment:
+      - BACKEND=http://nginx:8080
+      - BLOCKING_PARANOIA=2
+      - DETECTION_PARANOIA=2
+      - MODSEC_AUDIT_ENGINE=RelevantOnly
+      - MODSEC_RULE_ENGINE=On
+      - NGINX_ALWAYS_TLS_REDIRECT=on
+      - SERVER_NAME=155.138.163.152
+      - SSL_ENGINE=on
+      - SSL_PORT=8443
+    depends_on:
+      - nginx
+
+  nginx:
+    image: nginx:1.27.1-alpine
+    container_name: nginx
+    hostname: nginx
+    restart: always
+    ports:
+      - "8080:8080"  # Internal port for WAF backend communication
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./html:/usr/share/nginx/html:ro
