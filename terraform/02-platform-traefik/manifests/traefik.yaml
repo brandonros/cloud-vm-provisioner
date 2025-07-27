@@ -57,9 +57,9 @@ spec:
 
     logs:
       general:
-        level: INFO
+        level: TRACE
       access:
-        enabled: false
+        enabled: true
 
     providers:
       kubernetesIngress:

@@ -274,8 +274,17 @@ routing-rpc-dispatcher: check-tunnel
     terraform init
     terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" -var="duckdns_token=${DUCKDNS_TOKEN:-}" -var="enable_dns=${ENABLE_DNS:-false}" -var="enable_tls=${ENABLE_TLS:-false}"
 
+routing-nginx: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Configuring Nginx routing..."
+    export TF_VAR_duckdns_token="${DUCKDNS_TOKEN:-}"
+    cd {{ script_path }}/terraform/04-routing-nginx
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" -var="duckdns_token=${DUCKDNS_TOKEN:-}" -var="enable_dns=${ENABLE_DNS:-false}" -var="enable_tls=${ENABLE_TLS:-false}"
+
 # Deploy all routing configurations
-routing: routing-postgresql routing-grafana routing-postgrest routing-rpc-consumer routing-rpc-dispatcher
+routing: routing-postgresql routing-grafana routing-postgrest routing-rpc-consumer routing-rpc-dispatcher routing-nginx
     @echo "✅ All routing configurations deployed"
 
 
