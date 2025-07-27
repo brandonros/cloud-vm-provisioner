@@ -56,6 +56,7 @@ Available recipes:
     platform-metrics-server
     platform-mimir
     platform-monitoring         # Deploy monitoring stack
+    platform-nginx              # Web services
     platform-node-exporter
     platform-observability      # Deploy observability stack
     platform-pgbouncer
@@ -67,6 +68,7 @@ Available recipes:
     platform-traefik
     routing                     # Deploy all routing configurations
     routing-grafana
+    routing-nginx
     routing-postgresql
     routing-postgrest
     routing-rpc-consumer
@@ -87,7 +89,13 @@ $ just vm wait-and-accept connect
 ### Create a VM with k3s provisioned
 
 ```
-just vm create-tunnel k3s platform-core
+just vm wait-and-accept create-tunnel k3s platform-core platform-nginx routing-nginx
+```
+
+### Clean up
+
+```
+just vm cleanup
 ```
 
 ## Supported cloud providers

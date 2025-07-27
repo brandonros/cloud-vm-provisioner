@@ -281,7 +281,7 @@ routing-nginx: check-tunnel
     export TF_VAR_duckdns_token="${DUCKDNS_TOKEN:-}"
     cd {{ script_path }}/terraform/04-routing-nginx
     terraform init
-    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" -var="duckdns_token=${DUCKDNS_TOKEN:-}" -var="enable_dns=${ENABLE_DNS:-false}" -var="enable_tls=${ENABLE_TLS:-false}"
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}" -var="duckdns_token=${DUCKDNS_TOKEN:-}" -var="enable_dns=${ENABLE_DNS:-true}" -var="enable_tls=${ENABLE_TLS:-true}"
 
 # Deploy all routing configurations
 routing: routing-postgresql routing-grafana routing-postgrest routing-rpc-consumer routing-rpc-dispatcher routing-nginx

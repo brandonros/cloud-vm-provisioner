@@ -28,13 +28,13 @@ variable "duckdns_token" {
 variable "enable_dns" {
   type        = bool
   description = "Whether to manage DNS records"
-  default     = false
+  default     = true
 }
 
 variable "enable_tls" {
   type        = bool
   description = "Whether to enable TLS certificates"
-  default     = false
+  default     = true
 }
 
 variable "enable_routing" {
