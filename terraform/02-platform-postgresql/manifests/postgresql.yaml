@@ -25,6 +25,11 @@ spec:
             data:
               postgresql.conf:
                 inline: |
+                  # replication
+                  hot_standby = on
+                  wal_level = replica
+                  max_wal_senders = 3
+
                   # Connection Settings
                   listen_addresses = '*'
                   max_connections = 100
