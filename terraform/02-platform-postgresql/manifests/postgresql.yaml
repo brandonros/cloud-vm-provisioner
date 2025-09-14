@@ -25,46 +25,46 @@ spec:
             data:
               postgresql.conf:
                 inline: |
-                  # Connection Settings - MASSIVELY INCREASED
+                  # Connection Settings
                   listen_addresses = '*'
-                  max_connections = 2000              # Was 500, now 2000
-                  superuser_reserved_connections = 10  # Increased for admin tasks
+                  max_connections = 100
+                  superuser_reserved_connections = 10
                   
-                  # Memory Settings - USING YOUR 64GB RAM PROPERLY
-                  shared_buffers = 16GB               # Was 256MB, now 16GB (25% of RAM)
-                  work_mem = 32MB                     # Was 4MB, now 32MB per operation
-                  maintenance_work_mem = 2GB          # Was 64MB, now 2GB
-                  effective_cache_size = 48GB         # Was 512MB, now 48GB (75% of RAM)
-                  huge_pages = try                    # Enable huge pages for better memory management
+                  # Memory Settings
+                  shared_buffers = 256MB               
+                  work_mem = 4MB                     
+                  maintenance_work_mem = 64MB
+                  effective_cache_size = 512MB
+                  huge_pages = try
                   
-                  # Parallel Processing - UTILIZE ALL 20 CPUS
-                  max_worker_processes = 20           # Match your CPU count
-                  max_parallel_workers = 20           # Use all CPUs for parallel queries
-                  max_parallel_workers_per_gather = 10 # Half CPUs per query
-                  max_parallel_maintenance_workers = 10 # For maintenance operations
+                  # Parallel Processing
+                  max_worker_processes = 2
+                  max_parallel_workers = 2
+                  max_parallel_workers_per_gather = 1
+                  max_parallel_maintenance_workers = 1
                   
-                  # Performance Settings - HIGH-END TUNING
-                  random_page_cost = 1.1              # SSD optimized
-                  effective_io_concurrency = 300      # Was 200, now 300 for high-end storage
-                  seq_page_cost = 1                   # Default for SSD
+                  # Performance Settings
+                  random_page_cost = 1.1
+                  effective_io_concurrency = 200
+                  seq_page_cost = 1
                   
-                  # WAL Settings - OPTIMIZED FOR HIGH THROUGHPUT
-                  wal_buffers = 64MB                  # Was 16MB, now 64MB
+                  # WAL Settings
+                  wal_buffers = 16MB
                   wal_writer_delay = 10ms             # Faster WAL writes
                   wal_writer_flush_after = 1MB        # Flush more frequently
                   checkpoint_completion_target = 0.9  # Keep this
                   checkpoint_timeout = 10min          # More frequent checkpoints for high load
-                  max_wal_size = 8GB                  # Was 1GB, now 8GB
-                  min_wal_size = 2GB                  # Was 80MB, now 2GB
+                  max_wal_size = 1GB
+                  min_wal_size = 80MB
                   
-                  # Connection and Statement Timeouts - OPTIMIZED FOR LOAD TESTING
-                  statement_timeout = 60s             # Increased from 30s
-                  idle_in_transaction_session_timeout = 120s # Increased from 60s
-                  lock_timeout = 30s                  # Increased from 10s
-                  deadlock_timeout = 1s               # Quick deadlock detection
+                  # Connection and Statement Timeouts
+                  statement_timeout = 30s
+                  idle_in_transaction_session_timeout = 60s
+                  lock_timeout = 10s
+                  deadlock_timeout = 1s
                   
-                  # Logging - MINIMAL FOR PERFORMANCE
-                  log_min_duration_statement = 5000   # Only log very slow queries
+                  # Logging
+                  log_min_duration_statement = 1000
                   log_connections = off
                   log_disconnections = off
                   log_lock_waits = on                 # Keep for debugging serialization issues
@@ -77,15 +77,15 @@ spec:
                   track_io_timing = on
                   track_functions = pl
                   
-                  # Background Writer - AGGRESSIVE TUNING
-                  bgwriter_delay = 50ms               # Was 200ms, more aggressive
-                  bgwriter_lru_maxpages = 1000        # Was 100, now 1000
-                  bgwriter_lru_multiplier = 4.0       # Was 2.0, more aggressive
-                  bgwriter_flush_after = 512kB        # Flush smaller chunks more often
+                  # Background Writer
+                  bgwriter_delay = 200ms
+                  bgwriter_lru_maxpages = 100
+                  bgwriter_lru_multiplier = 2.0
+                  bgwriter_flush_after = 512kB
                   
-                  # Auto-vacuum - TUNED FOR HIGH TRANSACTION VOLUME
+                  # Auto-vacuum
                   autovacuum = on
-                  autovacuum_max_workers = 6          # Was 3, now 6
+                  autovacuum_max_workers = 3
                   autovacuum_naptime = 30s            # Was 1min, more frequent
                   autovacuum_vacuum_threshold = 25    # Was 50, more aggressive
                   autovacuum_analyze_threshold = 25   # Was 50, more aggressive
