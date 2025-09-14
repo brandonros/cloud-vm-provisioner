@@ -175,14 +175,13 @@ spec:
                       value: "Test_Password123!"
                     PGDATA:
                       value: "/var/lib/postgresql/data/pgdata"
-                  
-                  # MASSIVE RESOURCE INCREASE - USE YOUR HARDWARE!
+
                   resources:
                     requests:
-                      cpu: "2"
+                      cpu: "1"
                       memory: "2Gi"
                     limits:
-                      cpu: "4"
+                      cpu: "2"
                       memory: "4Gi"
                   
                   volumeMounts:
