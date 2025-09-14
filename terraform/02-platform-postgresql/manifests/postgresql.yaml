@@ -179,11 +179,11 @@ spec:
                   # MASSIVE RESOURCE INCREASE - USE YOUR HARDWARE!
                   resources:
                     requests:
-                      cpu: "2"      # Instead of 12
-                      memory: "8Gi" # Instead of 48Gi
+                      cpu: "2"
+                      memory: "2Gi"
                     limits:
-                      cpu: "8"      # Instead of 18
-                      memory: "16Gi" # Instead of 56Gi
+                      cpu: "4"
+                      memory: "4Gi"
                   
                   volumeMounts:
                     data:
