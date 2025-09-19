@@ -62,6 +62,7 @@ Available recipes:
     platform-pgbouncer
     platform-postgres-exporter
     platform-postgresql         # Database services
+    platform-mssql         
     platform-postgrest
     platform-rabbitmq           # Messaging services
     platform-tempo

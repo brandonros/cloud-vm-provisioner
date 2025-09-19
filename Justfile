@@ -75,6 +75,14 @@ platform-metrics-server: check-tunnel
     terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
 # Database services
+platform-mssql: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying MS-SQL..."
+    cd {{ script_path }}/terraform/02-platform-mssql
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
 platform-postgresql: check-tunnel
     #!/usr/bin/env bash
     set -e
