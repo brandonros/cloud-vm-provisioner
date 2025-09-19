@@ -1,0 +1,145 @@
+hull:
+  config:
+    general:
+      nameOverride: mssql
+      rbac: false
+      noObjectNamePrefixes: true
+
+  objects:
+    serviceaccount:
+      default:
+        enabled: false
+    
+    service:
+      mssql:
+        type: ClusterIP
+        ports:
+          sql:
+            port: 1433
+            targetPort: 1433
+    
+    statefulset:
+      mssql:
+        replicas: 1
+
+        volumeClaimTemplates:
+          - metadata:
+              name: data1
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 8Gi
+          - metadata:
+              name: secrets1
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 8Gi
+          - metadata:
+              name: log1
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 8Gi
+          - metadata:
+              name: system1
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 8Gi
+
+        pod:
+          initContainers:
+            permission-fix:
+              image:
+                repository: busybox
+                tag: 1.36
+
+              command:
+                - sh
+                - -c
+                - |
+                  chown -R 10001:0 /.system
+                  chown -R 10001:0 /var/opt/mssql/data
+                  chown -R 10001:0 /var/opt/mssql/log
+                  chown -R 10001:0 /var/opt/mssql/secrets
+                  chmod -R 755 /.system
+                  chmod -R 755 /var/opt/mssql/data
+                  chmod -R 755 /var/opt/mssql/log
+                  chmod -R 755 /var/opt/mssql/secrets
+
+              securityContext:
+                runAsUser: 0
+                runAsGroup: 0
+
+              volumeMounts:
+                data:
+                  name: data1
+                  mountPath: /var/opt/mssql/data
+                log:
+                  name: log1
+                  mountPath: /var/opt/mssql/log
+                secrets:
+                  name: secrets1
+                  mountPath: /var/opt/mssql/secrets
+                system:
+                  name: system1
+                  mountPath: /.system
+
+          containers:
+            main:
+              resources:
+                requests:
+                  memory: 2Gi
+                  cpu: 1000m
+                limits:
+                  memory: 4Gi
+                  cpu: 2000m
+
+              image:
+                repository: mssql/server
+                tag: 2022-latest
+
+              env:
+                ACCEPT_EULA:
+                  value: 'Y'
+                SA_PASSWORD:
+                  value: 'Test_Password123!'
+                MSSQL_PID:
+                  value: 'Developer'
+                MSSQL_AGENT_ENABLED:
+                  value: 'true'
+                MSSQL_ENABLE_HADR:
+                  value: '0'
+                MSSQL_LCID:
+                  value: '1033'
+
+              securityContext:
+                runAsUser: 10001
+                runAsGroup: 10001
+
+              ports:
+                sql:
+                  containerPort: 1433
+
+              volumeMounts:
+                system:
+                  name: system1
+                  mountPath: /.system
+                log:
+                  name: log1
+                  mountPath: /log
+                secrets:
+                  name: secrets1
+                  mountPath: /var/opt/mssql/secrets
+                data:
+                  name: data1
+                  mountPath: /var/opt/mssql/data
