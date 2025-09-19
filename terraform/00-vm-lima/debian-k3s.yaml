@@ -15,9 +15,9 @@ containerd:
 
 # images
 images:
-- location: "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-arm64.qcow2"
+- location: "https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-arm64.qcow2"
   arch: "aarch64"
-  digest: "sha256:8694e5f09eef0ee1ea528df534571e6efbfa93285cbd17ab9cdba87c33707f8d"
+  digest: "sha256:65a6d27dd944f3b94bedb2430fa0b8d6696545d68ea7ecd3e1d7ef53cb031668"
 
 # memory
 memory: "8GiB"

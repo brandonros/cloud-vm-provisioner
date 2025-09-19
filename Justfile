@@ -7,7 +7,7 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 set export
 
 # Default cloud provider (can be overridden with env var)
-export CLOUD_PROVIDER := env_var_or_default("CLOUD_PROVIDER", "vultr")
+export CLOUD_PROVIDER := env_var_or_default("CLOUD_PROVIDER", "lima")
 export TF_SKIP_PROVIDER_VERIFY := "true"
 export ARM_SUBSCRIPTION_ID := "16c3f0f7-3a06-449e-8ac6-ec2d63078996"
 

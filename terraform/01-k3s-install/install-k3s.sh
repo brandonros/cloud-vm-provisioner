@@ -40,7 +40,7 @@ else
 fi
 
 # Install k9s
-K9S_VERSION="v0.50.7"
+K9S_VERSION="v0.50.11"
 if ! command -v k9s &> /dev/null; then
     wget https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_linux_${ARCH_K9S}.deb
     sudo apt install -y ./k9s_linux_*.deb
@@ -72,7 +72,7 @@ if ! command -v kubectl &> /dev/null; then
     echo "kubectl not found, installing k3s..."
     
     # install k3s
-    curl -sfL https://get.k3s.io | sudo INSTALL_K3S_VERSION="v1.33.1+k3s1" INSTALL_K3S_EXEC="server --disable=traefik --disable=metrics-server" sh -
+    curl -sfL https://get.k3s.io | sudo INSTALL_K3S_VERSION="v1.33.4+k3s1" INSTALL_K3S_EXEC="server --disable=traefik --disable=metrics-server" sh -
     
     # trust cluster ssl
     echo "trusting cluster ssl"
