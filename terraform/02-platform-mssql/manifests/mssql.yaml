@@ -118,7 +118,7 @@ spec:
                       cpu: 2000m
 
                   image:
-                    repository: mssql/server
+                    repository: mcr.microsoft.com/mssql/server
                     tag: 2022-latest
 
                   env:
