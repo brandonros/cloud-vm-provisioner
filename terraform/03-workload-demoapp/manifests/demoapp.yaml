@@ -35,7 +35,7 @@ spec:
                       cpu: 2000m
                   image:
                     repository: ghcr.io/brandonros/java-demoapp
-                    tag: 892d653957fd9a93b12e869acd5529f92d546b95
+                    tag: 3b435dbfebca682bfef4b3a196555e21cbfa6724
                   env:
                     SERVER_PORT:
                       value: 8080
