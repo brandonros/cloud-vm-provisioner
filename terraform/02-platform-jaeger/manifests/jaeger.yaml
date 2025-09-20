@@ -1,0 +1,74 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: jaeger
+  namespace: kube-system
+spec:
+  repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
+  chart: hull-wrapper
+  targetNamespace: jaeger
+  createNamespace: true
+  version: 0.2.0
+  valuesContent: |-
+    hull:
+      config:
+        general:
+          nameOverride: jaeger
+          rbac: false
+          noObjectNamePrefixes: true
+
+      objects:
+        serviceaccount:
+          default:
+            enabled: false
+        
+        service:
+          jaeger:
+            type: ClusterIP
+            ports:
+              ui:
+                port: 16686
+                targetPort: 16686
+              otlp-grpc:
+                port: 4317
+                targetPort: 4317
+              otlp-http:
+                port: 4318
+                targetPort: 4318
+              config:
+                port: 5778
+                targetPort: 5778
+              zipkin:
+                port: 9411
+                targetPort: 9411
+        
+        deployment:
+          jaeger:
+            replicas: 1
+            
+            pod:
+              containers:
+                main:
+                  resources:
+                    requests:
+                      memory: 256Mi
+                      cpu: 100m
+                    limits:
+                      memory: 512Mi
+                      cpu: 500m
+
+                  image:
+                    repository: cr.jaegertracing.io/jaegertracing/jaeger
+                    tag: 2.10.0
+
+                  ports:
+                    ui:
+                      containerPort: 16686
+                    otlp-grpc:
+                      containerPort: 4317
+                    otlp-http:
+                      containerPort: 4318
+                    config:
+                      containerPort: 5778
+                    zipkin:
+                      containerPort: 9411

@@ -45,6 +45,8 @@ spec:
                       value: sa
                     SPRING_DATASOURCE_PRIMARY_PASSWORD:
                       value: Test_Password123!
+                    MANAGEMENT_OTLP_TRACING_ENDPOINT:
+                      value: http://jaeger.jaeger.svc.cluster.local:4318/v1/traces
                   ports:
                     http:
                       containerPort: 8080

@@ -156,6 +156,14 @@ platform-kube-state-metrics: check-tunnel
     terraform init
     terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
+platform-jaeger: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Jaeger..."
+    cd {{ script_path }}/terraform/02-platform-jaeger
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
 # Observability services
 platform-loki: check-tunnel
     #!/usr/bin/env bash
