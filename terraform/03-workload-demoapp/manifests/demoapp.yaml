@@ -1,0 +1,55 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: demoapp
+  namespace: kube-system
+spec:
+  repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
+  chart: hull-wrapper
+  targetNamespace: demoapp
+  createNamespace: true
+  version: 0.2.0
+  valuesContent: |-
+    hull:
+      config:
+        general:
+          nameOverride: demoapp
+          rbac: false
+          noObjectNamePrefixes: true
+      objects:
+        serviceaccount:
+          default:
+            enabled: false
+        deployment:
+          demoapp:
+            replicas: 2
+            pod:
+              containers:
+                demoapp:
+                  resources:
+                    requests:
+                      memory: 256Mi
+                      cpu: 250m
+                    limits:
+                      memory: 2048Mi
+                      cpu: 2000m
+                  image:
+                    repository: ghcr.io/brandonros/java-demoapp
+                    tag: 892d653957fd9a93b12e869acd5529f92d546b95
+                  env:
+                    SPRING_DATASOURCE_PRIMARY_URL:
+                      value: jdbc:sqlserver://mssql:1433;databaseName=db;encrypt=true;trustServerCertificate=true
+                    SPRING_DATASOURCE_PRIMARY_USERNAME:
+                      value: sa
+                    SPRING_DATASOURCE_PRIMARY_PASSWORD:
+                      value: Test_Password123!
+                  ports:
+                    http:
+                      containerPort: 3000
+        service:
+          demoapp:
+            type: ClusterIP
+            ports:
+              http:
+                port: 3000
+                targetPort: 3000

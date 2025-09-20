@@ -215,6 +215,14 @@ platform: platform-core platform-database platform-monitoring platform-observabi
 
 # === Individual Workload Services ===
 
+workload-demoapp: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying demoapp..."
+    cd {{ script_path }}/terraform/03-workload-demoapp
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
 workload-rpc-consumer: check-tunnel
     #!/usr/bin/env bash
     set -e

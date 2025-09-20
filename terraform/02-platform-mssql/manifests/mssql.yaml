@@ -111,11 +111,11 @@ spec:
                 main:
                   resources:
                     requests:
+                      memory: 512Mi
+                      cpu: 300m
+                    limits:
                       memory: 2Gi
                       cpu: 1000m
-                    limits:
-                      memory: 4Gi
-                      cpu: 2000m
 
                   image:
                     repository: mcr.microsoft.com/mssql/server
