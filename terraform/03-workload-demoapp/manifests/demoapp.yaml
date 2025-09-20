@@ -37,19 +37,21 @@ spec:
                     repository: ghcr.io/brandonros/java-demoapp
                     tag: 892d653957fd9a93b12e869acd5529f92d546b95
                   env:
+                    SERVER_PORT:
+                      value: 8080
                     SPRING_DATASOURCE_PRIMARY_URL:
-                      value: jdbc:sqlserver://mssql:1433;databaseName=db;encrypt=true;trustServerCertificate=true
+                      value: "jdbc:sqlserver://mssql.mssql.svc.cluster.local:1433;databaseName=db;encrypt=true;trustServerCertificate=true"
                     SPRING_DATASOURCE_PRIMARY_USERNAME:
                       value: sa
                     SPRING_DATASOURCE_PRIMARY_PASSWORD:
                       value: Test_Password123!
                   ports:
                     http:
-                      containerPort: 3000
+                      containerPort: 8080
         service:
           demoapp:
             type: ClusterIP
             ports:
               http:
-                port: 3000
-                targetPort: 3000
+                port: 8080
+                targetPort: 8080
