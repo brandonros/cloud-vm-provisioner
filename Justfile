@@ -74,6 +74,15 @@ platform-metrics-server: check-tunnel
     terraform init
     terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
 
+# E-mail services
+platform-stalwart: check-tunnel
+    #!/usr/bin/env bash
+    set -e
+    echo "🚀 Deploying Stalwart..."
+    cd {{ script_path }}/terraform/02-platform-stalwart
+    terraform init
+    terraform apply -auto-approve -var="cloud_provider=${CLOUD_PROVIDER}"
+
 # Database services
 platform-mssql: check-tunnel
     #!/usr/bin/env bash

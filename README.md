@@ -61,6 +61,7 @@ Available recipes:
     platform-observability      # Deploy observability stack
     platform-pgbouncer
     platform-postgres-exporter
+    platform-stalwart           # E-mail services
     platform-postgresql         # Database services
     platform-mssql         
     platform-postgrest

@@ -1,0 +1,117 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: stalwart
+  namespace: kube-system
+spec:
+  repo: https://raw.githubusercontent.com/brandonros/hull-wrapper/master/
+  chart: hull-wrapper
+  targetNamespace: stalwart
+  createNamespace: true
+  version: 0.2.0
+  valuesContent: |-
+    hull:
+      config:
+        general:
+          nameOverride: stalwart
+          rbac: false
+          noObjectNamePrefixes: true
+
+      objects:
+        serviceaccount:
+          default:
+            enabled: false
+        
+        service:
+          stalwart:
+            type: ClusterIP
+            ports:
+              https:
+                port: 443
+                targetPort: 443
+              http-alt:
+                port: 8080
+                targetPort: 8080
+              smtp:
+                port: 25
+                targetPort: 25
+              smtp-submission:
+                port: 587
+                targetPort: 587
+              smtps:
+                port: 465
+                targetPort: 465
+              imap:
+                port: 143
+                targetPort: 143
+              imaps:
+                port: 993
+                targetPort: 993
+              sieve:
+                port: 4190
+                targetPort: 4190
+              pop3:
+                port: 110
+                targetPort: 110
+              pop3s:
+                port: 995
+                targetPort: 995
+        
+        statefulset:
+          stalwart:
+            replicas: 1
+
+            volumeClaimTemplates:
+              - metadata:
+                  name: stalwart-data
+                spec:
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: 10Gi
+            
+            pod:
+              containers:
+                main:
+                  resources:
+                    requests:
+                      memory: 512Mi
+                      cpu: 200m
+                    limits:
+                      memory: 1Gi
+                      cpu: 1000m
+
+                  image:
+                    repository: stalwartlabs/stalwart
+                    tag: latest
+
+                  stdin: true
+                  tty: true
+
+                  ports:
+                    https:
+                      containerPort: 443
+                    http-alt:
+                      containerPort: 8080
+                    smtp:
+                      containerPort: 25
+                    smtp-submission:
+                      containerPort: 587
+                    smtps:
+                      containerPort: 465
+                    imap:
+                      containerPort: 143
+                    imaps:
+                      containerPort: 993
+                    sieve:
+                      containerPort: 4190
+                    pop3:
+                      containerPort: 110
+                    pop3s:
+                      containerPort: 995
+
+                  volumeMounts:
+                    data:
+                      name: stalwart-data
+                      mountPath: /opt/stalwart
