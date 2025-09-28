@@ -86,9 +86,6 @@ spec:
                     repository: stalwartlabs/stalwart
                     tag: latest
 
-                  stdin: true
-                  tty: true
-
                   ports:
                     https:
                       containerPort: 443

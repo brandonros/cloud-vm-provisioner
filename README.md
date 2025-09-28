@@ -85,7 +85,7 @@ Available recipes:
 ### Create and connect to a new VM
 
 ```
-$ just vm wait-and-accept connect
+just vm wait-and-accept connect
 ```
 
 ### Create a VM with k3s provisioned
