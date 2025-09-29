@@ -326,7 +326,7 @@ connect: load-instance-details
     #!/usr/bin/env bash
     set -e
     source /tmp/vm_info.txt
-    ssh -p ${instance_ssh_port} ${instance_username}@${instance_ipv4}
+    ssh -p ${instance_ssh_port} -L 8080:localhost:8080 ${instance_username}@${instance_ipv4}
 
 # Clean up all resources and local state
 cleanup:

@@ -23,6 +23,34 @@ spec:
             enabled: false
         
         service:
+          stalwart-node:
+            type: NodePort
+            selector:
+              app.kubernetes.io/component: stalwart
+              app.kubernetes.io/instance: stalwart
+              app.kubernetes.io/name: stalwart
+            ports:
+              smtp:
+                port: 25
+                targetPort: 25
+                nodePort: 30025
+              smtp:
+                port: 587
+                targetPort: 587
+                nodePort: 30587
+              smtps:
+                port: 465
+                targetPort: 465
+                nodePort: 30465
+              imaps:
+                port: 993
+                targetPort: 993
+                nodePort: 30993
+              https:
+                port: 443
+                targetPort: 443
+                nodePort: 30443
+
           stalwart:
             type: ClusterIP
             ports:
