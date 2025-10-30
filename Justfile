@@ -53,6 +53,8 @@ fetch-kubeconfig server_ip='':
   echo "Kubeconfig written to ${kubeconfig_path}"
 
 cleanup:
+  #!/bin/bash
+  cd vms/hetzner
   terraform destroy
 
 install-gateway-api kubeconfig='':
