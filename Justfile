@@ -8,13 +8,19 @@ script_path := justfile_directory()
 default:
     @just --list
 
+provision-vm:
+  #!/usr/bin/env bash
+  cd vms/hetzner
+  terraform init
+  terraform apply -auto-approve
+
 fetch-kubeconfig server_ip='':
   #!/usr/bin/env bash
 
   # extract server_ip form tfstate
   server_ip="{{server_ip}}"
   if [[ -z "${server_ip}" ]]; then
-    if terraform_output="$(terraform output -raw server_ipv4 2>/dev/null)"; then
+    if terraform_output="$(cd vms/hetzner && terraform output -raw server_ipv4 2>/dev/null)"; then
       server_ip="${terraform_output}"
     else
       echo "error: server IPv4 not provided; pass it as an argument or export SERVER_IP" >&2
@@ -45,10 +51,6 @@ fetch-kubeconfig server_ip='':
     'cat /home/user/k3s.yaml' \
   | sed "s|https://127.0.0.1:6443|https://${server_ip}:6443|" > "${kubeconfig_path}"
   echo "Kubeconfig written to ${kubeconfig_path}"
-
-provision:
-  terraform init
-  terraform apply -auto-approve
 
 cleanup:
   terraform destroy
@@ -138,7 +140,7 @@ deploy chart='' release='' namespace='' kubeconfig='' repo='' version='':
   echo "Chart ${chart} deployed as release ${release_name} in namespace ${namespace_name} using kubeconfig ${kubeconfig}"
 
 go:
-  just provision
+  just provision-vm
   just fetch-kubeconfig
   just install-gateway-api k3s.yaml
   just deploy cert-manager cert-manager cert-manager k3s.yaml https://charts.jetstack.io v1.15.3

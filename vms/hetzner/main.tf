@@ -29,7 +29,7 @@ resource "hcloud_server" "server1" {
     ipv4_enabled = true
     ipv6_enabled = false
   }
-  user_data = templatefile("${path.module}/cloud-config.yaml.tpl", {
+  user_data = templatefile("${path.module}/../cloud-config.yaml.tpl", {
     allowed_api_cidrs  = local.allowed_api_cidrs
     ssh_authorized_key = local.ssh_authorized_key
     user_password_hash = local.user_password_hash
