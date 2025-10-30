@@ -1,0 +1,24 @@
+{{- range .Values.httpsGateways }}
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ .name }}
+  namespace: {{ .namespace }}
+  annotations:
+    cert-manager.io/issuer: {{ .issuerName }}
+spec:
+  gatewayClassName: {{ .gatewayClassName }}
+  listeners:
+    - name: {{ .listenerName }}
+      hostname: {{ .hostname }}
+      port: {{ .port }}
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: {{ .allowedNamespaces }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ .tlsSecretName }}
+{{- end }}

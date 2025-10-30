@@ -1,0 +1,9 @@
+apiVersion: v2
+name: nginx
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+dependencies:
+  - name: hull
+    version: 1.31.2
+    repository: https://vidispine.github.io/hull

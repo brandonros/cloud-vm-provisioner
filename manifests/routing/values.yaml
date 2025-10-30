@@ -1,0 +1,88 @@
+#============================================================================
+# Certificate Issuers
+#============================================================================
+issuers:
+  - name: nginx-letsencrypt-prod-issuer
+    namespace: traefik
+    email: test@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretName: nginx-letsencrypt-prod-account-key
+    httpGatewayName: nginx-http-gateway
+    httpGatewayNamespace: traefik
+
+#============================================================================
+# TLS Certificates
+#============================================================================
+certificates:
+  - name: nginx-prod-tls
+    namespace: traefik
+    secretName: nginx-prod-tls
+    issuerName: nginx-letsencrypt-prod-issuer
+    dnsNames:
+      - nginxtest123.duckdns.org
+
+#============================================================================
+# Gateways
+#============================================================================
+# HTTP gateway (for ACME challenges)
+httpGateways:
+  - name: nginx-http-gateway
+    namespace: traefik
+    gatewayClassName: traefik
+    listenerName: nginx-http
+    hostname: nginxtest123.duckdns.org
+    port: 8000
+    allowedNamespaces: All
+
+# HTTPS gateway
+httpsGateways:
+  - name: nginx-https-gateway
+    namespace: traefik
+    gatewayClassName: traefik
+    listenerName: nginx-https
+    hostname: nginxtest123.duckdns.org
+    port: 8443
+    allowedNamespaces: All
+    tlsSecretName: nginx-prod-tls
+
+#============================================================================
+# Routes
+#============================================================================
+# HTTPS route (main traffic)
+httpsRoutes:
+  - name: nginx-https-route
+    namespace: traefik
+    gatewayName: nginx-https-gateway
+    gatewayNamespace: traefik
+    sectionName: nginx-https
+    hostnames:
+      - nginxtest123.duckdns.org
+    backendService:
+      name: nginx
+      namespace: nginx
+      port: 80
+      weight: 100
+
+# HTTP redirect route (HTTP -> HTTPS)
+httpRedirectRoutes:
+  - name: nginx-http-redirect-route
+    namespace: traefik
+    gatewayName: nginx-http-gateway
+    gatewayNamespace: traefik
+    hostnames:
+      - nginxtest123.duckdns.org
+    scheme: https
+    statusCode: 301
+
+#============================================================================
+# Reference Grants (for cross-namespace access)
+#============================================================================
+httpReferenceGrants:
+  - name: nginx-reference-grant
+    namespace: nginx
+    fromNamespace: traefik
+    toServiceName: nginx
+
+tcpGateways: []
+tcpReferenceGrants: []
+tcpRoutes: []

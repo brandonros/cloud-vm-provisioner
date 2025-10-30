@@ -1,0 +1,17 @@
+{{- range .Values.httpReferenceGrants }}
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: {{ .name }}
+  namespace: {{ .namespace }}
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: {{ .fromNamespace }}
+  to:
+    - group: ""
+      kind: Service
+      name: {{ .toServiceName }}
+{{- end }}

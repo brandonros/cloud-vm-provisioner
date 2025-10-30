@@ -1,0 +1,21 @@
+{{- range .Values.tcpRoutes }}
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: {{ .name }}
+  namespace: {{ .namespace }}
+spec:
+  parentRefs:
+  - name: {{ .gatewayName }}
+    namespace: {{ .gatewayNamespace }}
+    kind: Gateway
+    sectionName: {{ .sectionName }}
+  rules:
+  - backendRefs:
+    - name: {{ .backendService.name }}
+      namespace: {{ .backendService.namespace }}
+      port: {{ .backendService.port }}
+      kind: Service
+      weight: {{ .backendService.weight }}
+{{- end }}

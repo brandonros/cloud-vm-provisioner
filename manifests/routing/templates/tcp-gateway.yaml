@@ -1,0 +1,19 @@
+{{- range .Values.tcpGateways }}
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ .name }}
+  namespace: {{ .namespace }}
+spec:
+  gatewayClassName: {{ .gatewayClassName }}
+  listeners:
+    - name: {{ .listenerName }}
+      port: {{ .port }}
+      protocol: TCP
+      {{- if .allowedNamespaces }}
+      allowedRoutes:
+        namespaces:
+          from: {{ .allowedNamespaces }}
+      {{- end }}
+{{- end }}

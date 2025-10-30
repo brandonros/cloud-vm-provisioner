@@ -1,0 +1,61 @@
+hull:
+  config:
+    general:
+      nameOverride: nginx
+      rbac: false
+      noObjectNamePrefixes: true
+
+  objects:
+    serviceaccount:
+      default:
+        enabled: false
+    
+    configmap:
+      static-files:
+        data:
+          index.html:
+            path: assets/index.html
+          style.css:
+            path: assets/style.css
+          script.js:
+            path: assets/script.js
+    
+    service:
+      nginx:
+        type: ClusterIP
+        ports:
+          http:
+            port: 80
+            targetPort: 80
+    
+    deployment:
+      nginx:
+        replicas: 2
+        pod:
+          containers:
+            nginx:
+              image:
+                repository: nginx
+                tag: alpine
+              
+              ports:
+                http:
+                  containerPort: 80
+              
+              volumeMounts:
+                static-files:
+                  name: static-files
+                  mountPath: /usr/share/nginx/html
+              
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+          
+          volumes:
+            static-files:
+              configMap:
+                name: static-files
