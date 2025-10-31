@@ -12,7 +12,9 @@ provider "hcloud" {
 }
 
 locals {
-  allowed_api_cidrs  = ["104.203.5.3/32"]
+  install_k3s        = false
+  install_llvm       = false
+  allowed_api_cidrs  = []
   ssh_authorized_key = file("~/.ssh/id_rsa.pub")
   # echo "hihaters" | openssl passwd -6 -salt ovSvGqIVXC9lTasZ -in -
   user_password_hash = "$6$ovSvGqIVXC9lTasZ$T3YJyx/ew41tndVvqPCV3xZ6tpGTQyQJNXfn/mQ7s9xfvjUy.1g2xLccyW9CattET53xi9Z4REzoNY7iO3Bhw1"
@@ -30,6 +32,8 @@ resource "hcloud_server" "server1" {
     ipv6_enabled = false
   }
   user_data = templatefile("${path.module}/../cloud-config.yaml.tpl", {
+    install_k3s        = local.install_k3s
+    install_llvm       = local.install_llvm
     allowed_api_cidrs  = local.allowed_api_cidrs
     ssh_authorized_key = local.ssh_authorized_key
     user_password_hash = local.user_password_hash
