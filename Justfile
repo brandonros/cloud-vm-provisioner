@@ -4,13 +4,15 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 set export
 
 script_path := justfile_directory()
+provider := "vultr"
+kubeconfig := "k3s.yaml"
 
 default:
     @just --list
 
 provision-vm:
   #!/usr/bin/env bash
-  cd vms/hetzner
+  cd vms/{{provider}}
   terraform init
   terraform apply -auto-approve
 
@@ -20,7 +22,7 @@ fetch-kubeconfig server_ip='':
   # extract server_ip form tfstate
   server_ip="{{server_ip}}"
   if [[ -z "${server_ip}" ]]; then
-    if terraform_output="$(cd vms/hetzner && terraform output -raw server_ipv4 2>/dev/null)"; then
+    if terraform_output="$(cd vms/{{provider}} && terraform output -raw server_ipv4 2>/dev/null)"; then
       server_ip="${terraform_output}"
     else
       echo "error: server IPv4 not provided; pass it as an argument or export SERVER_IP" >&2
@@ -54,10 +56,10 @@ fetch-kubeconfig server_ip='':
 
 cleanup:
   #!/bin/bash
-  cd vms/hetzner
+  cd vms/{{provider}}
   terraform destroy
 
-install-gateway-api kubeconfig='':
+install-gateway-api:
   #!/usr/bin/env bash
 
   repo_root="$(pwd)"
@@ -77,7 +79,7 @@ install-gateway-api kubeconfig='':
 
   echo "Gateway API setup complete."
 
-deploy chart='' release='' namespace='' kubeconfig='' repo='' version='':
+deploy chart='' release='' namespace='' repo='' version='':
   #!/usr/bin/env bash
 
   repo_root="$(pwd)"
@@ -144,9 +146,9 @@ deploy chart='' release='' namespace='' kubeconfig='' repo='' version='':
 go:
   just provision-vm
   just fetch-kubeconfig
-  just install-gateway-api k3s.yaml
-  just deploy cert-manager cert-manager cert-manager k3s.yaml https://charts.jetstack.io v1.15.3
-  just deploy traefik traefik traefik k3s.yaml https://traefik.github.io/charts 34.4.0
-  just deploy metrics-server metrics-server kube-system k3s.yaml https://kubernetes-sigs.github.io/metrics-server/ 3.12.2
-  just deploy nginx nginx nginx k3s.yaml
-  just deploy routing routing kube-system k3s.yaml
+  just install-gateway-api
+  just deploy cert-manager cert-manager cert-manager https://charts.jetstack.io v1.15.3
+  just deploy traefik traefik traefik https://traefik.github.io/charts 34.4.0
+  just deploy metrics-server metrics-server kube-system https://kubernetes-sigs.github.io/metrics-server/ 3.12.2
+  just deploy nginx nginx nginx
+  just deploy routing routing kube-system
