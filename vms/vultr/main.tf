@@ -21,8 +21,8 @@ locals {
 }
 
 resource "vultr_instance" "server1" {
-  #plan   = "vc2-1c-1gb"      # 1 vCPU, 1 GB
-  plan   = "vc2-2c-4gb"       # 2 vCPUs, 4 GB
+  plan   = "vc2-1c-1gb"      # 1 vCPU, 1 GB
+  #plan   = "vc2-2c-4gb"       # 2 vCPUs, 4 GB
   #plan   = "vhf-4c-16gb"     # 4 vCPUs, 16 GB
   #plan   = "voc-c-8c-16gb-150s-amd" # CPU Optimized Cloud, 8 vCPUs, 16 GB
   region = "atl"

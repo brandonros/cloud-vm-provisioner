@@ -14,6 +14,7 @@ Terraform configurations for provisioning VMs across cloud providers
 $ just
 Available recipes:
     cleanup
+    connect
     deploy chart='' release='' namespace='' kubeconfig='' repo='' version=''
     fetch-kubeconfig server_ip=''
     go

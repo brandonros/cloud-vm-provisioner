@@ -59,6 +59,28 @@ cleanup:
   cd vms/{{provider}}
   terraform destroy
 
+connect server_ip='':
+  #!/usr/bin/env bash
+
+  server_ip="{{server_ip}}"
+  if [[ -z "${server_ip}" ]]; then
+    if terraform_output="$(cd vms/{{provider}} && terraform output -raw server_ipv4 2>/dev/null)"; then
+      server_ip="${terraform_output}"
+    else
+      echo "error: server IPv4 not provided; pass it as an argument or export SERVER_IP" >&2
+      exit 1
+    fi
+  fi
+  if [[ -z "${server_ip}" ]]; then
+    echo "error: server IPv4 is empty" >&2
+    exit 1
+  fi
+
+  ssh_key_path="${SSH_KEY_PATH:-${SSH_PRIVATE_KEY_PATH:-${HOME}/.ssh/id_rsa}}"
+  remote_user="${REMOTE_USER:-user}"
+
+  ssh -o StrictHostKeyChecking=no -i "${ssh_key_path}" "${remote_user}@${server_ip}"
+
 install-gateway-api:
   #!/usr/bin/env bash
 
