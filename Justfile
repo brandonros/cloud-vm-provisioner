@@ -4,7 +4,7 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 set export
 
 script_path := justfile_directory()
-provider := "vultr"
+provider := env_var_or_default("CLOUD_PROVIDER", "vultr")
 kubeconfig := "k3s.yaml"
 
 default:
