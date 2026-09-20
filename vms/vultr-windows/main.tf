@@ -12,9 +12,11 @@ provider "vultr" {
 }
 
 resource "vultr_instance" "server1" {
-  #plan   = "vc2-1c-2gb"      # 1 vCPU, 2 GB (Windows minimum)
-  #plan   = "vc2-2c-4gb"       # 2 vCPUs, 4 GB
-  plan   = "vhf-4c-16gb"     # 4 vCPUs, 16 GB
+  # vc2 = Cloud Compute (regular, cheapest), vhf = High Frequency (3GHz+ Intel, NVMe),
+  # vhp = High Performance (newer AMD/Intel, NVMe), voc = Optimized Cloud (dedicated vCPUs;
+  # -c cpu, -g general, -m memory, -s storage). Not every plan is in every region:
+  # curl -s https://api.vultr.com/v2/regions/atl/availability
+  plan   = "vhp-4c-8gb-amd"     # 4 vCPUs, 8 GB
   region = "atl"
   os_id  = 2514               # Windows Server 2025 Standard
   hostname = "server1"

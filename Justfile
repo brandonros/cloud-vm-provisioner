@@ -81,6 +81,39 @@ connect server_ip='':
 
   ssh -o StrictHostKeyChecking=no -i "${ssh_key_path}" "${remote_user}@${server_ip}"
 
+rdp server_ip='':
+  #!/usr/bin/env bash
+
+  server_ip="{{server_ip}}"
+  if [[ -z "${server_ip}" ]]; then
+    if terraform_output="$(cd vms/{{provider}} && terraform output -raw server_ipv4 2>/dev/null)"; then
+      server_ip="${terraform_output}"
+    else
+      echo "error: server IPv4 not provided; pass it as an argument or export SERVER_IP" >&2
+      exit 1
+    fi
+  fi
+  if [[ -z "${server_ip}" ]]; then
+    echo "error: server IPv4 is empty" >&2
+    exit 1
+  fi
+
+  # wait for host to be available
+  while ! nc -z "${server_ip}" 3389 >/dev/null 2>&1; do
+    sleep 2
+  done
+
+  # Windows App can't take a password, so put it on the clipboard
+  if password="$(cd vms/{{provider}} && terraform output -raw default_password 2>/dev/null)"; then
+    printf '%s' "${password}" | pbcopy
+    echo "Password copied to clipboard"
+  fi
+
+  remote_user="${REMOTE_USER:-Administrator}"
+  rdp_file="$(mktemp -d)/${server_ip}.rdp"
+  printf 'full address:s:%s\nusername:s:%s\n' "${server_ip}" "${remote_user}" > "${rdp_file}"
+  open -a "Windows App" "${rdp_file}"
+
 install-gateway-api:
   #!/usr/bin/env bash
 

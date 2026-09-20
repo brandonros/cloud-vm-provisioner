@@ -21,6 +21,10 @@ locals {
 }
 
 resource "vultr_instance" "server1" {
+  # vc2 = Cloud Compute (regular, cheapest), vhf = High Frequency (3GHz+ Intel, NVMe),
+  # vhp = High Performance (newer AMD/Intel, NVMe), voc = Optimized Cloud (dedicated vCPUs;
+  # -c cpu, -g general, -m memory, -s storage). Not every plan is in every region:
+  # curl -s https://api.vultr.com/v2/regions/atl/availability
   plan   = "vc2-1c-1gb"      # 1 vCPU, 1 GB
   #plan   = "vc2-2c-4gb"       # 2 vCPUs, 4 GB
   #plan   = "vhf-4c-16gb"     # 4 vCPUs, 16 GB
